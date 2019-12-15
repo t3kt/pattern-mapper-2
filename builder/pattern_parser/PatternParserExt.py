@@ -26,7 +26,7 @@ class PatternParser(common.ExtensionBase):
 		pattern = parser.parse(svgXml)
 		patternObj = pattern.toJsonDict()
 		minify = self.ownerComp.par.Minifyjson
-		patternJson = json.dumps(patternObj, indent='  ' if minify else '')
+		patternJson = json.dumps(patternObj, indent=None if minify else '  ')
 		patternJsonDat = self.op('set_pattern_json')
 		patternJsonDat.text = patternJson
 
