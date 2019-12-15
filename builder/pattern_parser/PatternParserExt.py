@@ -34,6 +34,7 @@ class _SvgParser(common.LoggableSubComponent):
 		super().__init__(hostobj, logprefix='SvgParser')
 		self.shapes = []  # type: List[PShape]
 		self.paths = []  # type: List[PShape]
+		self.offset = tdu.Vector(0, 0, 0)
 
 	def parse(self, svgXml) -> 'PPattern':
 		if not svgXml:
@@ -41,6 +42,7 @@ class _SvgParser(common.LoggableSubComponent):
 		root = ET.fromstring(svgXml)
 		width = float(root.get('width', 1))
 		height = float(root.get('height', 1))
+		self.offset = tdu.Vector(-width / 2, -height / 2, 0)
 		self._handleElem(root, 0, nameStack=[])
 		return PPattern(
 			width=width, height=height,

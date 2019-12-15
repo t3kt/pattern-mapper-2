@@ -1,5 +1,5 @@
 import typing
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional
 import dataclasses
 from enum import Enum
 
@@ -89,27 +89,40 @@ def excludeKeys(d, keys):
 	}
 
 def _valToJson(val):
+	# this must be done before the == '' and other comparisons since these
+	# classes throw exceptions when compared against non-supported values.
+	if isinstance(val, (tdu.Vector, tdu.Color)):
+		return list(val)
 	if val is None or val == '':
 		return None
 	if dataclasses.is_dataclass(val) and hasattr(val, 'toJsonDict'):
 		return val.toJsonDict()
+	if isinstance(val, Enum):
+		return val.name
 	if isinstance(val, str):
 		return val
 	if isinstance(val, (list, tuple)):
 		return [_valToJson(v) for v in val]
 	if isinstance(val, dict):
-		return {
-			k: _valToJson(v)
-			for k, v in val.items()
-		}
+		return {k: _valToJson(v) for k, v in val.items()}
 	return val
 
 def _valFromJson(jVal, valType: type):
+	# print('_valFromJson({}, valType: {!r})'.format(repr(jVal)[:30], valType))
 	if jVal is None:
 		return None
 	if typing_inspect.is_optional_type(valType):
 		return _valFromJson(jVal, typing_inspect.get_args(valType)[0])
 	try:
+		if valType is tdu.Vector:
+			return tdu.Vector(jVal[0], jVal[1], jVal[2] if len(jVal) > 2 else 0)
+		if valType is tdu.Color:
+			return tdu.Color(
+				jVal[0], jVal[1], jVal[2],
+				jVal[3] if len(jVal) > 3 else 1)
+		if isinstance(valType, type) and issubclass(valType, Enum):
+			# noinspection PyTypeChecker
+			return _enumByName(valType, jVal)
 		valTypeOrigin = typing_inspect.get_origin(valType)
 		if valTypeOrigin in (list, tuple):
 			if not jVal:
@@ -118,7 +131,7 @@ def _valFromJson(jVal, valType: type):
 				typeArg = typing_inspect.get_args(valType)[0]
 				vals = [_valFromJson(v, typeArg) for v in jVal]
 			return valTypeOrigin(vals)
-		if valTypeOrigin is typing.Dict:
+		if valTypeOrigin is dict:
 			if not jVal:
 				return {}
 			vType = typing_inspect.get_args(valType)[1]
@@ -157,6 +170,7 @@ class DataObject:
 			f.name: _valFromJson(obj.get(f.name), f.type)
 			for f in dataclasses.fields(cls)
 		}
+		# noinspection PyArgumentList
 		return cls(**fieldVals)
 
 	@classmethod
@@ -175,18 +189,13 @@ class DataObject:
 	def toOptionalJsonDict(cls, obj: 'DataObject'):
 		return obj.toJsonDict() if obj is not None else None
 
-def enumByName(cls: typing.Type[Enum], name: str, default: Enum = None):
+def _enumByName(cls: typing.Type[Enum], name: str, default: Enum = None):
 	if name is None or name == '':
 		return default
 	try:
 		return cls[name]
 	except KeyError:
 		return default
-
-Vec3T = Tuple[float, float, float]
-Vec4T = Tuple[float, float, float, float]
-CoordT = Vec3T
-ColorT = Vec4T
 
 def aggregateTduVectors(vecs: Iterable[tdu.Vector], aggregate=Callable[[Iterable[float]], float]):
 	vecs = list(vecs)  # avoid duplicating lazily produced inputs

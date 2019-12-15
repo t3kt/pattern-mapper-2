@@ -1,8 +1,8 @@
 import common
 import json
 
-from pm2_model import PPattern, PPoint, PShape
-from pm2_settings import PPreProcSettings, PSettings
+from pm2_model import PPattern, PShape
+from pm2_settings import PPreProcSettings, PSettings, BoundType
 
 # noinspection PyUnreachableCode
 if False:
@@ -41,7 +41,7 @@ class _PreProcessor(common.LoggableSubComponent):
 		shapePointPositions = [
 			v
 			for shape in self.pattern.shapes
-			for v in shape.pointPosVectors()
+			for v in shape.pointPositions()
 		]
 		self.minBound = common.aggregateTduVectors(shapePointPositions, min)
 		self.maxBound = common.aggregateTduVectors(shapePointPositions, max)
@@ -49,25 +49,47 @@ class _PreProcessor(common.LoggableSubComponent):
 			self._recenterCoords()
 		if self.settings.rescale:
 			self._rescaleCoords()
-		pass
 
 	def _recenterCoords(self):
 		if self.settings.recenter.centerOnShape:
 			shapeNames = self.settings.recenter.centerOnShape.split(' ')
-			centerShapes = []
+			centers = []
 			for shapeName in shapeNames:
 				shape = self._getShapeByName(shapeName)
 				if shape:
-					centerShapes.append(shape)
-			if not centerShapes:
+					centers.append(shape.centerOrAverage())
+			if not centers:
 				self._LogEvent('Unable to find shape for recentering: {!r}'.format(self.settings.recenter.centerOnShape))
 				return
+			center = common.averageTduVectors(centers)
+		elif self.settings.recenter.boundType == BoundType.shapes:
+			center = common.averageTduVectors([self.minBound, self.maxBound])
 		else:
-			pass
-		raise NotImplementedError()
+			center = tdu.Vector(self.pattern.width / 2, self.pattern.height / 2, 0)
+		offset = -center
+		if offset == tdu.Vector(0, 0, 0):
+			return
+		for shape in self.pattern.shapes:
+			_offsetShapePoints(shape, offset)
+		for path in self.pattern.paths:
+			_offsetShapePoints(path, offset)
+		self.minBound += offset
+		self.maxBound += offset
+		self.pattern.offset = (self.pattern.offset or tdu.Vector(0, 0, 0)) + offset
 
 	def _rescaleCoords(self):
-		pass
+		if self.settings.rescale.bound == BoundType.shapes:
+			size = self.maxBound - self.minBound
+		else:
+			size = tdu.Vector(self.pattern.width, self.pattern.height, 0)
+		self.scale = 1 / max(size.x, size.y, size.z)
+		for shape in self.pattern.shapes:
+			_scaleShapePoints(shape, self.scale)
+		for path in self.pattern.paths:
+			_scaleShapePoints(path, self.scale)
+		if self.pattern.scale is None:
+			self.pattern.scale = 1
+		self.pattern.scale *= self.scale
 
 	def _getShapeByName(self, shapeName):
 		if not shapeName or not self.pattern.shapes:
@@ -76,6 +98,14 @@ class _PreProcessor(common.LoggableSubComponent):
 			if shape.shapeName == shapeName:
 				return shape
 
-def _average(vals):
-	vals = list(vals)
-	return sum(vals) / len(vals)
+def _offsetShapePoints(shape: PShape, offset: tdu.Vector):
+	for point in shape.points:
+		point.pos += offset
+	if shape.center:
+		shape.center += offset
+
+def _scaleShapePoints(shape: PShape, scale: float):
+	for point in shape.points:
+		point.pos *= scale
+	if shape.center:
+		shape.center *= scale
