@@ -16,7 +16,6 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-
 class PatternParser(common.ExtensionBase):
 	def ParsePatternSvg(self):
 		svgXmlDat = self.op('load_svg_xml')
@@ -29,7 +28,6 @@ class PatternParser(common.ExtensionBase):
 		patternJson = json.dumps(patternObj, indent=None if minify else '  ')
 		patternJsonDat = self.op('set_pattern_json')
 		patternJsonDat.text = patternJson
-
 
 class _SvgParser(common.LoggableSubComponent):
 	def __init__(self, hostobj):
@@ -90,7 +88,7 @@ class _SvgParser(common.LoggableSubComponent):
 			for pos in pointPositions
 		]
 		shape = PShape(
-			name=pathElem.get('id', None),
+			shapeName=pathElem.get('id', None),
 			path='/'.join(nameStack + [elemName]),
 			parentPath='/'.join(nameStack),
 			color=_elemColor(pathElem),
@@ -139,4 +137,4 @@ def _hexToRgb(hexcolor: str):
 	return _HEXDEC[hexcolor[0:2]], _HEXDEC[hexcolor[2:4]], _HEXDEC[hexcolor[4:6]]
 
 _NUMERALS = '0123456789abcdefABCDEF'
-_HEXDEC = {v: int(v, 16) for v in (x+y for x in _NUMERALS for y in _NUMERALS)}
+_HEXDEC = {v: int(v, 16) for v in (x + y for x in _NUMERALS for y in _NUMERALS)}

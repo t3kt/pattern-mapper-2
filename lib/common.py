@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Dict, List, Optional, Tuple, Union
+import dataclasses
 
 # noinspection PyUnreachableCode
 if False:
@@ -22,7 +23,7 @@ class LoggableBase:
 
 class ExtensionBase(LoggableBase):
 	def __init__(self, ownerComp):
-		self.ownerComp = ownerComp  # type: op
+		self.ownerComp = ownerComp  # type: OP
 		self.enablelogging = True
 		self.par = ownerComp.par
 		self.path = ownerComp.path
@@ -55,6 +56,66 @@ class LoggableSubComponent(LoggableBase):
 			event = self.logprefix + ' ' + event
 		self.hostobj._LogEvent(event, indentafter=indentafter, unindentbefore=unindentbefore)
 
+def cleanDict(d):
+	if not d:
+		return None
+	return {
+		key: val
+		for key, val in d.items()
+		if not (val is None or (isinstance(val, (str, list, dict, tuple)) and len(val) == 0))
+	}
 
-class Foo:
-	pass
+def mergeDicts(*parts):
+	x = {}
+	for part in parts:
+		if part:
+			x.update(part)
+	return x
+
+def excludeKeys(d, keys):
+	if not d:
+		return {}
+	return {
+		key: val
+		for key, val in d.items()
+		if key not in keys
+	}
+
+@dataclasses.dataclass
+class DataObject:
+	# def toJsonDict(self):
+	# 	return cleanDict(JSONSerializer.serialize(self))
+	#
+	# @classmethod
+	# def fromJsonDict(cls, obj):
+	# 	return JSONSerializer.deserialize(cls, obj)
+
+	def toJsonDict(self) -> dict:
+		return cleanDict(dataclasses.asdict(self))
+
+	@classmethod
+	def fromJsonDict(cls, obj):
+		return cls(**obj)
+
+	@classmethod
+	def fromJsonDicts(cls, objs: List[Dict]):
+		return [cls.fromJsonDict(obj) for obj in objs] if objs else []
+
+	@classmethod
+	def fromOptionalJsonDict(cls, obj, default=None):
+		return cls.fromJsonDict(obj) if obj else default
+
+	@classmethod
+	def toJsonDicts(cls, nodes: 'Iterable[DataObject]'):
+		return [n.toJsonDict() for n in nodes] if nodes else []
+
+	@classmethod
+	def toOptionalJsonDict(cls, obj: 'DataObject'):
+		return obj.toJsonDict() if obj is not None else None
+
+
+Vec2T = Tuple[float, float]
+Vec3T = Tuple[float, float, float]
+Vec4T = Tuple[float, float, float, float]
+CoordT = Union[Vec2T, Vec3T]
+ColorT = Union[Vec3T, Vec4T]
