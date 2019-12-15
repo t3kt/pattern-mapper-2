@@ -4,9 +4,13 @@ from common import DataObject, cleanDict, mergeDicts, excludeKeys
 
 @dataclass
 class PPreProcSettings(DataObject):
+	recenter: Optional['PRecenterSettings'] = None
 	rescale: Optional[bool] = None
-	recenter: Optional[bool] = None
 	fixTriangleCenters: Optional[bool] = None
+
+@dataclass
+class PRecenterSettings(DataObject):
+	centerOnShape: Optional[str] = None
 
 @dataclass
 class PGroupingSettings(DataObject):

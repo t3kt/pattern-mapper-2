@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import dataclasses
 
 # noinspection PyUnreachableCode
@@ -119,3 +119,11 @@ Vec3T = Tuple[float, float, float]
 Vec4T = Tuple[float, float, float, float]
 CoordT = Union[Vec2T, Vec3T]
 ColorT = Union[Vec3T, Vec4T]
+
+def aggregateTduVectors(vecs: Iterable[tdu.Vector], aggregate=Callable[[Iterable[float]], float]):
+	vecs = list(vecs)  # avoid duplicating lazily produced inputs
+	return tdu.Vector(
+		aggregate(v.x for v in vecs),
+		aggregate(v.y for v in vecs),
+		aggregate(v.z for v in vecs),
+	)

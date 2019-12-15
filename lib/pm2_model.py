@@ -1,6 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional
 from common import DataObject, cleanDict, mergeDicts, excludeKeys
 from common import CoordT, ColorT
 
@@ -9,10 +9,28 @@ from common import CoordT, ColorT
 #
 # from dataclasses_serialization.json import JSONSerializer
 
+# noinspection PyUnreachableCode
+if False:
+	# noinspection PyUnresolvedReferences
+	from _stubs import *
 
 @dataclass
 class PPoint(DataObject):
 	pos: CoordT
+
+	def x(self): return self.pos[0]
+	def y(self): return self.pos[1]
+	def z(self): return self.pos[2] if len(self.pos) > 2 else 0
+
+	def posVector(self):
+		return tdu.Vector(self.x(), self.y(), self.z())
+
+def _pointPosAggregate(points: Iterable[PPoint], aggregate=Callable[[Iterable[float]], float]):
+	return tdu.Vector(
+		aggregate(p.x() for p in points),
+		aggregate(p.y() for p in points),
+		aggregate(p.z() for p in points),
+	)
 
 @dataclass
 class PShape(DataObject):
@@ -37,6 +55,9 @@ class PShape(DataObject):
 			points=PPoint.fromJsonDicts(obj.get('points')),
 			**excludeKeys(obj, ['points'])
 		)
+
+	def pointPosVectors(self):
+		return [point.posVector() for point in self.points] if self.points else []
 
 @dataclass
 class PGroup(DataObject):
