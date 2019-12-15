@@ -1,4 +1,5 @@
 import common
+import json
 from typing import List
 import xml.etree.ElementTree as ET
 
@@ -18,7 +19,16 @@ if False:
 
 class PatternParser(common.ExtensionBase):
 	def ParsePatternSvg(self):
-		pass
+		svgXmlDat = self.op('load_svg_xml')
+		svgXmlDat.par.loadonstartpulse.pulse()
+		svgXml = svgXmlDat.text
+		parser = _SvgParser(self)
+		pattern = parser.parse(svgXml)
+		patternObj = pattern.toJsonDict()
+		minify = self.ownerComp.par.Minifyjson
+		patternJson = json.dumps(patternObj, indent='  ' if minify else '')
+		patternJsonDat = self.op('set_pattern_json')
+		patternJsonDat.text = patternJson
 
 
 class _SvgParser(common.LoggableSubComponent):
@@ -87,10 +97,10 @@ class _SvgParser(common.LoggableSubComponent):
 			points=points,
 		)
 		if path.closed:
-			shape.index = len(self.shapes)
+			shape.shapeIndex = len(self.shapes)
 			self.shapes.append(shape)
 		else:
-			shape.index = len(self.paths)
+			shape.shapeIndex = len(self.paths)
 			self.paths.append(shape)
 
 def _elemName(elem: ET.Element, indexInParent: int):
