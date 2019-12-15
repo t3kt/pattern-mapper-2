@@ -2,6 +2,7 @@ import typing
 from typing import Callable, Dict, Iterable, List, Optional
 import dataclasses
 from enum import Enum
+import json
 
 # noinspection PyUnreachableCode
 if False:
@@ -189,6 +190,30 @@ class DataObject:
 	def toOptionalJsonDict(cls, obj: 'DataObject'):
 		return obj.toJsonDict() if obj is not None else None
 
+	@classmethod
+	def parseJsonStr(cls, jsonStr: str):
+		obj = _parseJson(jsonStr)
+		return cls.fromJsonDict(obj)
+
+	def toJsonStr(self, minify=True):
+		obj = self.toJsonDict()
+		return _toJson(obj, minify=minify)
+
+def _parseJson(jsonStr: str):
+	if not jsonStr:
+		return {}
+	return json.loads(jsonStr)
+
+def _toJson(obj, minify=True):
+	if not obj:
+		return ''
+	return json.dumps(
+		obj,
+		indent=None if minify else '  ',
+		separators=(',', ':') if minify else (',', ': '),
+		sort_keys=True,
+	)
+
 def _enumByName(cls: typing.Type[Enum], name: str, default: Enum = None):
 	if name is None or name == '':
 		return default
@@ -212,3 +237,19 @@ def average(vals):
 	vals = list(vals)
 	return sum(vals) / len(vals)
 
+def formatValue(val):
+	if isinstance(val, str):
+		return val
+	if val is None:
+		return ''
+	if isinstance(val, bool):
+		return str(int(val))
+	if isinstance(val, float) and int(val) == val:
+		return str(int(val))
+	return str(val)
+
+
+def formatValueList(vals):
+	if not vals:
+		return None
+	return ' '.join([formatValue(i) for i in vals])

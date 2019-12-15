@@ -1,0 +1,81 @@
+from typing import Iterable
+
+import common
+from common import formatValue
+from pm2_model import PPattern, PShape
+
+# noinspection PyUnreachableCode
+if False:
+	# noinspection PyUnresolvedReferences
+	from _stubs import *
+
+class PatternTableExtractor(common.ExtensionBase):
+	def Extract(self):
+		inputPatternJson = self.op('input_pattern_json').text
+		pattern = PPattern.parseJsonStr(inputPatternJson)
+		self._BuildShapeTable(self.op('set_shapes'), pattern.shapes)
+		self._BuildShapeTable(self.op('set_paths'), pattern.paths)
+		pointTable = self.op('set_points')
+		self._InitPointsTable(pointTable)
+		self._AddPointsToTable(pointTable, pattern.shapes, 'shape')
+		self._AddPointsToTable(pointTable, pattern.paths, 'path')
+
+	@staticmethod
+	def _BuildShapeTable(dat: 'DAT', shapes: Iterable[PShape]):
+		dat.clear()
+		dat.appendRow([
+			'shapeIndex',
+			'shapeName',
+			'path',
+			'parentPath',
+			'points.count',
+			'color.r', 'color.g', 'color.b', 'color.a',
+			'center.x', 'center.y', 'center.z',
+			'depthLayer',
+			'rotateAxis',
+		])
+		for shape in shapes:
+			vals = [
+				shape.shapeIndex,
+				shape.shapeName,
+				shape.path,
+				shape.parentPath,
+				len(shape.points),
+			]
+			if shape.color:
+				vals += list(shape.color)
+			else:
+				vals += ['', '', '', '']
+			if shape.center:
+				vals += list(shape.center)
+			else:
+				vals += ['', '', '']
+			vals += [
+				shape.depthLayer,
+				shape.rotateAxis,
+			]
+			dat.appendRow([formatValue(v) for v in vals])
+
+	@staticmethod
+	def _InitPointsTable(dat: 'DAT'):
+		dat.clear()
+		dat.appendRow([
+			'shapeType',
+			'shapeIndex',
+			'pointIndex',
+			'pos.x',
+			'pos.y',
+			'pos.z',
+		])
+
+	@staticmethod
+	def _AddPointsToTable(dat: 'DAT', shapes: Iterable[PShape], shapeType: str):
+		for shape in shapes:
+			for i, point in enumerate(shape.points):
+				vals = [
+					shapeType,
+					shape.shapeIndex,
+					i,
+				]
+				vals += list(point.pos)
+				dat.appendRow([formatValue(v) for v in vals])

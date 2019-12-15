@@ -1,6 +1,4 @@
 import common
-import json
-
 from pm2_model import PPattern, PShape
 from pm2_settings import PPreProcSettings, PSettings, BoundType
 
@@ -10,19 +8,14 @@ if False:
 	from _stubs import *
 
 class PatternPreProcessor(common.ExtensionBase):
-	def __init__(self, ownerComp):
-		super().__init__(ownerComp)
-
 	def ProcessPattern(self):
 		inputPatternJson = self.op('input_pattern_json').text
-		inputPatternObj = json.loads(inputPatternJson or '{}')
-		pattern = PPattern.fromJsonDict(inputPatternObj)
+		pattern = PPattern.parseJsonStr(inputPatternJson)
 		settingsJson = self.op('settings_json').text
-		settingsObj = json.loads(settingsJson or '{}')
-		settings = PSettings.fromJsonDict(settingsObj)
+		settings = PSettings.parseJsonStr(settingsJson)
 		processor = _PreProcessor(self, settings.preProc)
 		processor.process(pattern)
-		outputPatternJson = json.dumps(pattern.toJsonDict(), indent=None if self.par.Minifyjson else '  ')
+		outputPatternJson = pattern.toJsonStr(minify=self.par.Minifyjson)
 		self.op('set_output_pattern_json').text = outputPatternJson
 
 class _PreProcessor(common.LoggableSubComponent):

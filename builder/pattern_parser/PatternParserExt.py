@@ -1,8 +1,7 @@
-import common
-import json
 from typing import List
 import xml.etree.ElementTree as ET
 
+import common
 from pm2_model import PPattern, PPoint, PShape
 
 import td_python_package_init
@@ -23,9 +22,7 @@ class PatternParser(common.ExtensionBase):
 		svgXml = svgXmlDat.text
 		parser = _SvgParser(self)
 		pattern = parser.parse(svgXml)
-		patternObj = pattern.toJsonDict()
-		minify = self.ownerComp.par.Minifyjson
-		patternJson = json.dumps(patternObj, indent=None if minify else '  ')
+		patternJson = pattern.toJsonStr(minify=self.par.Minifyjson)
 		patternJsonDat = self.op('set_pattern_json')
 		patternJsonDat.text = patternJson
 
@@ -50,9 +47,10 @@ class _SvgParser(common.LoggableSubComponent):
 			paths=self.paths,
 		)
 
-	def _handleElem(self, elem: ET.Element, indexInParent: int, nameStack: List[str]):
+	def _handleElem(self, elem: ET.Element, indexInParent: int, nameStack: List[str], elemId: str = None):
 		elemName = _elemName(elem, indexInParent)
-		elemId = elem.get('id', '')
+		if elemId is None:
+			elemId = elem.get('id', '')
 		if elemId.startswith('-') or elem.get('display') == 'none':
 			return
 		tagName = _localName(elem.tag)
@@ -63,8 +61,11 @@ class _SvgParser(common.LoggableSubComponent):
 				self._LogEvent('Skipping invalid element (nameStack: {}, error: {})'.format(nameStack, e))
 		else:
 			childNameStack = nameStack + [elemName]
-			for childIndex, childElem in enumerate(list(elem)):
-				self._handleElem(childElem, childIndex, childNameStack)
+			if _isStrokeFillPairParent(elem):
+				self._handleElem(elem[0], 0, childNameStack, elemId=elemId)
+			else:
+				for childIndex, childElem in enumerate(list(elem)):
+					self._handleElem(childElem, childIndex, childNameStack)
 
 	def _handlePathElem(self, pathElem: ET.Element, elemName: str, nameStack: List[str]):
 		rawPath = pathElem.get('d')
@@ -103,6 +104,18 @@ class _SvgParser(common.LoggableSubComponent):
 			shape.shapeIndex = len(self.paths)
 			self.paths.append(shape)
 
+def _isStrokeFillPairParent(elem: ET.Element):
+	if _localName(elem.tag) != 'g' or len(elem) != 2:
+		return False
+	child1 = elem[0]
+	child2 = elem[1]
+	if _localName(child1.tag) != 'path' or _localName(child2.tag) != 'path':
+		return False
+	if 'fill' in child1.attrib and 'stroke' not in child1.attrib:
+		if child2.get('fill-opacity', '') == '0' and 'stroke' in child2.attrib:
+			return True
+	return False
+
 def _elemName(elem: ET.Element, indexInParent: int):
 	tagName = _localName(elem.tag)
 	elemId = elem.get('id')
@@ -126,10 +139,15 @@ def _pathPoint(pathPt: complex):
 	return tdu.Position(pathPt.real, pathPt.imag, 0)
 
 def _elemColor(elem: ET.Element):
-	if 'stroke' in elem.attrib:
-		return _hexToRgb(elem.attrib['stroke'])
 	if 'fill' in elem.attrib:
-		return _hexToRgb(elem.attrib['fill'])
+		rgb = _hexToRgb(elem.attrib['fill'])
+		a = float(elem.get('fill-opacity', '1'))
+	elif 'stroke' in elem.attrib:
+		rgb = _hexToRgb(elem.attrib['stroke'])
+		a = float(elem.get('stroke-opacity', '1'))
+	else:
+		return None
+	return tdu.Color(rgb[0], rgb[1], rgb[2], a)
 
 def _hexToRgb(hexcolor: str):
 	if not hexcolor:
