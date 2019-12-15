@@ -1,11 +1,18 @@
+import typing
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import dataclasses
+from enum import Enum
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
+import td_python_package_init
+
+td_python_package_init.init()
+
+import typing_inspect
 
 class LoggableBase:
 	def _GetLogId(self) -> Optional[str]:
@@ -81,6 +88,53 @@ def excludeKeys(d, keys):
 		if key not in keys
 	}
 
+def _valToJson(val):
+	if val is None or val == '':
+		return None
+	if dataclasses.is_dataclass(val) and hasattr(val, 'toJsonDict'):
+		return val.toJsonDict()
+	if isinstance(val, str):
+		return val
+	if isinstance(val, (list, tuple)):
+		return [_valToJson(v) for v in val]
+	if isinstance(val, dict):
+		return {
+			k: _valToJson(v)
+			for k, v in val.items()
+		}
+	return val
+
+def _valFromJson(jVal, valType: type):
+	if jVal is None:
+		return None
+	if typing_inspect.is_optional_type(valType):
+		return _valFromJson(jVal, typing_inspect.get_args(valType)[0])
+	try:
+		valTypeOrigin = typing_inspect.get_origin(valType)
+		if valTypeOrigin in (list, tuple):
+			if not jVal:
+				vals = []
+			else:
+				typeArg = typing_inspect.get_args(valType)[0]
+				vals = [_valFromJson(v, typeArg) for v in jVal]
+			return valTypeOrigin(vals)
+		if valTypeOrigin is typing.Dict:
+			if not jVal:
+				return {}
+			vType = typing_inspect.get_args(valType)[1]
+			return {
+				k: _valFromJson(v, vType)
+				for k, v in jVal.items()
+			}
+		if dataclasses.is_dataclass(valType) and hasattr(valType, 'fromJsonDict'):
+			return valType.fromJsonDict(jVal)
+		return valType(jVal)
+	except TypeError as e:
+		dbgVal = repr(jVal)
+		if len(dbgVal) > 30:
+			dbgVal = dbgVal[:29] + '...'
+		raise TypeError('Error handling field with valType: {!r} and value: {}: {}'.format(valType, dbgVal, e))
+
 @dataclasses.dataclass
 class DataObject:
 	# def toJsonDict(self):
@@ -91,11 +145,19 @@ class DataObject:
 	# 	return JSONSerializer.deserialize(cls, obj)
 
 	def toJsonDict(self) -> dict:
-		return cleanDict(dataclasses.asdict(self))
+		obj = {
+			k: _valToJson(v)
+			for k, v in dataclasses.asdict(self).items()
+		}
+		return cleanDict(obj)
 
 	@classmethod
 	def fromJsonDict(cls, obj):
-		return cls(**obj)
+		fieldVals = {
+			f.name: _valFromJson(obj.get(f.name), f.type)
+			for f in dataclasses.fields(cls)
+		}
+		return cls(**fieldVals)
 
 	@classmethod
 	def fromJsonDicts(cls, objs: List[Dict]):
@@ -113,12 +175,18 @@ class DataObject:
 	def toOptionalJsonDict(cls, obj: 'DataObject'):
 		return obj.toJsonDict() if obj is not None else None
 
+def enumByName(cls: typing.Type[Enum], name: str, default: Enum = None):
+	if name is None or name == '':
+		return default
+	try:
+		return cls[name]
+	except KeyError:
+		return default
 
-Vec2T = Tuple[float, float]
 Vec3T = Tuple[float, float, float]
 Vec4T = Tuple[float, float, float, float]
-CoordT = Union[Vec2T, Vec3T]
-ColorT = Union[Vec3T, Vec4T]
+CoordT = Vec3T
+ColorT = Vec4T
 
 def aggregateTduVectors(vecs: Iterable[tdu.Vector], aggregate=Callable[[Iterable[float]], float]):
 	vecs = list(vecs)  # avoid duplicating lazily produced inputs
@@ -127,3 +195,11 @@ def aggregateTduVectors(vecs: Iterable[tdu.Vector], aggregate=Callable[[Iterable
 		aggregate(v.y for v in vecs),
 		aggregate(v.z for v in vecs),
 	)
+
+def averageTduVectors(vecs: Iterable[tdu.Vector]):
+	return aggregateTduVectors(vecs, average)
+
+def average(vals):
+	vals = list(vals)
+	return sum(vals) / len(vals)
+

@@ -1,36 +1,34 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Optional
-from common import DataObject, cleanDict, mergeDicts, excludeKeys
+from typing import Any, Dict, List, Optional
+from common import DataObject
 from common import CoordT, ColorT
-
-# import td_python_package_init
-# td_python_package_init.init()
-#
-# from dataclasses_serialization.json import JSONSerializer
+import common
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
+def _createTduVector(coord: CoordT):
+	return tdu.Vector(
+		coord[0],
+		coord[1],
+		coord[2] if len(coord) > 2 else 0,
+	)
+
 @dataclass
 class PPoint(DataObject):
 	pos: CoordT
 
-	def x(self): return self.pos[0]
-	def y(self): return self.pos[1]
-	def z(self): return self.pos[2] if len(self.pos) > 2 else 0
-
 	def posVector(self):
-		return tdu.Vector(self.x(), self.y(), self.z())
+		return _createTduVector(self.pos)
 
-def _pointPosAggregate(points: Iterable[PPoint], aggregate=Callable[[Iterable[float]], float]):
-	return tdu.Vector(
-		aggregate(p.x() for p in points),
-		aggregate(p.y() for p in points),
-		aggregate(p.z() for p in points),
-	)
+	def setPosVector(self, val: tdu.Vector):
+		self.pos = tuple(val)
+
+	def offsetPos(self, offset: tdu.Vector):
+		self.setPosVector(self.posVector() + offset)
 
 @dataclass
 class PShape(DataObject):
@@ -42,22 +40,21 @@ class PShape(DataObject):
 	color: Optional[ColorT] = None
 	depthLayer: Optional[int] = None
 	rotateAxis: Optional[float] = None
-
-	def toJsonDict(self) -> dict:
-		return cleanDict(mergeDicts(
-			excludeKeys(super().toJsonDict(), ['points']),
-			{'points': PPoint.toJsonDicts(self.points)},
-		))
-
-	@classmethod
-	def fromJsonDict(cls, obj):
-		return cls(
-			points=PPoint.fromJsonDicts(obj.get('points')),
-			**excludeKeys(obj, ['points'])
-		)
+	center: Optional[CoordT] = None
 
 	def pointPosVectors(self):
 		return [point.posVector() for point in self.points] if self.points else []
+
+	def centerVector(self):
+		if self.center:
+			return _createTduVector(self.center)
+		return common.averageTduVectors(self.pointPosVectors())
+
+	def offsetPoints(self, offset: tdu.Vector):
+		for point in self.points:
+			point.offsetPos(offset)
+		if self.center:
+			self.center = tuple(self.centerVector() + offset)
 
 @dataclass
 class PGroup(DataObject):
@@ -73,21 +70,3 @@ class PPattern(DataObject):
 	shapes: List[PShape] = dataclasses.field(default_factory=list)
 	paths: List[PShape] = dataclasses.field(default_factory=list)
 	groups: List[PGroup] = dataclasses.field(default_factory=list)
-
-	def toJsonDict(self) -> dict:
-		return cleanDict(mergeDicts(
-			excludeKeys(super().toJsonDict(), ['shapes', 'paths', 'groups']),
-			{
-				'shapes': PShape.toJsonDicts(self.shapes),
-				'paths': PShape.toJsonDicts(self.paths),
-				'groups': PGroup.toJsonDicts(self.groups),
-			}
-		))
-
-	@classmethod
-	def fromJsonDict(cls, obj):
-		return cls(
-			shapes=PShape.fromJsonDicts(obj.get('shapes')),
-			paths=PShape.fromJsonDicts(obj.get('paths')),
-			groups=PGroup.fromJsonDicts(obj.get('groups')),
-		)
