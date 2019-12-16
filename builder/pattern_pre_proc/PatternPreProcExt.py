@@ -28,9 +28,12 @@ class _PreProcessor(common.LoggableSubComponent):
 		self.scale = 1
 
 	def process(self, pattern: PPattern):
+		self._LogEvent('Processing')
 		self.pattern = pattern or PPattern()
 		if not self.pattern.shapes and not self.pattern.paths:
+			self._LogEvent('No shapes or paths')
 			return
+		self._LogEvent('proc settings: {}'.format(self.settings))
 		shapePointPositions = [
 			v
 			for shape in self.pattern.shapes
@@ -44,6 +47,7 @@ class _PreProcessor(common.LoggableSubComponent):
 			self._rescaleCoords()
 
 	def _recenterCoords(self):
+		self._LogEvent('Recentering coords')
 		if self.settings.recenter.centerOnShape:
 			shapeNames = self.settings.recenter.centerOnShape.split(' ')
 			centers = []
@@ -71,6 +75,7 @@ class _PreProcessor(common.LoggableSubComponent):
 		self.pattern.offset = (self.pattern.offset or tdu.Vector(0, 0, 0)) + offset
 
 	def _rescaleCoords(self):
+		self._LogEvent('Rescaling coords')
 		if self.settings.rescale.bound == BoundType.shapes:
 			size = self.maxBound - self.minBound
 		else:

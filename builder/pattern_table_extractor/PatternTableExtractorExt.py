@@ -29,8 +29,8 @@ class PatternTableExtractor(common.ExtensionBase):
 			'path',
 			'parentPath',
 			'points.count',
-			'color.r', 'color.g', 'color.b', 'color.a',
-			'center.x', 'center.y', 'center.z',
+			'color_r', 'color_g', 'color_b', 'color_a',
+			'center_x', 'center_y', 'center_z',
 			'depthLayer',
 			'rotateAxis',
 		])
@@ -63,9 +63,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			'shapeType',
 			'shapeIndex',
 			'pointIndex',
-			'pos.x',
-			'pos.y',
-			'pos.z',
+			'pos_x', 'pos_y', 'pos_z',
 		])
 
 	@staticmethod

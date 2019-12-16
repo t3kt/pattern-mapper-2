@@ -1,3 +1,4 @@
+import datetime
 import typing
 from typing import Callable, Dict, Iterable, List, Optional
 import dataclasses
@@ -14,6 +15,82 @@ import td_python_package_init
 td_python_package_init.init()
 
 import typing_inspect
+
+
+_TimestampFormat = '[%H:%M:%S]'
+_PreciseTimestampFormat = '[%H:%M:%S.%f]'
+
+def _LoggerTimestamp():
+	return datetime.datetime.now().strftime(
+		# _TimestampFormat
+		_PreciseTimestampFormat
+	)
+
+def Log(msg, file=None):
+	print(
+		_LoggerTimestamp(),
+		msg,
+		file=file)
+	if file:
+		file.flush()
+
+class IndentedLogger:
+	def __init__(self, outfile=None):
+		self._indentLevel = 0
+		self._indentStr = ''
+		self._outFile = outfile
+
+	def _AddIndent(self, amount):
+		self._indentLevel += amount
+		self._indentStr = '\t' * self._indentLevel
+
+	def Indent(self):
+		self._AddIndent(1)
+
+	def Unindent(self):
+		self._AddIndent(-1)
+
+	def LogEvent(self, path, opid, event, indentafter=False, unindentbefore=False):
+		if unindentbefore:
+			self.Unindent()
+		if event:
+			if not path and not opid:
+				Log('%s%s' % (self._indentStr, event), file=self._outFile)
+			elif not opid:
+				Log('%s%s %s' % (self._indentStr, path or '', event), file=self._outFile)
+			else:
+				Log('%s[%s] %s %s' % (self._indentStr, opid or '', path or '', event), file=self._outFile)
+		if indentafter:
+			self.Indent()
+
+	def LogBegin(self, path, opid, event):
+		self.LogEvent(path, opid, event, indentafter=True)
+
+	def LogEnd(self, path, opid, event):
+		self.LogEvent(path, opid, event, unindentbefore=True)
+
+class _Tee:
+	def __init__(self, *files):
+		self.files = files
+
+	def write(self, obj):
+		for f in self.files:
+			f.write(obj)
+			# f.flush()  # make the output to be visible immediately
+
+	def flush(self):
+		for f in self.files:
+			f.flush()
+
+def _InitFileLog():
+	f = open(project.name + '-log.txt', mode='a')
+	print('\n-----[Initialize Log: {}]-----\n'.format(
+		datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S.%f')), file=f)
+	f.flush()
+	return IndentedLogger(outfile=_Tee(sys.stdout, f))
+
+_logger = IndentedLogger()
+# _logger = _InitFileLog()
 
 class LoggableBase:
 	def _GetLogId(self) -> Optional[str]:
@@ -49,7 +126,13 @@ class ExtensionBase(LoggableBase):
 		return self.ownerComp.par.opshortcut.eval()
 
 	def _LogEvent(self, event, indentafter=False, unindentbefore=False):
-		pass
+		if self.enablelogging:
+			_logger.LogEvent(
+				self.ownerComp.path,
+				self._GetLogId(),
+				event,
+				indentafter=indentafter,
+				unindentbefore=unindentbefore)
 
 
 class LoggableSubComponent(LoggableBase):
@@ -107,6 +190,9 @@ def _valToJson(val):
 	if isinstance(val, dict):
 		return {k: _valToJson(v) for k, v in val.items()}
 	return val
+
+# def _unwrapForwardTypeRef(t):
+# 	if isinstance(t, typing.Fo)
 
 def _valFromJson(jVal, valType: type):
 	# print('_valFromJson({}, valType: {!r})'.format(repr(jVal)[:30], valType))
