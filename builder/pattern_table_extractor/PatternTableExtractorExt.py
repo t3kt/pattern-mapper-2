@@ -33,6 +33,8 @@ class PatternTableExtractor(common.ExtensionBase):
 			'center_x', 'center_y', 'center_z',
 			'depthLayer',
 			'rotateAxis',
+			'isTriangle',
+			'isOpenLoop',
 		])
 		for shape in shapes:
 			vals = [
@@ -53,6 +55,8 @@ class PatternTableExtractor(common.ExtensionBase):
 			vals += [
 				shape.depthLayer,
 				shape.rotateAxis,
+				shape.isTriangle(),
+				shape.isOpenLoop(),
 			]
 			dat.appendRow([formatValue(v) for v in vals])
 

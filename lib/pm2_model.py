@@ -27,8 +27,23 @@ class PShape(DataObject):
 	def pointPositions(self):
 		return [point.pos for point in self.points] if self.points else []
 
+	def pointPositionsWithoutLoop(self):
+		if self.isOpenLoop():
+			return self.pointPositions()[:-1]
+		return self.pointPositions()
+
 	def centerOrAverage(self):
-		return self.center or common.averageTduVectors(self.pointPositions())
+		return self.center or common.averageTduVectors(self.pointPositionsWithoutLoop())
+
+	def isOpenLoop(self):
+		return len(self.points) >= 4 and self.points[0].pos == self.points[-1].pos
+
+	def isTriangle(self):
+		if len(self.points) == 3 and not self.isOpenLoop():
+			return True
+		if len(self.points) == 4 and self.isOpenLoop():
+			return True
+		return False
 
 @dataclass
 class PGroup(DataObject):
@@ -46,3 +61,11 @@ class PPattern(DataObject):
 	shapes: List[PShape] = dataclasses.field(default_factory=list)
 	paths: List[PShape] = dataclasses.field(default_factory=list)
 	groups: List[PGroup] = dataclasses.field(default_factory=list)
+
+	def __post_init__(self):
+		if self.shapes is None:
+			self.shapes = []
+		if self.paths is None:
+			self.paths = []
+		if self.groups is None:
+			self.groups = []
