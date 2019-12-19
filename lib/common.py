@@ -241,11 +241,11 @@ def _valFromJson(jVal, valType: type, field: dataclasses.Field):
 				k: _valFromJson(v, vType, field)
 				for k, v in jVal.items()
 			}
-		if '_t' in jVal:
-			typeMap = field.metadata.get('TypeMap') if field else None  # type: TypeMap
-			if typeMap:
-				valType = typeMap.getTypeFromCode(jVal['_t']) or valType
 		if dataclasses.is_dataclass(valType) and hasattr(valType, 'fromJsonDict'):
+			if '_t' in jVal:
+				typeMap = field.metadata.get('TypeMap') if field else None  # type: TypeMap
+				if typeMap:
+					valType = typeMap.getTypeFromCode(jVal['_t']) or valType
 			return valType.fromJsonDict(jVal)
 		return valType(jVal)
 	except TypeError as e:
