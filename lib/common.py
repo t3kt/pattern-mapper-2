@@ -4,6 +4,7 @@ from typing import Callable, Dict, Iterable, List, Optional
 import dataclasses
 from enum import Enum
 import json
+import sys
 
 # noinspection PyUnreachableCode
 if False:
@@ -172,7 +173,14 @@ def excludeKeys(d, keys):
 		if key not in keys
 	}
 
-def _valToJson(val):
+class TypeMap:
+	def __init__(self, *types: type):
+		self.typesByCode = {t.__name__: t for t in types}
+		self.codesByType = {t: t.__name__ for t in types}
+	def getCodeForType(self, t: type) -> str: return self.codesByType.get(t)
+	def getTypeFromCode(self, code: str) -> type: return self.typesByCode.get(code)
+
+def _valToJson(val, field: dataclasses.Field = None):
 	# this must be done before the == '' and other comparisons since these
 	# classes throw exceptions when compared against non-supported values.
 	if isinstance(val, (tdu.Vector, tdu.Position, tdu.Color)):
@@ -180,7 +188,12 @@ def _valToJson(val):
 	if val is None or val == '':
 		return None
 	if dataclasses.is_dataclass(val) and hasattr(val, 'toJsonDict'):
-		return val.toJsonDict()
+		obj = val.toJsonDict()
+		typeMap = field.metadata.get('TypeMap') if field else None  # type: TypeMap
+		code = typeMap.getCodeForType(type(val)) if typeMap else None
+		if code:
+			obj['_t'] = code
+		return obj
 	if isinstance(val, Enum):
 		return val.name
 	if isinstance(val, str):
@@ -194,12 +207,12 @@ def _valToJson(val):
 # def _unwrapForwardTypeRef(t):
 # 	if isinstance(t, typing.Fo)
 
-def _valFromJson(jVal, valType: type):
+def _valFromJson(jVal, valType: type, field: dataclasses.Field):
 	# print('_valFromJson({}, valType: {!r})'.format(repr(jVal)[:30], valType))
 	if jVal is None:
 		return None
 	if typing_inspect.is_optional_type(valType):
-		return _valFromJson(jVal, typing_inspect.get_args(valType)[0])
+		return _valFromJson(jVal, typing_inspect.get_args(valType)[0], field)
 	try:
 		if valType is tdu.Vector:
 			return tdu.Vector(jVal[0], jVal[1], jVal[2] if len(jVal) > 2 else 0)
@@ -218,16 +231,20 @@ def _valFromJson(jVal, valType: type):
 				vals = []
 			else:
 				typeArg = typing_inspect.get_args(valType)[0]
-				vals = [_valFromJson(v, typeArg) for v in jVal]
+				vals = [_valFromJson(v, typeArg, field) for v in jVal]
 			return valTypeOrigin(vals)
 		if valTypeOrigin is dict:
 			if not jVal:
 				return {}
 			vType = typing_inspect.get_args(valType)[1]
 			return {
-				k: _valFromJson(v, vType)
+				k: _valFromJson(v, vType, field)
 				for k, v in jVal.items()
 			}
+		if '_t' in jVal:
+			typeMap = field.metadata.get('TypeMap') if field else None  # type: TypeMap
+			if typeMap:
+				valType = typeMap.getTypeFromCode(jVal['_t']) or valType
 		if dataclasses.is_dataclass(valType) and hasattr(valType, 'fromJsonDict'):
 			return valType.fromJsonDict(jVal)
 		return valType(jVal)
@@ -239,24 +256,16 @@ def _valFromJson(jVal, valType: type):
 
 @dataclasses.dataclass
 class DataObject:
-	# def toJsonDict(self):
-	# 	return cleanDict(JSONSerializer.serialize(self))
-	#
-	# @classmethod
-	# def fromJsonDict(cls, obj):
-	# 	return JSONSerializer.deserialize(cls, obj)
-
 	def toJsonDict(self) -> dict:
-		obj = {
-			k: _valToJson(v)
-			for k, v in dataclasses.asdict(self).items()
-		}
-		return cleanDict(obj)
+		return cleanDict({
+			field.name: _valToJson(getattr(self, field.name), field)
+			for field in dataclasses.fields(self)
+		})
 
 	@classmethod
 	def fromJsonDict(cls, obj):
 		fieldVals = {
-			f.name: _valFromJson(obj.get(f.name), f.type)
+			f.name: _valFromJson(obj.get(f.name), f.type, f)
 			for f in dataclasses.fields(cls)
 		}
 		# noinspection PyArgumentList
@@ -280,22 +289,16 @@ class DataObject:
 
 	@classmethod
 	def parseJsonStr(cls, jsonStr: str):
-		obj = _parseJson(jsonStr)
-		return cls.fromJsonDict(obj)
+		return cls.fromJsonDict(_parseJson(jsonStr))
 
 	def toJsonStr(self, minify=True):
-		obj = self.toJsonDict()
-		return _toJson(obj, minify=minify)
+		return _toJson(self.toJsonDict(), minify=minify)
 
 def _parseJson(jsonStr: str):
-	if not jsonStr:
-		return {}
-	return json.loads(jsonStr)
+	return json.loads(jsonStr) if jsonStr else {}
 
 def _toJson(obj, minify=True):
-	if not obj:
-		return ''
-	return json.dumps(
+	return '' if not obj else json.dumps(
 		obj,
 		indent=None if minify else '  ',
 		separators=(',', ':') if minify else (',', ': '),
@@ -338,6 +341,4 @@ def formatValue(val):
 
 
 def formatValueList(vals):
-	if not vals:
-		return None
-	return ' '.join([formatValue(i) for i in vals])
+	return ' '.join([formatValue(i) for i in vals]) if vals else ''
