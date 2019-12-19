@@ -1,7 +1,8 @@
+import dataclasses
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
-from common import DataObject
+from typing import List, Optional
+from common import DataObject, TypeMap
 
 class BoundType(Enum):
 	frame = 'frame'
@@ -23,8 +24,25 @@ class PPreProcSettings(DataObject):
 	fixTriangleCenters: Optional[bool] = None
 
 @dataclass
+class PGroupGenSpec(DataObject):
+	groupName: Optional[str] = None
+	temporary: Optional[bool] = None
+
+@dataclass
+class PPathGroupGenSpec(PGroupGenSpec):
+	paths: List[str] = dataclasses.field(default_factory=list)
+	groupAtPathDepth: Optional[int] = None
+
+@dataclass
 class PGroupingSettings(DataObject):
-	pass
+	groupGenerators: List[PGroupGenSpec] = dataclasses.field(
+		default_factory=list,
+		metadata={
+			'TypeMap': TypeMap(
+				PPathGroupGenSpec,
+			)
+		}
+	)
 
 @dataclass
 class PSettings(DataObject):

@@ -41,6 +41,7 @@ class PGroup(DataObject):
 	groupPath: Optional[str] = None
 	shapeIndices: List[int] = dataclasses.field(default_factory=list)
 	meta: Dict[str, Any] = dataclasses.field(default_factory=dict)
+	temporary: Optional[bool] = None
 
 	def __post_init__(self):
 		self.shapeIndices = self.shapeIndices or []
@@ -50,6 +51,7 @@ class PSequenceStep(DataObject):
 	sequenceIndex: int = 0
 	shapeIndices: List[int] = dataclasses.field(default_factory=list)
 	meta: Dict[str, Any] = dataclasses.field(default_factory=dict)
+	temporary: Optional[bool] = None
 
 	def __post_init__(self):
 		self.shapeIndices = self.shapeIndices or []
