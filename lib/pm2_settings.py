@@ -26,6 +26,7 @@ class PPreProcSettings(DataObject):
 @dataclass
 class PGroupGenSpec(DataObject):
 	groupName: Optional[str] = None
+	suffixes: List[str] = None
 	temporary: Optional[bool] = None
 
 @dataclass

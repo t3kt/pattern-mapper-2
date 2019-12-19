@@ -342,3 +342,61 @@ def formatValue(val):
 
 def formatValueList(vals):
 	return ' '.join([formatValue(i) for i in vals]) if vals else ''
+
+def longestCommonPrefix(strs):
+	if not strs:
+		return []
+	for i, letter_group in enumerate(zip(*strs)):
+		if len(set(letter_group)) > 1:
+			return strs[0][:i]
+	else:
+		return min(strs)
+
+class ValueSequence:
+	def __init__(self, vals, cyclic, backup=None):
+		self.vals = list(vals or [])
+		self.cyclic = cyclic
+		self.backup = backup
+
+	@classmethod
+	def FromSpec(cls, spec, parse=None, cyclic=True, backup=None):
+		if spec in (None, ''):
+			vals = []
+		elif isinstance(spec, str):
+			vals = spec.split()
+		elif isinstance(spec, (list, tuple)):
+			vals = spec
+		else:
+			vals = [spec]
+		if parse is None:
+			parse = parseValue
+		return cls(map(parse, vals), cyclic=cyclic, backup=backup)
+
+	def __len__(self): return len(self.vals)
+	def __iter__(self): return iter(self.vals)
+	def __bool__(self): return bool(self.vals)
+
+	def __getitem__(self, index):
+		if not self.vals:
+			return None
+		if 0 <= index < len(self.vals):
+			return self.vals[index]
+		if self.cyclic:
+			return self.vals[index % len(self.vals)]
+		elif callable(self.backup):
+			return self.backup(index)
+		else:
+			return self.backup
+
+	def permuteWith(self, otherseq: 'ValueSequence', n=None):
+		if n is None:
+			n = max(len(self), len(otherseq))
+		for i in range(n):
+			yield self[i], otherseq[i]
+
+	def __str__(self):
+		return '({})'.format(' '.join(map(str, self.vals)))
+
+	def __repr__(self):
+		return '{}(vals={!r}, cyclic={!r})'.format(
+			type(self).__name__, self.vals, self.cyclic)
