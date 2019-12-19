@@ -1,6 +1,5 @@
 import common
-from pm2_model import PPattern, PShape
-from pm2_settings import PSettings
+from pm2_model import PPattern
 
 # noinspection PyUnreachableCode
 if False:
@@ -11,8 +10,6 @@ class PatternGeometryBuilder(common.ExtensionBase):
 	def BuildPatternGeometry(self, sop):
 		inputPatternJson = self.op('input_pattern_json').text
 		pattern = PPattern.parseJsonStr(inputPatternJson)
-		settingsJson = self.op('settings_json').text
-		settings = PSettings.parseJsonStr(settingsJson)
 		sop.clear()
 		sop.primAttribs.create('Cd')
 		sop.primAttribs.create('shapeIndex', 0)
