@@ -175,7 +175,7 @@ def excludeKeys(d, keys):
 def _valToJson(val):
 	# this must be done before the == '' and other comparisons since these
 	# classes throw exceptions when compared against non-supported values.
-	if isinstance(val, (tdu.Vector, tdu.Color)):
+	if isinstance(val, (tdu.Vector, tdu.Position, tdu.Color)):
 		return list(val)
 	if val is None or val == '':
 		return None
@@ -203,6 +203,8 @@ def _valFromJson(jVal, valType: type):
 	try:
 		if valType is tdu.Vector:
 			return tdu.Vector(jVal[0], jVal[1], jVal[2] if len(jVal) > 2 else 0)
+		if valType is tdu.Position:
+			return tdu.Position(jVal[0], jVal[1], jVal[2] if len(jVal) > 2 else 0)
 		if valType is tdu.Color:
 			return tdu.Color(
 				jVal[0], jVal[1], jVal[2],

@@ -87,7 +87,7 @@ class _SvgParser(common.LoggableSubComponent):
 		# if pointpositions[-1] == pointpositions[0]:
 		# 	pointpositions.pop()
 		points = [
-			PPoint(pos=tuple(pos))
+			PPoint(pos=tdu.Vector(pos))
 			for pos in pointPositions
 		]
 		shape = PShape(
@@ -96,6 +96,7 @@ class _SvgParser(common.LoggableSubComponent):
 			parentPath='/'.join(nameStack),
 			color=_elemColor(pathElem),
 			points=points,
+			closed=path.closed,
 		)
 		if path.closed:
 			shape.shapeIndex = len(self.shapes)
@@ -147,7 +148,7 @@ def _elemColor(elem: ET.Element):
 		a = float(elem.get('stroke-opacity', '1'))
 	else:
 		return None
-	return tdu.Color(rgb[0], rgb[1], rgb[2], a)
+	return tdu.Color(rgb[0], rgb[1], rgb[2], a * 255)
 
 def _hexToRgb(hexcolor: str):
 	if not hexcolor:

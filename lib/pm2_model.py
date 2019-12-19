@@ -19,6 +19,7 @@ class PShape(DataObject):
 	path: Optional[str] = None
 	parentPath: Optional[str] = None
 	points: List[PPoint] = dataclasses.field(default_factory=list)
+	closed: Optional[bool] = None
 	color: Optional[tdu.Color] = None
 	depthLayer: Optional[int] = None
 	rotateAxis: Optional[float] = None
@@ -27,23 +28,11 @@ class PShape(DataObject):
 	def pointPositions(self):
 		return [point.pos for point in self.points] if self.points else []
 
-	def pointPositionsWithoutLoop(self):
-		if self.isOpenLoop():
-			return self.pointPositions()[:-1]
-		return self.pointPositions()
-
 	def centerOrAverage(self):
-		return self.center or common.averageTduVectors(self.pointPositionsWithoutLoop())
-
-	def isOpenLoop(self):
-		return len(self.points) >= 4 and self.points[0].pos == self.points[-1].pos
+		return self.center or common.averageTduVectors(self.pointPositions())
 
 	def isTriangle(self):
-		if len(self.points) == 3 and not self.isOpenLoop():
-			return True
-		if len(self.points) == 4 and self.isOpenLoop():
-			return True
-		return False
+		return len(self.points) == 3 and self.closed
 
 @dataclass
 class PGroup(DataObject):

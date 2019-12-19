@@ -28,13 +28,13 @@ class PatternTableExtractor(common.ExtensionBase):
 			'shapeName',
 			'path',
 			'parentPath',
+			'closed',
 			'points.count',
 			'color_r', 'color_g', 'color_b', 'color_a',
 			'center_x', 'center_y', 'center_z',
 			'depthLayer',
 			'rotateAxis',
 			'isTriangle',
-			'isOpenLoop',
 		])
 		for shape in shapes:
 			vals = [
@@ -42,21 +42,15 @@ class PatternTableExtractor(common.ExtensionBase):
 				shape.shapeName,
 				shape.path,
 				shape.parentPath,
+				shape.closed,
 				len(shape.points),
 			]
-			if shape.color:
-				vals += list(shape.color)
-			else:
-				vals += ['', '', '', '']
-			if shape.center:
-				vals += list(shape.center)
-			else:
-				vals += ['', '', '']
+			vals += list(shape.color) if shape.color else ['', '', '', '']
+			vals += list(shape.center) if shape.center else ['', '', '']
 			vals += [
 				shape.depthLayer,
 				shape.rotateAxis,
 				shape.isTriangle(),
-				shape.isOpenLoop(),
 			]
 			dat.appendRow([formatValue(v) for v in vals])
 

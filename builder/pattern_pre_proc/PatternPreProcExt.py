@@ -114,7 +114,7 @@ class _PreProcessor(common.LoggableSubComponent):
 			shape.center = shape.centerOrAverage()
 
 	def _fixTriangleCenter(self, shape: PShape):
-		positions = shape.pointPositionsWithoutLoop()
+		positions = shape.pointPositions()
 		try:
 			shape.center = _getTriangleCenter(positions)
 			return
