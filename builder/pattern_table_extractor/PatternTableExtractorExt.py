@@ -2,7 +2,7 @@ from typing import Iterable
 
 import common
 from common import formatValue
-from pm2_model import PPattern, PShape
+from pm2_model import PPattern, PShape, PGroup
 
 # noinspection PyUnreachableCode
 if False:
@@ -19,6 +19,7 @@ class PatternTableExtractor(common.ExtensionBase):
 		self._InitPointsTable(pointTable)
 		self._AddPointsToTable(pointTable, pattern.shapes, 'shape')
 		self._AddPointsToTable(pointTable, pattern.paths, 'path')
+		self._BuildGroupTable(self.op('set_groups'), pattern.groups)
 
 	@staticmethod
 	def _BuildShapeTable(dat: 'DAT', shapes: Iterable[PShape]):
@@ -29,7 +30,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			'path',
 			'parentPath',
 			'closed',
-			'points.count',
+			'point_count',
 			'color_r', 'color_g', 'color_b', 'color_a',
 			'center_x', 'center_y', 'center_z',
 			'depthLayer',
@@ -75,3 +76,20 @@ class PatternTableExtractor(common.ExtensionBase):
 				]
 				vals += list(point.pos)
 				dat.appendRow([formatValue(v) for v in vals])
+
+	@staticmethod
+	def _BuildGroupTable(dat: 'DAT', groups: Iterable[PGroup]):
+		dat.clear()
+		dat.appendRow([
+			'groupName',
+			'groupPath',
+			'shape_count',
+			'shapeIndices',
+		])
+		for group in groups:
+			dat.appendRow([
+				group.groupName,
+				group.groupPath,
+				len(group.shapeIndices),
+				' '.join(map(str, group.shapeIndices)),
+			])

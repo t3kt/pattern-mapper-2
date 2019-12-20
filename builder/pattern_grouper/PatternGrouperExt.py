@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import common
+from common import loggedmethod, simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import PSettings, PGroupGenSpec, PPathGroupGenSpec
 from typing import Dict, List
@@ -12,13 +13,16 @@ if False:
 	from _stubs import *
 
 class PatternGrouper(common.ExtensionBase):
+	@loggedmethod
 	def ProcessPattern(self):
 		inputPatternJson = self.op('input_pattern_json').text
 		pattern = PPattern.parseJsonStr(inputPatternJson)
 		settingsJson = self.op('settings_json').text
 		settings = PSettings.parseJsonStr(settingsJson)
+		self._LogEvent('settings: {}'.format(settings))
 		if settings.grouping:
 			for spec in settings.grouping.groupGenerators:
+				self._LogEvent('using group generator {}({})'.format(type(spec), spec))
 				generator = _GroupGenerator.fromSpec(self, spec)
 				generator.generateGroups(pattern)
 		outputPatternJson = pattern.toJsonStr(minify=self.par.Minifyjson)
@@ -74,6 +78,7 @@ class _PathGroupGenerator(_GroupGenerator):
 		self.pathPatterns = common.ValueSequence.FromSpec(groupGenSpec.paths, cyclic=False)
 		self.groupAtPathDepth = groupGenSpec.groupAtPathDepth
 
+	@simpleloggedmethod
 	def generateGroups(self, pattern: PPattern):
 		groups = []  # type: List[PGroup]
 		n = len(self.pathPatterns)
@@ -105,6 +110,7 @@ class _PathGroupGenerator(_GroupGenerator):
 			groups[0].groupName = self._getName(0, isSolo=True)
 		pattern.groups += groups
 
+	@loggedmethod
 	def _groupsFromPathMatches(self, baseName: str, shapes: List[PShape]) -> List[PGroup]:
 		if self.groupAtPathDepth == 0:
 			return [
