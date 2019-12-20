@@ -1,6 +1,6 @@
 import datetime
 import typing
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Union
 import dataclasses
 from enum import Enum
 import json
@@ -148,6 +148,43 @@ class LoggableSubComponent(LoggableBase):
 			event = self.logprefix + ' ' + event
 		self.hostobj._LogEvent(event, indentafter=indentafter, unindentbefore=unindentbefore)
 
+def _defaultformatargs(args, kwargs):
+	if not args:
+		return kwargs or ''
+	if not kwargs:
+		return args
+	return '{} {}'.format(args, kwargs)
+
+def _decoratewithlogging(func, formatargs):
+	def wrapper(self: ExtensionBase, *args, **kwargs):
+		self._LogBegin('{}({})'.format(func.__name__, formatargs(args, kwargs)))
+		try:
+			return func(self, *args, **kwargs)
+		finally:
+			self._LogEnd()
+	return wrapper
+
+def loggedmethod(func):
+	return _decoratewithlogging(func, _defaultformatargs)
+
+def simpleloggedmethod(func):
+	return customloggedmethod(omitargs=True)(func)
+
+def customloggedmethod(
+		omitargs: Union[bool, List[str]] = None):
+	if not omitargs:
+		formatargs = _defaultformatargs
+	elif omitargs is True:
+		def formatargs(*_):
+			return ''
+	elif not isinstance(omitargs, (list, tuple, set)):
+		raise Exception('Invalid "omitargs" specifier for loggedmethod: {!r}'.format(omitargs))
+	else:
+		def formatargs(args, kwargs):
+			return _defaultformatargs(args, excludeKeys(kwargs, omitargs))
+
+	return lambda func: _decoratewithlogging(func, formatargs)
+
 def cleanDict(d):
 	if not d:
 		return None
@@ -180,7 +217,7 @@ class TypeMap:
 	def getCodeForType(self, t: type) -> str: return self.codesByType.get(t)
 	def getTypeFromCode(self, code: str) -> type: return self.typesByCode.get(code)
 
-def _valToJson(val, field: dataclasses.Field = None):
+def _valToJson(val, field: dataclasses.Field):
 	# this must be done before the == '' and other comparisons since these
 	# classes throw exceptions when compared against non-supported values.
 	if isinstance(val, (tdu.Vector, tdu.Position, tdu.Color)):
@@ -199,9 +236,9 @@ def _valToJson(val, field: dataclasses.Field = None):
 	if isinstance(val, str):
 		return val
 	if isinstance(val, (list, tuple)):
-		return [_valToJson(v) for v in val]
+		return [_valToJson(v, field) for v in val]
 	if isinstance(val, dict):
-		return {k: _valToJson(v) for k, v in val.items()}
+		return {k: _valToJson(v, field) for k, v in val.items()}
 	return val
 
 # def _unwrapForwardTypeRef(t):
