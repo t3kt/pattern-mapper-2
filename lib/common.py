@@ -254,13 +254,21 @@ def _valFromJson(jVal, valType: type, field: dataclasses.Field):
 			dbgVal = dbgVal[:29] + '...'
 		raise TypeError('Error handling field with valType: {!r} and value: {}: {}'.format(valType, dbgVal, e))
 
+def _isEmptyList(val):
+	if isinstance(val, (list, tuple)) and len(val) == 0:
+		return True
+	return False
+
 @dataclasses.dataclass
 class DataObject:
 	def toJsonDict(self) -> dict:
-		return cleanDict({
-			field.name: _valToJson(getattr(self, field.name), field)
-			for field in dataclasses.fields(self)
-		})
+		obj = {}
+		for field in dataclasses.fields(self):
+			val = _valToJson(getattr(self, field.name), field)
+			if val is None or _isEmptyList(val):
+				continue
+			obj[field.name] = val
+		return obj
 
 	@classmethod
 	def fromJsonDict(cls, obj):
@@ -298,7 +306,7 @@ def _parseJson(jsonStr: str):
 	return json.loads(jsonStr) if jsonStr else {}
 
 def _toJson(obj, minify=True):
-	return '' if not obj else json.dumps(
+	return '{}' if not obj else json.dumps(
 		obj,
 		indent=None if minify else '  ',
 		separators=(',', ':') if minify else (',', ': '),
@@ -342,6 +350,20 @@ def formatValue(val):
 
 def formatValueList(vals):
 	return ' '.join([formatValue(i) for i in vals]) if vals else ''
+
+def parseValue(val, nonevalue=''):
+	if val is None or val == nonevalue:
+		return None
+	if val == '' or isinstance(val, (int, float)):
+		return val
+	try:
+		# noinspection PyTypeChecker
+		parsed = float(val)
+		if int(parsed) == parsed:
+			return int(parsed)
+		return parsed
+	except ValueError:
+		return val
 
 def longestCommonPrefix(strs):
 	if not strs:
