@@ -8,6 +8,10 @@ class BoundType(Enum):
 	frame = 'frame'
 	shapes = 'shapes'
 
+class BoolOp(Enum):
+	OR = 'OR'
+	AND = 'AND'
+
 @dataclass
 class PRecenterSettings(DataObject):
 	centerOnShape: Optional[str] = None
@@ -28,6 +32,7 @@ class PGroupGenSpec(DataObject):
 	groupName: Optional[str] = None
 	suffixes: List[str] = None
 	temporary: Optional[bool] = None
+	mergeAs: Optional[str] = None
 
 @dataclass
 class PPathGroupGenSpec(PGroupGenSpec):

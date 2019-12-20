@@ -87,9 +87,10 @@ class PatternTableExtractor(common.ExtensionBase):
 			'shapeIndices',
 		])
 		for group in groups:
-			dat.appendRow([
+			vals = [
 				group.groupName,
 				group.groupPath,
 				len(group.shapeIndices),
 				' '.join(map(str, group.shapeIndices)),
-			])
+			]
+			dat.appendRow([formatValue(v) for v in vals])
