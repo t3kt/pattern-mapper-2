@@ -11,7 +11,7 @@ class BoundType(Enum):
 @dataclass
 class PRecenterSettings(DataObject):
 	centerOnShape: Optional[str] = None
-	boundType: Optional[BoundType] = None
+	bound: Optional[BoundType] = None
 
 @dataclass
 class PRescaleSettings(DataObject):

@@ -1,6 +1,7 @@
 import math
 
 import common
+from common import loggedmethod, simpleloggedmethod
 from pm2_model import PPattern, PShape
 from pm2_settings import PPreProcSettings, PSettings, BoundType
 from typing import List
@@ -11,6 +12,7 @@ if False:
 	from _stubs import *
 
 class PatternPreProcessor(common.ExtensionBase):
+	@loggedmethod
 	def ProcessPattern(self):
 		inputPatternJson = self.op('input_pattern_json').text
 		pattern = PPattern.parseJsonStr(inputPatternJson)
@@ -30,6 +32,7 @@ class _PreProcessor(common.LoggableSubComponent):
 		self.maxBound = tdu.Vector(0, 0, 0)
 		self.scale = 1
 
+	@simpleloggedmethod
 	def process(self, pattern: PPattern):
 		self._LogEvent('Processing')
 		self.pattern = pattern or PPattern()
@@ -50,8 +53,8 @@ class _PreProcessor(common.LoggableSubComponent):
 		if self.settings.rescale:
 			self._rescaleCoords()
 
+	@loggedmethod
 	def _recenterCoords(self):
-		self._LogEvent('Recentering coords')
 		if self.settings.recenter.centerOnShape:
 			shapeNames = self.settings.recenter.centerOnShape.split(' ')
 			centers = []
@@ -63,13 +66,14 @@ class _PreProcessor(common.LoggableSubComponent):
 				self._LogEvent('Unable to find shape for recentering: {!r}'.format(self.settings.recenter.centerOnShape))
 				return
 			center = common.averageTduVectors(centers)
-		elif self.settings.recenter.boundType == BoundType.shapes:
+		elif self.settings.recenter.bound == BoundType.shapes:
 			center = common.averageTduVectors([self.minBound, self.maxBound])
 		else:
 			center = tdu.Vector(self.pattern.width / 2, self.pattern.height / 2, 0)
 		offset = -center
 		if offset == tdu.Vector(0, 0, 0):
 			return
+		self._LogEvent('Offset: {}'.format(offset))
 		for shape in self.pattern.shapes:
 			_offsetShapePoints(shape, offset)
 		for path in self.pattern.paths:
@@ -78,13 +82,14 @@ class _PreProcessor(common.LoggableSubComponent):
 		self.maxBound += offset
 		self.pattern.offset = (self.pattern.offset or tdu.Vector(0, 0, 0)) + offset
 
+	@loggedmethod
 	def _rescaleCoords(self):
-		self._LogEvent('Rescaling coords')
 		if self.settings.rescale.bound == BoundType.shapes:
 			size = self.maxBound - self.minBound
 		else:
 			size = tdu.Vector(self.pattern.width, self.pattern.height, 0)
 		self.scale = 1 / max(size.x, size.y, size.z)
+		self._LogEvent('Scale: {}'.format(self.scale))
 		for shape in self.pattern.shapes:
 			_scaleShapePoints(shape, self.scale)
 		for path in self.pattern.paths:
