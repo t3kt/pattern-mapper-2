@@ -211,9 +211,9 @@ def excludeKeys(d, keys):
 	}
 
 class TypeMap:
-	def __init__(self, *types: type):
-		self.typesByCode = {t.__name__: t for t in types}
-		self.codesByType = {t: t.__name__ for t in types}
+	def __init__(self, **typesByCode):
+		self.typesByCode = typesByCode
+		self.codesByType = {t: c for c, t in typesByCode.items()}
 	def getCodeForType(self, t: type) -> str: return self.codesByType.get(t)
 	def getTypeFromCode(self, code: str) -> type: return self.typesByCode.get(code)
 

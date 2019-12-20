@@ -40,7 +40,7 @@ class PGroupingSettings(DataObject):
 		default_factory=list,
 		metadata={
 			'TypeMap': TypeMap(
-				PPathGroupGenSpec,
+				path=PPathGroupGenSpec,
 			)
 		}
 	)
