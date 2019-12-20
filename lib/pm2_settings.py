@@ -51,6 +51,16 @@ class PGroupingSettings(DataObject):
 	)
 
 @dataclass
+class PDuplicateMergeScope(DataObject):
+	groups: List[str] = dataclasses.field(default_factory=list)
+
+@dataclass
+class PDuplicateMergeSettings(DataObject):
+	tolerance: Optional[float] = None
+	scopes: List[PDuplicateMergeScope] = dataclasses.field(default_factory=list)
+
+@dataclass
 class PSettings(DataObject):
 	preProc: Optional[PPreProcSettings] = None
 	grouping: Optional[PGroupingSettings] = None
+	dedup: Optional[PDuplicateMergeSettings] = None
