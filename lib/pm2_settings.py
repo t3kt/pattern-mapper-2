@@ -12,6 +12,18 @@ class BoolOp(Enum):
 	OR = 'OR'
 	AND = 'AND'
 
+class ShapeEquivalence(Enum):
+	# Compare the shape center positions and their radius
+	centerRadius = 'centerRadius'
+
+	# Are points equal, compared in the same order.
+	alignedPoints = 'alignedPoints'
+
+	# Are points equal, regardless of which point is the first point.
+	# So shape1 (1,2) (3,4) (5,6)
+	# equals shape2 (3,4) (5,6) (1,2)
+	points = 'points'
+
 @dataclass
 class PRecenterSettings(DataObject):
 	centerOnShape: Optional[str] = None
@@ -57,6 +69,7 @@ class PDuplicateMergeScope(DataObject):
 @dataclass
 class PDuplicateMergeSettings(DataObject):
 	tolerance: Optional[float] = None
+	equivalence: Optional[ShapeEquivalence] = None
 	scopes: List[PDuplicateMergeScope] = dataclasses.field(default_factory=list)
 
 @dataclass

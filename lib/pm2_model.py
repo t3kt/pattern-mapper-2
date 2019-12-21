@@ -25,6 +25,7 @@ class PShape(DataObject):
 	depthLayer: Optional[int] = None
 	rotateAxis: Optional[float] = None
 	center: Optional[tdu.Vector] = None
+	dupCount: Optional[int] = None
 
 	def pointPositions(self):
 		return [point.pos for point in self.points] if self.points else []
@@ -34,6 +35,10 @@ class PShape(DataObject):
 
 	def isTriangle(self):
 		return len(self.points) == 3 and self.closed
+
+	def radius(self):
+		center = self.centerOrAverage()
+		return max(p.pos.distance(center) for p in self.points)
 
 @dataclass
 class PGroup(DataObject):
