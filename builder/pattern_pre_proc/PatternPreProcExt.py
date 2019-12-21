@@ -52,6 +52,7 @@ class _PreProcessor(common.LoggableSubComponent):
 			self._recenterCoords()
 		if self.settings.rescale:
 			self._rescaleCoords()
+		self._calculatePointDistances()
 
 	@loggedmethod
 	def _recenterCoords(self):
@@ -142,10 +143,12 @@ class _PreProcessor(common.LoggableSubComponent):
 			segDist = prevPoint.pos.distance(point.pos) * self.scale
 			totalDist += segDist
 			point.absDist = totalDist
+			prevPoint = point
 		if shape.closed and len(shape.points) > 2:
 			totalDist += shape.points[-1].pos.distance(shape.points[0].pos) * self.scale
 		for point in shape.points:
-			point.absDist = point.relDist / totalDist
+			if point.absDist is not None:
+				point.relDist = point.absDist / totalDist
 		shape.pathLength = totalDist
 
 def _getTriangleCenter(positions: List[tdu.Vector]):

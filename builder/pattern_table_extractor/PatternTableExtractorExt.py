@@ -37,6 +37,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			'rotateAxis',
 			'isTriangle',
 			'pathLength',
+			'dupCount',
 		])
 		for shape in shapes:
 			vals = [
@@ -54,6 +55,7 @@ class PatternTableExtractor(common.ExtensionBase):
 				shape.rotateAxis,
 				shape.isTriangle(),
 				shape.pathLength,
+				shape.dupCount,
 			]
 			dat.appendRow([formatValue(v) for v in vals])
 
@@ -65,6 +67,8 @@ class PatternTableExtractor(common.ExtensionBase):
 			'shapeIndex',
 			'pointIndex',
 			'pos_x', 'pos_y', 'pos_z',
+			'absDist',
+			'relDist',
 		])
 
 	@staticmethod
@@ -77,6 +81,9 @@ class PatternTableExtractor(common.ExtensionBase):
 					i,
 				]
 				vals += list(point.pos)
+				vals += [
+					point.absDist, point.relDist,
+				]
 				dat.appendRow([formatValue(v) for v in vals])
 
 	@staticmethod
