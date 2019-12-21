@@ -7,9 +7,10 @@ if False:
 
 
 def init():
-	proj = globals().get('project')
-	if not proj:
-		return
+	# proj = globals().get('project')
+	# if not proj:
+	# 	return
+	proj = project
 	pkgpath = proj.folder + '/deps'
 
 	if pkgpath not in sys.path:
