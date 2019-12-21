@@ -6,6 +6,8 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
+remap = tdu.remap
+
 class PatternGeometryBuilder(common.ExtensionBase):
 	def BuildPatternGeometry(self, sop):
 		inputPatternJson = self.op('input_pattern_json').text
@@ -40,3 +42,10 @@ class PatternGeometryBuilder(common.ExtensionBase):
 				vertex.point.P = point.pos
 				vertex.absRelDist[0] = point.absDist or 0.0
 				vertex.absRelDist[1] = point.relDist or 0.0
+
+	@staticmethod
+	def SetUVLayerToLocalPos(sop, uvlayer: int):
+		for prim in sop.prims:
+			for vertex in prim:
+				vertex.uv[(uvlayer * 3) + 0] = remap(vertex.point.x, prim.min.x, prim.max.x, 0, 1)
+				vertex.uv[(uvlayer * 3) + 1] = remap(vertex.point.y, prim.min.y, prim.max.y, 0, 1)
