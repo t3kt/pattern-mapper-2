@@ -12,6 +12,8 @@ if False:
 @dataclass
 class PPoint(DataObject):
 	pos: tdu.Vector
+	absDist: Optional[float] = None
+	relDist: Optional[float] = None
 
 @dataclass
 class PShape(DataObject):
@@ -26,6 +28,7 @@ class PShape(DataObject):
 	rotateAxis: Optional[float] = None
 	center: Optional[tdu.Vector] = None
 	dupCount: Optional[int] = None
+	pathLength: Optional[float] = None
 
 	def pointPositions(self):
 		return [point.pos for point in self.points] if self.points else []

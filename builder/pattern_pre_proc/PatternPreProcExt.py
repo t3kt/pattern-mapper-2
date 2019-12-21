@@ -127,6 +127,27 @@ class _PreProcessor(common.LoggableSubComponent):
 			self._LogEvent(e)
 		shape.center = shape.centerOrAverage()
 
+	def _calculatePointDistances(self):
+		for shape in self.pattern.shapes:
+			self._calculateShapePointDistances(shape)
+		for path in self.pattern.paths:
+			self._calculateShapePointDistances(path)
+
+	def _calculateShapePointDistances(self, shape: PShape):
+		totalDist = 0
+		prevPoint = shape.points[0]
+		prevPoint.absDist = 0
+		prevPoint.relDist = 0
+		for point in shape.points[1:]:
+			segDist = prevPoint.pos.distance(point.pos) * self.scale
+			totalDist += segDist
+			point.absDist = totalDist
+		if shape.closed and len(shape.points) > 2:
+			totalDist += shape.points[-1].pos.distance(shape.points[0].pos) * self.scale
+		for point in shape.points:
+			point.absDist = point.relDist / totalDist
+		shape.pathLength = totalDist
+
 def _getTriangleCenter(positions: List[tdu.Vector]):
 	if len(positions) != 3:
 		raise Exception('Shape is not a triangle (wrong number of points: {})'.format(positions))
