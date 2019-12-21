@@ -44,7 +44,7 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 	def __init__(self, hostObj, pattern: PPattern, dedupSettings: PDuplicateMergeSettings):
 		super().__init__(hostObj, logprefix='ShapeDedup')
 		self.pattern = pattern
-		self.comparator = _ShapeComparator(dedupSettings.tolerance, dedupSettings.equivalence)
+		self.comparator = _ShapeComparator(dedupSettings)
 		if not dedupSettings.scopes:
 			self.scopes = None
 		else:
@@ -137,12 +137,18 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 		return shapeIndices
 
 class _ShapeComparator:
-	def __init__(self, tolerance: float, equivalence: ShapeEquivalence):
-		self.tolerance = tolerance or 0.0
-		self.equivalence = equivalence
+	def __init__(self, dedupSettings: PDuplicateMergeSettings):
+		self.tolerance = dedupSettings.tolerance or 0.0
+		self.equivalence = dedupSettings.equivalence
+		self.ignoreDepth = dedupSettings.ignoreDepth
+
+	def _distance(self, vec1: tdu.Vector, vec2: tdu.Vector):
+		if self.ignoreDepth:
+			return tdu.Vector(vec1.x, vec2.y).distance(tdu.Vector(vec2.x, vec2.y))
+		return vec1.distance(vec2)
 
 	def _vectorsEquivalent(self, vec1: tdu.Vector, vec2: tdu.Vector):
-		return vec1.distance(vec2) <= self.tolerance
+		return self._distance(vec1, vec2) <= self.tolerance
 
 	def shapesEquivalent(self, shape1: PShape, shape2: PShape):
 		n = len(shape1.points)

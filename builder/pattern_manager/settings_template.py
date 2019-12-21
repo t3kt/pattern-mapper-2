@@ -7,5 +7,7 @@ def settings():
 			rescale=PRescaleSettings(bound=BoundType.frame),
 			fixTriangleCenters=True,
 		),
-		dedup=PDuplicateMergeSettings(),
+		dedup=PDuplicateMergeSettings(
+			ignoreDepth=True,
+		),
 	)

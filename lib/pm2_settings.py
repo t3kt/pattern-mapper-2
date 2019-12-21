@@ -71,6 +71,7 @@ class PDuplicateMergeSettings(DataObject):
 	tolerance: Optional[float] = None
 	equivalence: Optional[ShapeEquivalence] = None
 	scopes: List[PDuplicateMergeScope] = dataclasses.field(default_factory=list)
+	ignoreDepth: Optional[bool] = None
 
 @dataclass
 class PSettings(DataObject):
