@@ -17,8 +17,7 @@ if False:
 
 class PatternParser(common.ExtensionBase):
 	def ParsePatternSvg(self):
-		svgXmlDat = self.op('load_svg_xml')
-		svgXmlDat.par.loadonstartpulse.pulse()
+		svgXmlDat = self.op('svg_xml')
 		svgXml = svgXmlDat.text
 		parser = _SvgParser(self)
 		pattern = parser.parse(svgXml)

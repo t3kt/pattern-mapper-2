@@ -20,7 +20,7 @@ class PatternGrouper(common.ExtensionBase):
 		settingsJson = self.op('settings_json').text
 		settings = PSettings.parseJsonStr(settingsJson)
 		self._LogEvent('settings: {}'.format(settings))
-		if settings.grouping:
+		if settings.grouping and settings.grouping.groupGenerators:
 			for spec in settings.grouping.groupGenerators:
 				self._LogEvent('using group generator {}({})'.format(type(spec), spec))
 				generator = _GroupGenerator.fromSpec(self, spec)

@@ -46,21 +46,22 @@ class PatternManager(common.ExtensionBase):
 		svgDat.text = ''
 		svgPath = patternDir / (name + '.svg')
 		if copySvgPath:
-			svgDat.par.file = copySvgPath
+			svgDat.par.file = copySvgPath.as_posix()
 			svgDat.par.loadonstartpulse.pulse()
-			svgDat.par.file = svgPath
-			svgDat.par.write.pulse()
+			svgDat.par.file = svgPath.as_posix()
+			svgDat.save(svgDat.par.file)
 		else:
-			svgDat.par.file = svgPath
+			svgDat.par.file = svgPath.as_posix()
 			svgDat.par.loadonstartpulse.pulse()
 		settingsPath = patternDir / 'settings.py'
 		settingsDat = self.op('settings')
-		settingsDat.par.file = settingsPath
+		settingsDat.par.file = settingsPath.as_posix()
 		settingsDat.text = ''
 		if settingsPath.exists():
 			settingsDat.par.loadonstartpulse.pulse()
 		else:
 			settingsDat.copy(self.op('settings_template'))
+			settingsDat.save(settingsDat.par.file)
 
 	def _GetSettings(self) -> Optional[PSettings]:
 		settingsDat = self.op('settings')
