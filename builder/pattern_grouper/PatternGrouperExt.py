@@ -101,7 +101,7 @@ class _PathGroupGenerator(_GroupGenerator):
 			shapes = [
 				shape
 				for shape in pattern.shapes
-				if re.match(pathPattern, shape.path)
+				if re.match(pathPattern, shape.shapePath)
 			]
 			if not shapes:
 				continue
@@ -118,7 +118,7 @@ class _PathGroupGenerator(_GroupGenerator):
 					shapes=shapes,
 				)
 			for group in groupsForPattern:
-				group.groupPath = '/'.join(common.longestCommonPrefix([shape.path.split('/') for shape in shapes]))
+				group.groupPath = '/'.join(common.longestCommonPrefix([shape.shapePath.split('/') for shape in shapes]))
 			groups += groupsForPattern
 		if len(groups) == 1 and self.suffixes is None:
 			groups[0].groupName = self._getName(0, isSolo=True)
@@ -139,7 +139,7 @@ class _PathGroupGenerator(_GroupGenerator):
 			]
 		shapesByPrefix = OrderedDict()  # type: Dict[str, List[PShape]]
 		for shape in shapes:
-			pathParts = shape.path.split('/') if shape.path else []
+			pathParts = shape.shapePath.split('/') if shape.shapePath else []
 			prefix = '/'.join(pathParts[:self.groupAtPathDepth])
 			if prefix not in shapesByPrefix:
 				shapesByPrefix[prefix] = []

@@ -43,7 +43,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			vals = [
 				shape.shapeIndex,
 				shape.shapeName,
-				shape.path,
+				shape.shapePath,
 				shape.parentPath,
 				shape.closed,
 				len(shape.points),

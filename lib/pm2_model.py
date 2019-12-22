@@ -19,7 +19,7 @@ class PPoint(DataObject):
 class PShape(DataObject):
 	shapeIndex: Optional[int] = None
 	shapeName: Optional[str] = None
-	path: Optional[str] = None
+	shapePath: Optional[str] = None
 	parentPath: Optional[str] = None
 	points: List[PPoint] = dataclasses.field(default_factory=list)
 	closed: Optional[bool] = None

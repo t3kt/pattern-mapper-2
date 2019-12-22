@@ -24,6 +24,10 @@ class ShapeEquivalence(Enum):
 	# equals shape2 (3,4) (5,6) (1,2)
 	points = 'points'
 
+class ShapeSourceAttr(Enum):
+	rgb = 'rgb'
+	value = 'value'
+
 @dataclass
 class PRecenterSettings(DataObject):
 	centerOnShape: Optional[str] = None
