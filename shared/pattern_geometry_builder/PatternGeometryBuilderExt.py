@@ -32,10 +32,11 @@ class PatternGeometryBuilder(common.ExtensionBase):
 			poly.shapeIndex[0] = shape.shapeIndex
 			poly.rotateAxis = 0, 0, shape.rotateAxis or 0
 			poly.centerPos = tuple(shape.centerOrAverage())
-			if shape.color:
-				poly.Cd = tuple(shape.color / 255.0)
-			else:
-				poly.Cd = 1, 1, 1, 1
+			color = shape.color or (255, 255, 255, 255)
+			poly.Cd[0] = color[0] / 255
+			poly.Cd[1] = color[1] / 255
+			poly.Cd[2] = color[2] / 255
+			poly.Cd[3] = color[3] / 255
 
 			for i, point in enumerate(shape.points):
 				vertex = poly[i]
