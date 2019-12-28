@@ -91,7 +91,7 @@ class _SvgParser(common.LoggableSubComponent):
 		]
 		shape = PShape(
 			shapeName=pathElem.get('id', None),
-			path='/'.join(nameStack + [elemName]),
+			shapePath='/'.join(nameStack + [elemName]),
 			parentPath='/'.join(nameStack),
 			color=_elemColor(pathElem),
 			points=points,
