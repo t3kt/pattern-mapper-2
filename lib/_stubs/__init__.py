@@ -688,7 +688,7 @@ ParMode.CONSTANT = ParMode.EXPRESSION = ParMode.EXPORT = 0
 
 ExpandoStub = _Expando
 
-class Cell:
+class Cell(_T.SupportsInt, _T.SupportsAbs, _T.SupportsFloat, _T.SupportsBytes):
 	val: str
 	row: int
 	col: int

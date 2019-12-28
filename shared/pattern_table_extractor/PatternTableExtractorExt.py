@@ -103,3 +103,17 @@ class PatternTableExtractor(common.ExtensionBase):
 				' '.join(map(str, group.shapeIndices)),
 			]
 			dat.appendRow([formatValue(v) for v in vals])
+
+	@staticmethod
+	def BuildShapeGroupMembershipTable(dat: 'DAT', shapeTable: 'DAT', groupTable: 'DAT'):
+		dat.clear()
+		dat.appendCol(shapeTable.col('shapeIndex'))
+		allShapeIndices = [int(shapeIndex) for shapeIndex in shapeTable.col('shapeIndex')[1:]]
+		for groupRow in range(1, groupTable.numRows):
+			groupName = groupTable[groupRow, 'groupName']
+			groupShapeIndices = {int(shapeIndex) for shapeIndex in groupTable[groupRow, 'shapeIndices'].val.split(' ')}
+			vals = [
+				int(shapeIndex in groupShapeIndices)
+				for shapeIndex in allShapeIndices
+			]
+			dat.appendCol([groupName] + vals)
