@@ -144,7 +144,7 @@ class _ShapeComparator:
 
 	def _distance(self, vec1: tdu.Vector, vec2: tdu.Vector):
 		if self.ignoreDepth:
-			return tdu.Vector(vec1.x, vec2.y).distance(tdu.Vector(vec2.x, vec2.y))
+			return tdu.Vector(vec1.x, vec2.y, 0).distance(tdu.Vector(vec2.x, vec2.y, 0))
 		return vec1.distance(vec2)
 
 	def _vectorsEquivalent(self, vec1: tdu.Vector, vec2: tdu.Vector):
