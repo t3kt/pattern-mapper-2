@@ -44,16 +44,24 @@ class PPreProcSettings(DataObject):
 	fixTriangleCenters: Optional[bool] = None
 
 @dataclass
+class PGroupGenAttrs(DataObject):
+	temporary: Optional[bool] = None
+	mergeAs: Optional[str] = None
+
+@dataclass
 class PGroupGenSpec(DataObject):
 	groupName: Optional[str] = None
 	suffixes: List[str] = None
-	temporary: Optional[bool] = None
-	mergeAs: Optional[str] = None
+	attrs: Optional[PGroupGenAttrs] = None
 
 @dataclass
 class PPathGroupGenSpec(PGroupGenSpec):
 	paths: List[str] = dataclasses.field(default_factory=list)
 	groupAtPathDepth: Optional[int] = None
+
+@dataclass
+class PIdGroupGenSpec(PGroupGenSpec):
+	ids: List[str] = dataclasses.field(default_factory=list)
 
 @dataclass
 class PGroupingSettings(DataObject):
@@ -62,6 +70,7 @@ class PGroupingSettings(DataObject):
 		metadata={
 			'TypeMap': TypeMap(
 				path=PPathGroupGenSpec,
+				id=PIdGroupGenSpec,
 			)
 		}
 	)
