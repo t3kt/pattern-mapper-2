@@ -29,6 +29,10 @@ class ShapeSourceAttr(Enum):
 	value = 'value'
 
 @dataclass
+class PScope(DataObject):
+	groups: List[str] = dataclasses.field(default_factory=list)
+
+@dataclass
 class PRecenterSettings(DataObject):
 	centerOnShape: Optional[str] = None
 	bound: Optional[BoundType] = None
@@ -76,18 +80,43 @@ class PGroupingSettings(DataObject):
 	)
 
 @dataclass
-class PDuplicateMergeScope(DataObject):
-	groups: List[str] = dataclasses.field(default_factory=list)
+class PSequenceGenAttrs(DataObject):
+	temporary: Optional[bool] = None
+
+@dataclass
+class PSequenceGenSpec(DataObject):
+	sequenceName: Optional[str] = None
+	suffixes: List[str] = None
+	attrs: Optional[PSequenceGenAttrs] = None
+	scopes: List[PScope] = dataclasses.field(default_factory=list)
+
+@dataclass
+class PAttrSequenceGenSpec(PSequenceGenSpec):
+	byAttr = Optional[ShapeSourceAttr] = None
+	roundDigits = Optional[int] = None
+	reverse = Optional[bool] = None
+
+@dataclass
+class PSequencingSettings(DataObject):
+	sequenceGenerators: List[PSequenceGenSpec] = dataclasses.field(
+		default_factory=list,
+		metadata={
+			'TypeMap': TypeMap(
+				attr=PAttrSequenceGenSpec,
+			)
+		}
+	)
 
 @dataclass
 class PDuplicateMergeSettings(DataObject):
 	tolerance: Optional[float] = None
 	equivalence: Optional[ShapeEquivalence] = None
-	scopes: List[PDuplicateMergeScope] = dataclasses.field(default_factory=list)
+	scopes: List[PScope] = dataclasses.field(default_factory=list)
 	ignoreDepth: Optional[bool] = None
 
 @dataclass
 class PSettings(DataObject):
 	preProc: Optional[PPreProcSettings] = None
 	grouping: Optional[PGroupingSettings] = None
+	sequencing: Optional[PSequencingSettings] = None
 	dedup: Optional[PDuplicateMergeSettings] = None
