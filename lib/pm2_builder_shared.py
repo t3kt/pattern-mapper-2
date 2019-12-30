@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Iterable, Set
+from typing import Optional, Iterable, Set, List
 from colorsys import rgb_to_hsv
+import re
 
 import common
 from common import loggedmethod
@@ -105,3 +106,18 @@ class PatternAccessor:
 		for group in self.pattern.groups:
 			if group.groupName == name:
 				return group
+
+	def getShapesByPathRegex(self, pathPattern: str) -> List[PShape]:
+		return [
+			shape
+			for shape in self.pattern.shapes
+			if re.match(pathPattern, shape.shapePath)
+		]
+
+	def getShapesByIndices(self, shapeIndices: Iterable[int]) -> List[PShape]:
+		shapeIndices = set(shapeIndices)
+		return [
+			shape
+			for shape in self.pattern.shapes
+			if shape.shapeIndex in shapeIndices
+		]

@@ -4,7 +4,7 @@ import common
 from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import *
-from pm2_builder_shared import PatternProcessorBase, GeneratorBase
+from pm2_builder_shared import PatternProcessorBase, GeneratorBase, PatternAccessor
 from typing import Dict, Iterable, List, Optional, Set
 import re
 
@@ -88,18 +88,11 @@ class _PathGroupGenerator(_GroupGenerator):
 		self._LogEvent('path patterns: {!r}'.format(self.pathPatterns))
 		groups = []  # type: List[PGroup]
 		n = len(self.pathPatterns)
+		patternAccessor = PatternAccessor(pattern)
 		for i in range(n):
 			pathPattern = self.pathPatterns[i]
 			self._LogEvent('trying path pattern: {!r} (type: {})'.format(pathPattern, type(pathPattern)))
-			shapes = [
-				# shape
-				# for shape in pattern.shapes
-				# if re.match(pathPattern, shape.shapePath)
-			]
-			for shape in pattern.shapes:
-				if re.match(pathPattern, shape.shapePath):
-					self._LogEvent('matched path {!r}'.format(shape.shapePath))
-					shapes.append(shape)
+			shapes = patternAccessor.getShapesByPathRegex(pathPattern)
 			if not shapes:
 				continue
 			if self.groupAtPathDepth is None:

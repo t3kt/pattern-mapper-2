@@ -43,5 +43,19 @@ class _AttrSequenceGenerator(_SequenceGenerator):
 			]
 
 	def generateSequences(self, pattern: PPattern):
+		if not self.scopes:
+			sequences = [
+				self._generateSeqForScope(pattern, None)
+			]
+		else:
+			sequences = []
+			n = len(self.scopes)
+			for i, scope in enumerate(self.scopes):
+				pass
+			pass
+		pass
+
+	def _generateSeqForScope(
+			self, pattern: PPattern, scope: Optional[PScope]):
 		pass
 
