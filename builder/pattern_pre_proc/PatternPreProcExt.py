@@ -4,6 +4,7 @@ import common
 from common import loggedmethod, simpleloggedmethod
 from pm2_model import PPattern, PShape
 from pm2_settings import PPreProcSettings, PSettings, BoundType
+from pm2_builder_shared import PatternProcessorBase
 from typing import List
 
 # noinspection PyUnreachableCode
@@ -11,17 +12,14 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class PatternPreProcessor(common.ExtensionBase):
-	@loggedmethod
-	def ProcessPattern(self):
-		inputPatternJson = self.op('input_pattern_json').text
-		pattern = PPattern.parseJsonStr(inputPatternJson)
-		settingsJson = self.op('settings_json').text
-		settings = PSettings.parseJsonStr(settingsJson)
+class PatternPreProcessor(PatternProcessorBase):
+	def _ProcessPattern(
+			self,
+			pattern: PPattern,
+			settings: PSettings) -> PPattern:
 		processor = _PreProcessor(self, settings.preProc)
 		processor.process(pattern)
-		outputPatternJson = pattern.toJsonStr(minify=self.par.Minifyjson)
-		self.op('set_output_pattern_json').text = outputPatternJson
+		return pattern
 
 class _PreProcessor(common.LoggableSubComponent):
 	def __init__(self, hostObj, settings: PPreProcSettings):

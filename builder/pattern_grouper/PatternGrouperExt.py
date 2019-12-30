@@ -1,9 +1,10 @@
 from collections import OrderedDict
 
 import common
-from common import loggedmethod, simpleloggedmethod
+from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import *
+from pm2_builder_shared import PatternProcessorBase
 from typing import Dict, Iterable, List, Optional, Set
 import re
 
@@ -12,22 +13,18 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class PatternGrouper(common.ExtensionBase):
-	@loggedmethod
-	def ProcessPattern(self):
-		inputPatternJson = self.op('input_pattern_json').text
-		pattern = PPattern.parseJsonStr(inputPatternJson)
-		settingsJson = self.op('settings_json').text
-		settings = PSettings.parseJsonStr(settingsJson)
-		self._LogEvent('settings: {}'.format(settings))
+class PatternGrouper(PatternProcessorBase):
+	def _ProcessPattern(
+			self,
+			pattern: PPattern,
+			settings: PSettings) -> PPattern:
 		if settings.grouping and settings.grouping.groupGenerators:
 			for spec in settings.grouping.groupGenerators:
 				self._LogEvent('using group generator {}({})'.format(type(spec), spec))
 				generator = _GroupGenerator.fromSpec(self, spec)
 				generator.generateGroups(pattern)
 		self._LogEvent('Generated {} groups: {}'.format(len(pattern.groups), [group.groupName for group in pattern.groups]))
-		outputPatternJson = pattern.toJsonStr(minify=self.par.Minifyjson)
-		self.op('set_output_pattern_json').text = outputPatternJson
+		return pattern
 
 class _GroupGenerator(common.LoggableSubComponent):
 	def __init__(
