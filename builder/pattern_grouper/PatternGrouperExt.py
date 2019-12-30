@@ -4,7 +4,7 @@ import common
 from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import *
-from pm2_builder_shared import PatternProcessorBase
+from pm2_builder_shared import PatternProcessorBase, GeneratorBase
 from typing import Dict, Iterable, List, Optional, Set
 import re
 
@@ -26,31 +26,21 @@ class PatternGrouper(PatternProcessorBase):
 		self._LogEvent('Generated {} groups: {}'.format(len(pattern.groups), [group.groupName for group in pattern.groups]))
 		return pattern
 
-class _GroupGenerator(common.LoggableSubComponent):
+class _GroupGenerator(GeneratorBase):
 	def __init__(
 			self,
 			hostObj,
 			groupGenSpec: PGroupGenSpec,
 			logPrefix: str = None):
-		super().__init__(hostObj, logprefix=logPrefix or 'GroupGen')
-		self.baseName = groupGenSpec.baseName
-		self.suffixes = common.ValueSequence.FromSpec(
-			groupGenSpec.suffixes, cyclic=False, backup=lambda i: i) if groupGenSpec.suffixes else None
+		super().__init__(
+			hostObj,
+			groupGenSpec,
+			logPrefix=logPrefix or 'GroupGen')
 		attrs = groupGenSpec.attrs or PGroupGenAttrs()
 		self.temporary = attrs.temporary
 		self.mergeName = attrs.mergeAs
 		self.merger = _GroupCombiner(self, boolOp=BoolOp.OR) if self.mergeName else None
 		# TODO: rotate axes
-
-	def _getName(self, index: int, isSolo=False):
-		name = self.baseName
-		if self.suffixes is None:
-			if index == 0 and isSolo and name:
-				return name
-			suffix = 0
-		else:
-			suffix = self.suffixes[index]
-		return (name or '') + str(suffix)
 
 	def _createGroup(
 			self,

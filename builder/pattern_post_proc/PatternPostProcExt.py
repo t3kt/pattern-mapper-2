@@ -1,11 +1,11 @@
 from collections import deque
 
 import common
-from common import loggedmethod, simpleloggedmethod
+from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence
-from pm2_builder_shared import PatternProcessorBase
-from typing import Dict, Iterable, List, Set
+from pm2_builder_shared import PatternProcessorBase, PatternAccessor
+from typing import Dict, Iterable, List
 
 # noinspection PyUnreachableCode
 if False:
@@ -42,6 +42,7 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 	def __init__(self, hostObj, pattern: PPattern, dedupSettings: PDuplicateMergeSettings):
 		super().__init__(hostObj, logprefix='ShapeDedup')
 		self.pattern = pattern
+		self.patternAccessor = PatternAccessor(pattern)
 		self.comparator = _ShapeComparator(dedupSettings)
 		if not dedupSettings.scopes:
 			self.scopes = None
@@ -71,7 +72,7 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 		else:
 			self.dupRemappers = []
 			for scope in self.scopes:
-				shapeIndices = self._getShapeIndicesByGroupPattern(scope)
+				shapeIndices = self.patternAccessor.getShapeIndicesByGroupPattern(scope)
 				shapes = [shape for shape in self.pattern.shapes if shape.shapeIndex in shapeIndices]
 				if shapes:
 					self.dupRemappers.append(self._loadDupRemapperForShapes(shapes))
@@ -113,26 +114,6 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 		self.pattern.shapes = remainingShapes
 		remapper.remapShapesInGroups(self.pattern)
 		return True
-
-	def _getGroupsByPatterns(self, groupNamePatterns: Iterable[str]) -> Iterable[PGroup]:
-		matchingGroupNames = []
-		allGroupNames = [group.groupName for group in self.pattern.groups]
-		for pattern in groupNamePatterns:
-			for name in mod.tdu.match(pattern, allGroupNames):
-				if name not in matchingGroupNames:
-					matchingGroupNames.append(name)
-		return [
-			group
-			for group in self.pattern.groups
-			if group.groupName in matchingGroupNames
-		]
-
-	def _getShapeIndicesByGroupPattern(self, groupNamePatterns: Iterable[str]) -> Set[int]:
-		shapeIndices = set()
-		groups = self._getGroupsByPatterns(groupNamePatterns)
-		for group in groups:
-			shapeIndices.update(group.shapeIndices)
-		return shapeIndices
 
 class _ShapeComparator:
 	def __init__(self, dedupSettings: PDuplicateMergeSettings):

@@ -25,7 +25,7 @@ class ShapeEquivalence(Enum):
 	points = 'points'
 
 class ShapeSourceAttr(Enum):
-	rgb = 'rgb'
+	alpha = 'alpha'
 	value = 'value'
 
 @dataclass
@@ -48,14 +48,17 @@ class PPreProcSettings(DataObject):
 	fixTriangleCenters: Optional[bool] = None
 
 @dataclass
+class PGenSpecBase(DataObject):
+	baseName: Optional[str] = None
+	suffixes: List[str] = None
+
+@dataclass
 class PGroupGenAttrs(DataObject):
 	temporary: Optional[bool] = None
 	mergeAs: Optional[str] = None
 
 @dataclass
-class PGroupGenSpec(DataObject):
-	baseName: Optional[str] = None
-	suffixes: List[str] = None
+class PGroupGenSpec(PGenSpecBase):
 	attrs: Optional[PGroupGenAttrs] = None
 
 @dataclass
@@ -84,9 +87,7 @@ class PSequenceGenAttrs(DataObject):
 	temporary: Optional[bool] = None
 
 @dataclass
-class PSequenceGenSpec(DataObject):
-	sequenceName: Optional[str] = None
-	suffixes: List[str] = None
+class PSequenceGenSpec(PGenSpecBase):
 	attrs: Optional[PSequenceGenAttrs] = None
 	scopes: List[PScope] = dataclasses.field(default_factory=list)
 
