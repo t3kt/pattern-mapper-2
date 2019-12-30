@@ -54,7 +54,7 @@ class PGroupGenAttrs(DataObject):
 
 @dataclass
 class PGroupGenSpec(DataObject):
-	groupName: Optional[str] = None
+	baseName: Optional[str] = None
 	suffixes: List[str] = None
 	attrs: Optional[PGroupGenAttrs] = None
 
@@ -97,12 +97,17 @@ class PAttrSequenceGenSpec(PSequenceGenSpec):
 	reverse: Optional[bool] = None
 
 @dataclass
+class PPathSequenceGenSpec(PSequenceGenSpec):
+	pathPath: Optional[str] = None
+
+@dataclass
 class PSequencingSettings(DataObject):
 	sequenceGenerators: List[PSequenceGenSpec] = dataclasses.field(
 		default_factory=list,
 		metadata={
 			'TypeMap': TypeMap(
 				attr=PAttrSequenceGenSpec,
+				path=PPathSequenceGenSpec,
 			)
 		}
 	)

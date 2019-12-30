@@ -14,7 +14,7 @@ def settings():
 			groupGenerators=
 			[
 				PPathGroupGenSpec(
-					groupName=n,
+					baseName=n,
 					paths=['^svg/g\\[id={}\\]/.*'.format(n.replace('.', '\\.'))],
 					groupAtPathDepth=groupAt,
 				)

@@ -1,4 +1,5 @@
 import common
+from pm2_settings import PSequenceGenSpec
 
 # noinspection PyUnreachableCode
 if False:
@@ -8,5 +9,8 @@ if False:
 class PatternSequencer(common.ExtensionBase):
 	pass
 
-class _PatternGenerator(common.LoggableSubComponent):
-	pass
+class _SequenceGenerator(common.LoggableSubComponent):
+	def __init__(self, hostObj, seqGenSpec: PSequenceGenSpec, logPrefix: str = None):
+		super().__init__(hostObj, logPrefix)
+		self.baseName = seqGenSpec
+

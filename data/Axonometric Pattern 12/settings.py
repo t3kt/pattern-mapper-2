@@ -13,16 +13,16 @@ def settings():
 		grouping=PGroupingSettings(
 			groupGenerators=[
 				# PPathGroupGenSpec(
-				# 	groupName='DepthLayer1',
+				# 	baseName='DepthLayer1',
 				# 	paths=['^.*/g\[id=DepthLayer1\]'],
 				# 	depthLayer =
 				# ),
 				# PPathGroupGenSpec(
-				# 	groupName='Corners',
+				# 	baseName='Corners',
 				# 	paths=[r'^.*/g\[id=.*Corner\]'],
 				# ),
 				# PPathGroupGenSpec(
-				# 	groupName='Edges',
+				# 	baseName='Edges',
 				# 	paths=[r'^.*/g\[id=.*Edges\]'],
 				# ),
 				PIdGroupGenSpec(

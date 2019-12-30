@@ -36,7 +36,7 @@ class _GroupGenerator(common.LoggableSubComponent):
 			groupGenSpec: PGroupGenSpec,
 			logPrefix: str = None):
 		super().__init__(hostObj, logprefix=logPrefix or 'GroupGen')
-		self.baseName = groupGenSpec.groupName
+		self.baseName = groupGenSpec.baseName
 		self.suffixes = common.ValueSequence.FromSpec(
 			groupGenSpec.suffixes, cyclic=False, backup=lambda i: i) if groupGenSpec.suffixes else None
 		attrs = groupGenSpec.attrs or PGroupGenAttrs()
@@ -167,7 +167,7 @@ def _IdGroupGenerator(hostObj, groupGenSpec: PIdGroupGenSpec):
 	return _PathGroupGenerator(
 		hostObj,
 		PPathGroupGenSpec(
-			groupName=groupGenSpec.groupName,
+			baseName=groupGenSpec.baseName,
 			suffixes=groupGenSpec.suffixes or groupGenSpec.ids,
 			attrs=groupGenSpec.attrs,
 			paths=[
