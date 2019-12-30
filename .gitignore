@@ -5,3 +5,4 @@ CrashAutoSave*
 *-log.txt
 
 backup/
+.DS_Store
