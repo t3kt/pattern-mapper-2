@@ -92,9 +92,9 @@ class PSequenceGenSpec(DataObject):
 
 @dataclass
 class PAttrSequenceGenSpec(PSequenceGenSpec):
-	byAttr = Optional[ShapeSourceAttr] = None
-	roundDigits = Optional[int] = None
-	reverse = Optional[bool] = None
+	byAttr: Optional[ShapeSourceAttr] = None
+	roundDigits: Optional[int] = None
+	reverse: Optional[bool] = None
 
 @dataclass
 class PSequencingSettings(DataObject):
