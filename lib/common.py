@@ -459,3 +459,40 @@ class ValueSequence:
 	def __repr__(self):
 		return '{}(vals={!r}, cyclic={!r})'.format(
 			type(self).__name__, self.vals, self.cyclic)
+
+def _padTo4(val: Union[str, float, int, bool, Iterable[Union[str, float, int, bool]]]):
+	if isinstance(val, str):
+		val = [val]
+	if not isinstance(val, (list, tuple)):
+		val = [val]
+	return [val[i if i < len(val) else -1] for i in range(4)]
+
+def configurePar(
+		par: Union['Par', Iterable['Par']],
+		default: Union[Union[str, float, bool], Iterable[Union[str, float, bool]]] = None,
+		normMin: Union[float, Iterable[float]] = None,
+		normMax: Union[float, Iterable[float]] = None,
+		clampMin: Union[float, Iterable[float]] = None,
+		clampMax: Union[float, Iterable[float]] = None,
+):
+	if not isinstance(par, (list, tuple)):
+		par = [par]
+	default = _padTo4(default)
+	normMin = _padTo4(normMin)
+	normMax = _padTo4(normMax)
+	clampMin = _padTo4(clampMin)
+	clampMax = _padTo4(clampMax)
+	for i, p in enumerate(par):
+		if default[i] is not None:
+			p.default = default[i]
+			p.val = default[i]
+		if normMin[i] is not None:
+			p.normMin = normMin[i]
+		if normMax[i] is not None:
+			p.normMax = normMax[i]
+		if clampMin[i] is not None:
+			p.min = clampMin[i]
+			p.clampMin = True
+		if clampMax[i] is not None:
+			p.max = clampMax[i]
+			p.clampMax = True

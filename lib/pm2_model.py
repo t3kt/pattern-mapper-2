@@ -1,5 +1,4 @@
-import dataclasses
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 from common import DataObject
 import common
@@ -21,7 +20,7 @@ class PShape(DataObject):
 	shapeName: Optional[str] = None
 	shapePath: Optional[str] = None
 	parentPath: Optional[str] = None
-	points: List[PPoint] = dataclasses.field(default_factory=list)
+	points: List[PPoint] = field(default_factory=list)
 	closed: Optional[bool] = None
 	color: Optional[tdu.Color] = None
 	depthLayer: Optional[int] = None
@@ -47,8 +46,8 @@ class PShape(DataObject):
 class PGroup(DataObject):
 	groupName: str
 	groupPath: Optional[str] = None
-	shapeIndices: List[int] = dataclasses.field(default_factory=list)
-	meta: Dict[str, Any] = dataclasses.field(default_factory=dict)
+	shapeIndices: List[int] = field(default_factory=list)
+	meta: Dict[str, Any] = field(default_factory=dict)
 	temporary: Optional[bool] = None
 
 	def __post_init__(self):
@@ -57,8 +56,8 @@ class PGroup(DataObject):
 @dataclass
 class PSequenceStep(DataObject):
 	sequenceIndex: int = 0
-	shapeIndices: List[int] = dataclasses.field(default_factory=list)
-	meta: Dict[str, Any] = dataclasses.field(default_factory=dict)
+	shapeIndices: List[int] = field(default_factory=list)
+	meta: Dict[str, Any] = field(default_factory=dict)
 	temporary: Optional[bool] = None
 
 	def __post_init__(self):
@@ -67,8 +66,8 @@ class PSequenceStep(DataObject):
 @dataclass
 class PSequence(DataObject):
 	sequenceName: str = None
-	steps: List[PSequenceStep] = dataclasses.field(default_factory=list)
-	meta: Dict[str, Any] = dataclasses.field(default_factory=dict)
+	steps: List[PSequenceStep] = field(default_factory=list)
+	meta: Dict[str, Any] = field(default_factory=dict)
 
 	def __post_init__(self):
 		self.steps = self.steps or []
@@ -79,10 +78,10 @@ class PPattern(DataObject):
 	height: Optional[float] = None
 	scale: Optional[float] = None
 	offset: Optional[tdu.Vector] = None
-	shapes: List[PShape] = dataclasses.field(default_factory=list)
-	paths: List[PShape] = dataclasses.field(default_factory=list)
-	groups: List[PGroup] = dataclasses.field(default_factory=list)
-	sequences: List[PSequence] = dataclasses.field(default_factory=list)
+	shapes: List[PShape] = field(default_factory=list)
+	paths: List[PShape] = field(default_factory=list)
+	groups: List[PGroup] = field(default_factory=list)
+	sequences: List[PSequence] = field(default_factory=list)
 
 	def __post_init__(self):
 		self.shapes = self.shapes or []
