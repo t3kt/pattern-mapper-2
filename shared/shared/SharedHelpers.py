@@ -18,6 +18,7 @@ def prepareComponent(comp: 'Union[str, COMP]'):
 	comp.par.reloadbuiltin.expr = 'me.par.externaltox'
 
 def _setUpTransformParams(page: 'Page', prefix: str):
+	page.appendToggle('Include' + prefix.lower() + 'transform', label='Include ' + prefix + ' Transform')
 	configurePar(
 		page.appendXYZ(prefix + 't', label=prefix + ' Translate'),
 		normMin=-1, normMax=1)
@@ -32,15 +33,18 @@ def _setUpTransformParams(page: 'Page', prefix: str):
 		normMin=-1, normMax=1)
 
 def _setUpAppearanceParams(page: 'Page', prefix: str, defaultUVMode: str):
+	page.appendToggle('Include' + prefix.lower() + 'opacity', label='Include ' + prefix + ' Opacity')
 	configurePar(
 		page.appendFloat(prefix + 'opacity', label=prefix + ' Opacity'),
 		default=1)
+	page.appendToggle('Include' + prefix.lower() + 'color', label='Include ' + prefix + ' Color')
 	configurePar(
 		page.appendRGBA(prefix + 'color', label=prefix + ' Color'),
 		default=1)
 	_setUpTextureParams(page, prefix + 'tex', defaultUVMode)
 
 def _setUpTextureParams(page: 'Page', prefix: str, defaultUVMode: str):
+	page.appendToggle('Include' + prefix.lower(), label='Include ' + prefix)
 	configurePar(
 		page.appendFloat(prefix + 'opacity', label=prefix + ' Opacity'),
 		default=0)
@@ -50,6 +54,7 @@ def _setUpTextureParams(page: 'Page', prefix: str, defaultUVMode: str):
 	p.menuNames = ['loc', 'glob', 'path']
 	p.menuLabels = ['Local', 'Global', 'Path']
 	p.default = defaultUVMode
+	page.appendToggle('Include' + prefix.lower() + 'transform', label='Include ' + prefix + ' Transform')
 	configurePar(
 		page.appendXYZ(prefix + 'offset', label=prefix + ' Offset'),
 		normMin=-1, normMax=1)
