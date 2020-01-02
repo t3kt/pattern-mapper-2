@@ -38,7 +38,7 @@ if False:
 # 	pass
 
 class ShapeStateExt(common.ExtensionBase):
-	def LoadShapeState(self, shapeState: PShapeState):
+	def SetShapeState(self, shapeState: PShapeState):
 		shapeState = shapeState or PShapeState()
 		self._SetAppearance(shapeState.fill, 'Fill')
 		self._SetAppearance(shapeState.wire, 'Wire')

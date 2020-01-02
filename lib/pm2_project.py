@@ -1,14 +1,26 @@
 from dataclasses import dataclass, field
 from typing import Optional, List
 
-from common import DataObject
+from common import DataObject, TypeMap
 from pm2_state import PShapeState
 
 @dataclass
-class PGroupShapeState(PShapeState):
-	groupName: str = None
+class PShapeStateGenSpec(DataObject):
+	enable: Optional[bool] = False
+	amount: Optional[float] = None
+
+@dataclass
+class POverrideShapeStateSpec(PShapeStateGenSpec):
+	groupName: Optional[str] = None
+	shapeState: Optional[PShapeState] = None
+	invertMask: Optional[bool] = None
 
 @dataclass
 class PProject(DataObject):
-	defaultShapeState: Optional[PShapeState] = None
-	groupShapeStates: List[PGroupShapeState] = field(default_factory=list)
+	stateGenerators: List[POverrideShapeStateSpec] = field(
+		default_factory=list,
+		metadata={
+			'TypeMap': TypeMap(
+				override=POverrideShapeStateSpec,
+			)
+		})
