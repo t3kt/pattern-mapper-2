@@ -121,6 +121,9 @@ class ExtensionBase(LoggableBase):
 			self.docked = []
 			self.destroy = ownerComp.destroy
 
+	def pars(self, *pattern: str) -> List[Par]:
+		return self.ownerComp.pars(*pattern)
+
 	def _GetLogId(self):
 		if not self.ownerComp.valid or not hasattr(self.ownerComp.par, 'opshortcut'):
 			return None
@@ -296,6 +299,12 @@ def _isEmptyList(val):
 		return True
 	return False
 
+def parMeta(*parNames: str, switchPar: str = None):
+	return {'Param': tuple(parNames), 'Switch': switchPar}
+
+def subObjMeta(prefix: str):
+	return {'ParamPrefix': prefix}
+
 @dataclasses.dataclass
 class DataObject:
 	def toJsonDict(self) -> dict:
@@ -315,6 +324,22 @@ class DataObject:
 		}
 		# noinspection PyArgumentList
 		return cls(**fieldVals)
+
+	# def toParamDict(self, prefix: str = None, includeSwitches=False):
+	# 	switches = {}
+	# 	params = {}
+	# 	for field in dataclasses.fields(self):
+	# 		pass
+	# 	pass
+	#
+	# def toParamSwitches(self, prefix: str = None):
+	# 	prefix = prefix.lower() if prefix else ''
+	#
+	# 	pass
+
+	def isEmpty(self):
+		# TODO: optimize this
+		return not self.toJsonDict()
 
 	@classmethod
 	def fromJsonDicts(cls, objs: List[Dict]):
