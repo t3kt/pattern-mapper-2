@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict
 
 import common
+from common import loggedmethod
 
 # noinspection PyUnreachableCode
 if False:
@@ -40,6 +41,20 @@ class PatternChooser(common.ExtensionBase):
 		if filePath.endswith('-thumb.png'):
 			return filePath.replace('-thumb.png', ''), 'thumb'
 		return None, None
+
+	def OnEntryLoadPulse(self, entryComp: 'COMP'):
+		patternName = entryComp.par.Patternname.eval()
+		self._SelectPattern(patternName)
+
+	@loggedmethod
+	def _SelectPattern(self, patternName: str):
+		self.par.Selectedpattern = patternName or ''
+		jsonDat = self.op('load_pattern_json')
+		patternTable = self.op('pattern_table')
+		if not patternName or not patternTable[patternName, 'pattern']:
+			jsonDat.text = ''
+		else:
+			jsonDat.par.loadonstartpulse.pulse()
 
 @dataclass
 class _PatternInfo:
