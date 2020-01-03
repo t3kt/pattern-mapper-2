@@ -42,6 +42,7 @@ class PatternManager(common.ExtensionBase):
 		patternDir = self._PatternDirectory
 		if not patternDir.exists():
 			patternDir.mkdir(parents=True, exist_ok=True)
+		pathsDat = self.op('set_paths')
 		svgDat = self.op('svg')
 		svgDat.text = ''
 		svgPath = patternDir / (name + '.svg')
@@ -62,6 +63,13 @@ class PatternManager(common.ExtensionBase):
 		else:
 			settingsDat.copy(self.op('settings_template'))
 			settingsDat.save(settingsDat.par.file)
+		pathsDat.clear()
+		pathsDat.appendCol(['dir', 'svg', 'settings'])
+		pathsDat.appendCol([
+			patternDir,
+			svgPath,
+			settingsPath,
+		])
 
 	def _GetSettings(self) -> Optional[PSettings]:
 		settingsDat = self.op('settings')
