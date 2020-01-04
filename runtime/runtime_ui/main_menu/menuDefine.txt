@@ -1,6 +1,7 @@
 button	item1	item2	callback	dividerAfter	disable	checked	highlight	shortcut	rowCallback
 File									
 	Open		onFileAction					Alt O	
+	Save		onFileAction						
 	Recent			True					
 									getRecentFiles
 	Quit		onQuit				True		

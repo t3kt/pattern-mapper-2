@@ -1,1 +1,8 @@
-{}
+{
+  "render": {
+    "fillEnable": true,
+    "renderHeight": 2000,
+    "renderWidth": 2000,
+    "wireEnable": true
+  }
+}

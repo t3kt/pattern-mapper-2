@@ -9,6 +9,8 @@ from pm2_runtime_shared import RuntimeSubsystem
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.pattern_chooser.PatternChooserExt import PatternChooser
+	from runtime.pattern_renderer.PatternRendererExt import PatternRenderer
 
 class RuntimeApp(common.ExtensionBase):
 
@@ -35,19 +37,25 @@ class RuntimeApp(common.ExtensionBase):
 
 	def SaveProject(self):
 		project = self._BuildProject()
+		self._Chooser.SaveProject(project)
 
-		raise NotImplementedError()
+	@property
+	def _Renderer(self) -> 'PatternRenderer': return self.op('pattern_renderer')
 
-	def _GetSubSystems(self) -> Iterable[RuntimeSubsystem]:
-		raise NotImplementedError()
+	@property
+	def _Chooser(self) -> 'PatternChooser': return self.op('pattern_chooser')
+
+	@property
+	def _SubSystems(self) -> Iterable[RuntimeSubsystem]:
+		yield self._Renderer
 
 	@simpleloggedmethod
 	def _LoadProject(self, project: PProject):
-		for comp in self._GetSubSystems():
+		for comp in self._SubSystems:
 			comp.ReadFromProject(project)
 
 	def _BuildProject(self) -> PProject:
 		project = PProject()
-		for comp in self._GetSubSystems():
+		for comp in self._SubSystems:
 			comp.WriteToProject(project)
 		return project

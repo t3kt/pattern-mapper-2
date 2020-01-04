@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import Dict
 
 import common
-from common import loggedmethod
+from common import loggedmethod, simpleloggedmethod
+from pm2_project import PProject
 
 # noinspection PyUnreachableCode
 if False:
@@ -66,6 +67,13 @@ class PatternChooser(common.ExtensionBase):
 				projectJsonDat.text = ''
 			else:
 				projectJsonDat.par.loadonstartpulse.pulse()
+
+	@simpleloggedmethod
+	def SaveProject(self, project: PProject):
+		projectJson = project.toJsonStr(minify=False)
+		projectJsonDat = self.op('load_project_json')
+		projectJsonDat.text = projectJson
+		projectJsonDat.par.writepulse.pulse()
 
 @dataclass
 class _PatternInfo:

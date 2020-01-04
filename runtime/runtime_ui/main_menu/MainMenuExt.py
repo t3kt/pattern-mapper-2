@@ -11,6 +11,8 @@ class MainMenu(RuntimeComponent):
 	def OnFileAction(self, itemName: str, info: dict):
 		if itemName == 'Open':
 			self._RuntimeApp.ShowPatternChooser()
+		elif itemName == 'Save':
+			self._RuntimeApp.SaveProject()
 
 	@loggedmethod
 	def OnEditAction(self, itemName: str, info: dict):

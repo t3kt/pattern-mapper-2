@@ -19,6 +19,8 @@ class POverrideShapeStateSpec(PShapeStateGenSpec):
 class PRenderSettings(DataObject):
 	renderWidth: Optional[int] = None
 	renderHeight: Optional[int] = None
+	wireEnable: Optional[bool] = None
+	fillEnable: Optional[bool] = None
 
 @dataclass
 class PProject(DataObject):

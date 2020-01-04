@@ -85,10 +85,13 @@ class ShapeStateExt(common.ExtensionBase):
 	def _GetTransform(self, prefix: str):
 		transform = PTransform()
 		lowPrefix = prefix.lower()
-		if getattr(self.par, 'Include' + lowPrefix + 'transform'):
+		if getattr(self.par, 'Include' + lowPrefix + 'translate'):
 			transform.translate = tdu.Vector(self.pars(prefix + 't[xyz]'))
+		if getattr(self.par, 'Include' + lowPrefix + 'rotate'):
 			transform.rotate = tdu.Vector(self.pars(prefix + 'r[xyz]'))
+		if getattr(self.par, 'Include' + lowPrefix + 'scale'):
 			transform.scale = tdu.Vector(self.pars(prefix + 's[xyz]'))
+		if getattr(self.par, 'Include' + lowPrefix + 'pivot'):
 			transform.pivot = tdu.Vector(self.pars(prefix + 'p[xyz]'))
 		if transform.isEmpty():
 			return None
@@ -97,23 +100,22 @@ class ShapeStateExt(common.ExtensionBase):
 	def _SetTransform(self, transform: PTransform, prefix: str):
 		if not transform:
 			transform = PTransform()
-		setattr(self.par, 'Include' + prefix.lower() + 'transform', transform.isEmpty())
-		if transform.isEmpty():
-			for par in self.pars(prefix + '[trsp][xyz]'):
-				par.val = par.default
-			return
+		setattr(self.par, 'Include' + prefix.lower() + 'translate', transform.translate is not None)
 		val = transform.translate or tdu.Vector(0, 0, 0)
 		setattr(self.par, prefix + 'tx', val.x)
 		setattr(self.par, prefix + 'ty', val.y)
 		setattr(self.par, prefix + 'tz', val.z)
+		setattr(self.par, 'Include' + prefix.lower() + 'rotate', transform.rotate is not None)
 		val = transform.rotate or tdu.Vector(0, 0, 0)
 		setattr(self.par, prefix + 'rx', val.x)
 		setattr(self.par, prefix + 'ry', val.y)
 		setattr(self.par, prefix + 'rz', val.z)
+		setattr(self.par, 'Include' + prefix.lower() + 'scale', transform.scale is not None)
 		val = transform.scale or tdu.Vector(1, 1, 1)
 		setattr(self.par, prefix + 'sx', val.x)
 		setattr(self.par, prefix + 'sy', val.y)
 		setattr(self.par, prefix + 'sz', val.z)
+		setattr(self.par, 'Include' + prefix.lower() + 'pivot', transform.pivot is not None)
 		val = transform.pivot or tdu.Vector(0, 0, 0)
 		setattr(self.par, prefix + 'px', val.x)
 		setattr(self.par, prefix + 'py', val.y)
