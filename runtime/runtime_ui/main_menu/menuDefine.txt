@@ -7,4 +7,4 @@ File
 	Quit		onQuit				True		
 Edit									
 Settings									
-	Show Guides		onSetting			me.par.Callbackdat.eval().module.guides			
+	Show Preview		onSetting			parent.ui.par.Showpreview.eval()			
