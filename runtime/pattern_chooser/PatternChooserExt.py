@@ -13,7 +13,7 @@ if False:
 class PatternChooser(common.ExtensionBase):
 	def BuildPatternTable(self, dat: 'DAT', files: 'DAT'):
 		dat.clear()
-		dat.appendRow(['pattern', 'dataPath', 'thumbPath'])
+		dat.appendRow(['pattern', 'dataPath', 'thumbPath', 'projectPath'])
 		dataDir = Path(self.par.Datafolder.eval())
 		patterns = {}  # type: Dict[str, _PatternInfo]
 		for row in range(1, files.numRows):
@@ -25,14 +25,17 @@ class PatternChooser(common.ExtensionBase):
 			if name not in patterns:
 				patterns[name] = _PatternInfo(name)
 			info = patterns[name]  # type: _PatternInfo
+			pathStr = str(relPath.as_posix())
 			if kind == 'data':
-				info.data = str(relPath.as_posix())
+				info.data = pathStr
 			elif kind == 'thumb':
-				info.thumb = str(relPath.as_posix())
+				info.thumb = pathStr
+			elif kind == 'project':
+				info.project = pathStr
 		for pattern in patterns.values():
 			if not pattern.data:
 				continue
-			dat.appendRow([pattern.name, pattern.data, pattern.thumb or ''])
+			dat.appendRow([pattern.name, pattern.data, pattern.thumb or '', pattern.project or ''])
 
 	@staticmethod
 	def _ParseFileName(filePath: str):
@@ -40,6 +43,8 @@ class PatternChooser(common.ExtensionBase):
 			return filePath.replace('-data.json', ''), 'data'
 		if filePath.endswith('-thumb.png'):
 			return filePath.replace('-thumb.png', ''), 'thumb'
+		if filePath.endswith('-project.json'):
+			return filePath.replace('-project.json', ''), 'project'
 		return None, None
 
 	def OnEntryLoadPulse(self, entryComp: 'COMP'):
@@ -49,15 +54,22 @@ class PatternChooser(common.ExtensionBase):
 	@loggedmethod
 	def _SelectPattern(self, patternName: str):
 		self.par.Selectedpattern = patternName or ''
-		jsonDat = self.op('load_pattern_json')
+		patternJsonDat = self.op('load_pattern_json')
+		projectJsonDat = self.op('load_project_json')
 		patternTable = self.op('pattern_table')
 		if not patternName or not patternTable[patternName, 'pattern']:
-			jsonDat.text = ''
+			patternJsonDat.text = ''
+			projectJsonDat.text = ''
 		else:
-			jsonDat.par.loadonstartpulse.pulse()
+			patternJsonDat.par.loadonstartpulse.pulse()
+			if not projectJsonDat.par.file:
+				projectJsonDat.text = ''
+			else:
+				projectJsonDat.par.loadonstartpulse.pulse()
 
 @dataclass
 class _PatternInfo:
 	name: str
 	data: str = None
 	thumb: str = None
+	project: str = None

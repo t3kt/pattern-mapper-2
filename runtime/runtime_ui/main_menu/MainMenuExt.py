@@ -1,19 +1,17 @@
-import common
+from common import loggedmethod
+from pm2_runtime_shared import RuntimeComponent
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
-	from runtime.RuntimeAppExt import RuntimeApp
 
-class MainMenu(common.ExtensionBase):
-	@property
-	def _RuntimeApp(self) -> 'RuntimeApp':
-		return ext.RuntimeApp
-
+class MainMenu(RuntimeComponent):
+	@loggedmethod
 	def OnFileAction(self, itemName: str, info: dict):
 		if itemName == 'Open':
 			self._RuntimeApp.ShowPatternChooser()
 
+	@loggedmethod
 	def OnEditAction(self, itemName: str, info: dict):
 		pass

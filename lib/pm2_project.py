@@ -16,6 +16,11 @@ class POverrideShapeStateSpec(PShapeStateGenSpec):
 	invertMask: Optional[bool] = None
 
 @dataclass
+class PRenderSettings(DataObject):
+	renderWidth: Optional[int] = None
+	renderHeight: Optional[int] = None
+
+@dataclass
 class PProject(DataObject):
 	stateGenerators: List[POverrideShapeStateSpec] = field(
 		default_factory=list,
@@ -24,3 +29,4 @@ class PProject(DataObject):
 				override=POverrideShapeStateSpec,
 			)
 		})
+	render: Optional[PRenderSettings] = None

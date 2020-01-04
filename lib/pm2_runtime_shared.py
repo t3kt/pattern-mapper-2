@@ -1,10 +1,15 @@
+from abc import abstractmethod, ABC
+
 import common
+from common import simpleloggedmethod
+from pm2_project import PProject
 from pm2_state import PShapeState, PAppearance, PTextureAttrs, UVMode, PTransform
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.RuntimeAppExt import RuntimeApp
 
 # @dataclass
 # class _ParMapping:
@@ -139,3 +144,17 @@ class ShapeStateExt(common.ExtensionBase):
 		setattr(self.par, prefix + 'texoffsetz', val.z)
 		setattr(self.par, prefix + 'texrotate', texture.rotate or 0)
 		setattr(self.par, prefix + 'texscale', texture.scale if texture.scale is not None else 1)
+
+class RuntimeComponent(common.ExtensionBase, ABC):
+	@property
+	def _RuntimeApp(self) -> 'RuntimeApp':
+		return ext.RuntimeApp
+
+class RuntimeSubsystem(RuntimeComponent):
+	@abstractmethod
+	def ReadFromProject(self, project: PProject):
+		pass
+
+	@abstractmethod
+	def WriteToProject(self, project: PProject):
+		pass
