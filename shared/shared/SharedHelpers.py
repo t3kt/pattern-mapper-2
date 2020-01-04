@@ -18,16 +18,19 @@ def prepareComponent(comp: 'Union[str, COMP]'):
 	comp.par.reloadbuiltin.expr = 'me.par.externaltox'
 
 def _setUpTransformParams(page: 'Page', prefix: str):
-	page.appendToggle('Include' + prefix.lower() + 'transform', label='Include ' + prefix + ' Transform')
+	page.appendToggle('Include' + prefix.lower() + 'translate', label='Include ' + prefix + ' Translate')
 	configurePar(
 		page.appendXYZ(prefix + 't', label=prefix + ' Translate'),
 		normMin=-1, normMax=1)
+	page.appendToggle('Include' + prefix.lower() + 'rotate', label='Include ' + prefix + ' Rotate')
 	configurePar(
 		page.appendXYZ(prefix + 'r', label=prefix + ' Rotate'),
 		normMin=-180, normMax=180)
+	page.appendToggle('Include' + prefix.lower() + 'scale', label='Include ' + prefix + ' Scale')
 	configurePar(
 		page.appendXYZ(prefix + 's', label=prefix + ' Scale'),
 		normMin=-2, normMax=2, default=1)
+	page.appendToggle('Include' + prefix.lower() + 'pivot', label='Include ' + prefix + ' Pivot')
 	configurePar(
 		page.appendXYZ(prefix + 'p', label=prefix + ' Pivot'),
 		normMin=-1, normMax=1)
