@@ -22,6 +22,8 @@ class MainMenu(RuntimeComponent):
 	def OnSettingAction(self, itemName: str):
 		if itemName == 'Show Preview':
 			par = self.ownerComp.parent.ui.par.Showpreview
+		elif itemName == 'Show Groups':
+			par = self.ownerComp.parent.ui.par.Showgroups
 		else:
 			return
 		par.val = not par.val

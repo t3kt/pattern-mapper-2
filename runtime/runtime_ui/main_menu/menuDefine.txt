@@ -7,4 +7,5 @@ File
 	Quit		onQuit				True		
 Edit									
 Settings									
+	Show Groups		onSetting			parent.ui.par.Showgroups.eval()			
 	Show Preview		onSetting			parent.ui.par.Showpreview.eval()			
