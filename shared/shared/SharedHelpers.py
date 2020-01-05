@@ -6,12 +6,12 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-def prepareComponent(comp: 'Union[str, COMP]'):
+def prepareComponent(comp: 'Union[str, COMP]', toxPathBase='shared/'):
 	comp = op(comp)
 	name = comp.name
 	shortcut = parent().par.opshortcut.eval()
 	comp.par.clone.expr = "(op.{0}.op({1!r}) if hasattr(op, {0!r}) else None) or ''".format(shortcut, name)
-	toxPath = 'shared/{0}/{0}.tox'.format(name)
+	toxPath = '{0}/{1}/{1}.tox'.format(toxPathBase, name)
 	toxExpr = "{0!r} if (mod.os.path.exists({0!r}) and me.par.clone.eval() in (None, '', me)) else ''".format(toxPath)
 	comp.par.externaltox.expr = toxExpr
 	comp.par.reloadcustom.expr = 'me.par.externaltox'
