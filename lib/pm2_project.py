@@ -24,7 +24,7 @@ class PRenderSettings(DataObject):
 
 @dataclass
 class PProject(DataObject):
-	stateGenerators: List[POverrideShapeStateSpec] = field(
+	stateGenerators: List[PShapeStateGenSpec] = field(
 		default_factory=list,
 		metadata={
 			'TypeMap': TypeMap(

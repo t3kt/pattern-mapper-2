@@ -1,7 +1,7 @@
 from pm2_project import POverrideShapeStateSpec
-from pm2_runtime_shared import ShapeStateExt
+from pm2_runtime_shared import ShapeStateGeneratorBase
 
-class GroupShapeStateOverrider(ShapeStateExt):
+class GroupShapeStateOverrider(ShapeStateGeneratorBase):
 	def SetSpec(self, spec: POverrideShapeStateSpec):
 		self.par.Groups = spec.groupName or '*'
 		self.par.Invertmask = spec.invertMask is True

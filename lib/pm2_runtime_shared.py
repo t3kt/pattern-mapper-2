@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 
 import common
 from common import simpleloggedmethod
-from pm2_project import PProject
+from pm2_project import PProject, PShapeStateGenSpec
 from pm2_state import PShapeState, PAppearance, PTextureAttrs, UVMode, PTransform
 
 # noinspection PyUnreachableCode
@@ -147,6 +147,13 @@ class ShapeStateExt(common.ExtensionBase):
 		setattr(self.par, prefix + 'texrotate', texture.rotate or 0)
 		setattr(self.par, prefix + 'texscale', texture.scale if texture.scale is not None else 1)
 
+class ShapeStateGeneratorBase(ShapeStateExt, ABC):
+	@abstractmethod
+	def SetSpec(self, spec: PShapeStateGenSpec): pass
+
+	@abstractmethod
+	def GetSpec(self) -> PShapeStateGenSpec: pass
+
 class RuntimeComponent(common.ExtensionBase, ABC):
 	@property
 	def _RuntimeApp(self) -> 'RuntimeApp':
@@ -154,9 +161,7 @@ class RuntimeComponent(common.ExtensionBase, ABC):
 
 class RuntimeSubsystem(RuntimeComponent):
 	@abstractmethod
-	def ReadFromProject(self, project: PProject):
-		pass
+	def ReadFromProject(self, project: PProject): pass
 
 	@abstractmethod
-	def WriteToProject(self, project: PProject):
-		pass
+	def WriteToProject(self, project: PProject): pass

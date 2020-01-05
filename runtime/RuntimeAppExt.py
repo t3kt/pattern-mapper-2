@@ -11,6 +11,7 @@ if False:
 	from _stubs import *
 	from runtime.pattern_chooser.PatternChooserExt import PatternChooser
 	from runtime.pattern_renderer.PatternRendererExt import PatternRenderer
+	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
 
 class RuntimeApp(common.ExtensionBase):
 
@@ -46,8 +47,12 @@ class RuntimeApp(common.ExtensionBase):
 	def _Chooser(self) -> 'PatternChooser': return self.op('pattern_chooser')
 
 	@property
+	def _StateManager(self) -> 'PatternStateManager': return self.op('pattern_state_manager')
+
+	@property
 	def _SubSystems(self) -> Iterable[RuntimeSubsystem]:
 		yield self._Renderer
+		yield self._StateManager
 
 	@simpleloggedmethod
 	def _LoadProject(self, project: PProject):

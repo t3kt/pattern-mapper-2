@@ -1,7 +1,8 @@
 import datetime
 import typing
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 import dataclasses
+from dataclasses import dataclass, field
 from enum import Enum
 import json
 import sys
@@ -521,3 +522,75 @@ def configurePar(
 		if clampMax[i] is not None:
 			p.max = clampMax[i]
 			p.clampMax = True
+
+@dataclass
+class OPAttrs:
+	order: Optional[float] = None
+	nodePos: Optional[Tuple[float, float]] = None
+	tags: Optional[List[str]] = None
+	panelParent: Optional['COMP'] = None
+	parVals: Optional[Dict[str, Any]] = None
+	parExprs: Optional[Dict[str, str]] = None
+	inputs: Optional[List] = None  # TODO: use a more specific type parameter
+
+	def overrideWith(self, other: 'OPAttrs') -> 'OPAttrs':
+		if not other:
+			return self
+		if other.order is not None:
+			self.order = other.order
+		self.nodePos = other.nodePos or self.nodePos
+		if other.tags:
+			if self.tags is not None:
+				self.tags += other.tags
+			else:
+				self.tags = list(other.tags)
+		self.panelParent = other.panelParent or self.panelParent
+		if other.parVals:
+			if self.parVals is not None:
+				self.parVals.update(other.parVals)
+			else:
+				self.parVals = dict(other.parVals)
+		if other.parExprs:
+			if self.parExprs is not None:
+				self.parExprs.update(other.parExprs)
+			else:
+				self.parExprs = dict(other.parExprs)
+		if other.inputs is not None:
+			self.inputs = list(other.inputs)
+		return self
+
+	def applyTo(self, o: 'OP'):
+		if self.order is not None:
+			o.par.alignorder = self.order
+		if self.nodePos:
+			o.nodeCenterX, o.nodeCenterY = self.nodePos
+		if self.tags:
+			o.tags.update(self.tags)
+		if self.panelParent:
+			self.panelParent.outputCOMPConnectors[0].connect(o)
+		if self.parVals:
+			for key, val in self.parVals.items():
+				setattr(o.par, key, val)
+		if self.parExprs:
+			for key, val in self.parExprs.items():
+				getattr(o.par, key).expr = val
+		if self.inputs:
+			for i, source in enumerate(self.inputs):
+				o.inputConnectors[i].connect(source)
+
+	@classmethod
+	def merged(cls, *attrs: 'OPAttrs'):
+		result = cls()
+		for a in attrs:
+			result.overrideWith(a)
+		return result
+
+def createFromTemplate(
+		template: 'OP',
+		dest: 'COMP',
+		name: str,
+		attrs: OPAttrs = None):
+	comp = dest.copy(template, name=name)
+	if attrs:
+		attrs.applyTo(comp)
+	return comp

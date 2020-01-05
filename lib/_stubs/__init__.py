@@ -754,6 +754,9 @@ class CHOP(OP):
 	def save(self, filepath) -> str: pass
 
 class COMP(OP):
+	inputCOMPConnectors: list
+	outputCOMPConnectors: list
+
 	def destroyCustomPars(self): pass
 	def sortCustomPages(self, *pages): pass
 	def appendCustomPage(self, name: str) -> 'Page': pass
