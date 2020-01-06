@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
 
 import common
 from common import loggedmethod, simpleloggedmethod
@@ -14,58 +13,45 @@ if False:
 class PatternChooser(common.ExtensionBase):
 	def BuildPatternTable(self, dat: 'DAT', files: 'DAT'):
 		dat.clear()
-		dat.appendRow(['pattern', 'dataPath', 'thumbPath', 'projectPath'])
+		dat.appendRow(['pattern', 'dir', 'dataPath', 'thumbPath', 'projectPath'])
 		dataDir = Path(self.par.Datafolder.eval())
-		patterns = {}  # type: Dict[str, _PatternInfo]
-		for row in range(1, files.numRows):
-			fileName = files[row, 'name'].val
-			relPath = dataDir / files[row, 'relpath'].val
-			name, kind = self._ParseFileName(fileName)
-			if not name:
-				continue
-			if name not in patterns:
-				patterns[name] = _PatternInfo(name)
-			info = patterns[name]  # type: _PatternInfo
-			pathStr = str(relPath.as_posix())
-			if kind == 'data':
-				info.data = pathStr
-			elif kind == 'thumb':
-				info.thumb = pathStr
-			elif kind == 'project':
-				info.project = pathStr
-		for pattern in patterns.values():
-			if not pattern.data:
-				continue
-			dat.appendRow([pattern.name, pattern.data, pattern.thumb or '', pattern.project or ''])
-
-	@staticmethod
-	def _ParseFileName(filePath: str):
-		if filePath.endswith('-data.json'):
-			return filePath.replace('-data.json', ''), 'data'
-		if filePath.endswith('-thumb.png'):
-			return filePath.replace('-thumb.png', ''), 'thumb'
-		if filePath.endswith('-project.json'):
-			return filePath.replace('-project.json', ''), 'project'
-		return None, None
-
-	def OnEntryLoadPulse(self, entryComp: 'COMP'):
-		patternName = entryComp.par.Patternname.eval()
-		self._SelectPattern(patternName)
+		names = list(sorted([c.val for c in files.col('name')[1:]]))
+		for name in names:
+			patternDir = dataDir / name
+			dat.appendRow([
+				name,
+				str(patternDir.as_posix()),
+				str((patternDir / 'build' / '{}-data.json'.format(name)).as_posix()),
+				str((patternDir / 'build' / '{}-thumb.png'.format(name)).as_posix()),
+				str((patternDir / 'build' / '{}-project.json'.format(name)).as_posix()),
+			])
 
 	@loggedmethod
-	def _SelectPattern(self, patternName: str):
+	def OnLoadButtonClick(self):
+		radios = self.op('patterns_radio')
+		patternIndex = int(radios.par.Value0)
+		patternTable = self.op('pattern_table')
+		patternName = patternTable[patternIndex + 1, 'pattern'].val
+		self.SelectPattern(patternName)
+
+	@loggedmethod
+	def SelectPattern(self, patternName: str):
 		self.par.Selectedpattern = patternName or ''
 		patternJsonDat = self.op('load_pattern_json')
 		projectJsonDat = self.op('load_project_json')
 		patternTable = self.op('pattern_table')
-		if not patternName or not patternTable[patternName, 'pattern']:
-			patternJsonDat.text = ''
-			projectJsonDat.text = ''
-		else:
-			patternJsonDat.par.loadonstartpulse.pulse()
-			if not projectJsonDat.par.file:
-				projectJsonDat.text = ''
-			else:
+		patternJsonDat.par.file = ''
+		projectJsonDat.par.file = ''
+		patternJsonDat.text = ''
+		projectJsonDat.text = ''
+		if patternName and patternTable[patternName, 'pattern']:
+			patternPath = Path(patternTable[patternName, 'dataPath'].val)
+			if patternPath.exists():
+				patternJsonDat.par.file = str(patternPath.as_posix())
+				patternJsonDat.par.loadonstartpulse.pulse()
+			projectPath = Path(patternTable[patternName, 'projectPath'].val)
+			if projectPath.exists():
+				projectJsonDat.par.file = str(projectPath.as_posix())
 				projectJsonDat.par.loadonstartpulse.pulse()
 
 	@simpleloggedmethod
