@@ -8,8 +8,13 @@ from pm2_runtime_shared import RuntimeComponent, ShapeStateExt, ShapeStateGenera
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
 
 class StateGeneratorsPanel(RuntimeComponent):
+	@property
+	def _StateManager(self) -> 'PatternStateManager':
+		return self.par.Statemanager.eval()
+
 	@staticmethod
 	def OnStateGenMarkerReplicate(comp: 'COMP', target: 'COMP'):
 		comp.par.display = True
@@ -49,3 +54,15 @@ class StateGeneratorsPanel(RuntimeComponent):
 	# 		else:
 	# 			editorPar.bindExpr = ''
 	# 			editorPar.val = editorPar.default
+
+	def OnCreateGeneratorClick(self):
+		manager = self._StateManager
+		manager.AddStateGenerator(POverrideShapeStateSpec())
+
+	def OnStateGenMarkerClick(self, comp: 'COMP'):
+		if comp.par.parentshortcut == 'stateGenMarker':
+			marker = comp
+		else:
+			marker = comp.parent.stateGenMarker
+		index = marker.digits - 1
+		self.par.Selectedgen = index

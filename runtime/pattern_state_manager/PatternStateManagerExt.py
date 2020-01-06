@@ -16,7 +16,7 @@ class PatternStateManager(RuntimeSubsystem):
 	def ReadFromProject(self, project: PProject):
 		self._ClearStateGenerators()
 		for spec in project.stateGenerators or []:
-			self._AddStateGenerator(spec)
+			self.AddStateGenerator(spec)
 
 	@simpleloggedmethod
 	def WriteToProject(self, project: PProject):
@@ -35,7 +35,7 @@ class PatternStateManager(RuntimeSubsystem):
 		return self._GeneratorChain.ops('gen__*')
 
 	@loggedmethod
-	def _AddStateGenerator(self, spec: PShapeStateGenSpec):
+	def AddStateGenerator(self, spec: PShapeStateGenSpec):
 		if isinstance(spec, POverrideShapeStateSpec):
 			template = self.op('templates/group_shape_state_override')
 		else:
