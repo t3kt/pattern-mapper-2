@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
-from pm2_project import PProject, POverrideShapeStateSpec
+from pm2_project import PProject, POverrideShapeStateSpec, PShapeStateGenSpec
 from pm2_runtime_shared import RuntimeSubsystem, ShapeStateGeneratorBase
 
 # noinspection PyUnreachableCode
@@ -35,7 +35,7 @@ class PatternStateManager(RuntimeSubsystem):
 		return self._GeneratorChain.ops('gen__*')
 
 	@loggedmethod
-	def _AddStateGenerator(self, spec):
+	def _AddStateGenerator(self, spec: PShapeStateGenSpec):
 		if isinstance(spec, POverrideShapeStateSpec):
 			template = self.op('templates/group_shape_state_override')
 		else:
