@@ -1,6 +1,6 @@
 from typing import Union, List
 
-from common import createFromTemplate, OPAttrs
+from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
 from pm2_project import PProject, POverrideShapeStateSpec
 from pm2_runtime_shared import RuntimeSubsystem, ShapeStateGeneratorBase
 
@@ -12,11 +12,13 @@ if False:
 _GeneratorT = Union[COMP, ShapeStateGeneratorBase]
 
 class PatternStateManager(RuntimeSubsystem):
+	@simpleloggedmethod
 	def ReadFromProject(self, project: PProject):
 		self._ClearStateGenerators()
 		for spec in project.stateGenerators or []:
 			self._AddStateGenerator(spec)
 
+	@simpleloggedmethod
 	def WriteToProject(self, project: PProject):
 		specs = []
 		for gen in self._Generators:
@@ -32,6 +34,7 @@ class PatternStateManager(RuntimeSubsystem):
 	def _Generators(self) -> List[_GeneratorT]:
 		return self._GeneratorChain.ops('gen__*')
 
+	@loggedmethod
 	def _AddStateGenerator(self, spec):
 		if isinstance(spec, POverrideShapeStateSpec):
 			template = self.op('templates/group_shape_state_override')

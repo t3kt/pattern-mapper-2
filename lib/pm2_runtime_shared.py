@@ -69,7 +69,7 @@ class ShapeStateExt(common.ExtensionBase):
 		if getattr(self.par, 'Include' + lowPrefix + 'tex'):
 			texture.opacity = float(getattr(self.par, prefix + 'texopacity'))
 			texture.source = int(getattr(self.par, prefix + 'texsource'))
-			modeName = str(getattr(self.par, prefix + 'uvmode'))
+			modeName = str(getattr(self.par, prefix + 'texuvmode'))
 			if hasattr(UVMode, modeName):
 				texture.uvMode = getattr(UVMode, modeName)
 		if getattr(self.par, 'Include' + lowPrefix + 'textransform'):
@@ -137,7 +137,7 @@ class ShapeStateExt(common.ExtensionBase):
 		setattr(self.par, 'Include' + lowPrefix + 'tex', texture.opacity is not None or texture.source is not None or texture.uvMode is not None)
 		setattr(self.par, prefix + 'texopacity', texture.opacity if texture.opacity is not None else 1)
 		setattr(self.par, prefix + 'texsource', texture.source or 0)
-		modePar = getattr(self.par, prefix + 'uvmode')
+		modePar = getattr(self.par, prefix + 'texuvmode')
 		modePar.val = texture.uvMode.name if texture.uvMode is not None else modePar.default
 		setattr(self.par, 'Include' + lowPrefix + 'textransform', texture.offset is not None or texture.rotate is not None or texture.scale is not None)
 		val = texture.offset or tdu.Vector(0, 0, 0)

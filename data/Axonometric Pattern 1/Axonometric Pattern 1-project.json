@@ -8,8 +8,11 @@
   "stateGenerators": [
     {
       "_t": "override",
+      "amount": 1.0,
+      "enable": true,
       "groupName": "*",
-      "enable": true
+      "invertMask": false,
+      "shapeState": {}
     }
   ]
 }

@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-import common
 from common import loggedmethod, simpleloggedmethod
 from pm2_project import PProject
+from pm2_runtime_shared import RuntimeComponent
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class PatternChooser(common.ExtensionBase):
+class PatternChooser(RuntimeComponent):
 	def BuildPatternTable(self, dat: 'DAT', files: 'DAT'):
 		dat.clear()
 		dat.appendRow(['pattern', 'dir', 'dataPath', 'thumbPath', 'projectPath'])
@@ -23,7 +23,7 @@ class PatternChooser(common.ExtensionBase):
 				str(patternDir.as_posix()),
 				str((patternDir / 'build' / '{}-data.json'.format(name)).as_posix()),
 				str((patternDir / 'build' / '{}-thumb.png'.format(name)).as_posix()),
-				str((patternDir / 'build' / '{}-project.json'.format(name)).as_posix()),
+				str((patternDir / '{}-project.json'.format(name)).as_posix()),
 			])
 
 	@loggedmethod
@@ -53,6 +53,7 @@ class PatternChooser(common.ExtensionBase):
 			if projectPath.exists():
 				projectJsonDat.par.file = str(projectPath.as_posix())
 				projectJsonDat.par.loadonstartpulse.pulse()
+			self._RuntimeApp.OnChoosePattern()
 
 	@simpleloggedmethod
 	def SaveProject(self, project: PProject):
