@@ -25,26 +25,27 @@ class StateGeneratorsPanel(RuntimeComponent):
 		ctrl = comp.op('invertmask_toggle')
 		ctrl.par.Value0.bindExpr = ctrl.shortcutPath(target, toParName='Invertmask')
 
-	def _GetSelectedGen(self) -> Optional[Union['COMP', 'ShapeStateGeneratorBase']]:
+	@property
+	def SelectedGenerator(self) -> Optional[Union['COMP', 'ShapeStateGeneratorBase']]:
 		index = int(self.par.Selectedgen)
 		genTable = self.op('generators')
 		if index < 0 or index >= genTable.numRows:
 			return None
 		return op(genTable[index + 1, 'path'])
 
-	@loggedmethod
-	def BindEditors(self):
-		gen = self._GetSelectedGen()
-		editor = self.op('state_settings_panel')  # type: Union[COMP, ShapeStateExt]
-		self._LogEvent('selected gen: {}'.format(gen))
-		# if not gen:
-		# 	shapeState = None
-		# else:
-		# 	spec = gen.GetSpec()  # type: POverrideShapeStateSpec
-		# 	shapeState = spec.shapeState
-		for editorPar in editor.pars('Include*', 'Fill*', 'Wire*', 'Local*', 'Global*'):
-			if gen:
-				editorPar.bindExpr = editor.shortcutPath(gen, toParName=editorPar.name)
-			else:
-				editorPar.bindExpr = ''
-				editorPar.val = editorPar.default
+	# @loggedmethod
+	# def BindEditors(self):
+	# 	gen = self.SelectedGenerator
+	# 	editor = self.op('state_settings_panel')  # type: Union[COMP, ShapeStateExt]
+	# 	self._LogEvent('selected gen: {}'.format(gen))
+	# 	# if not gen:
+	# 	# 	shapeState = None
+	# 	# else:
+	# 	# 	spec = gen.GetSpec()  # type: POverrideShapeStateSpec
+	# 	# 	shapeState = spec.shapeState
+	# 	for editorPar in editor.pars('Include*', 'Fill*', 'Wire*', 'Local*', 'Global*'):
+	# 		if gen:
+	# 			editorPar.bindExpr = editor.shortcutPath(gen, toParName=editorPar.name)
+	# 		else:
+	# 			editorPar.bindExpr = ''
+	# 			editorPar.val = editorPar.default
