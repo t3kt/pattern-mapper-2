@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 from common import loggedmethod, simpleloggedmethod
@@ -61,10 +60,3 @@ class PatternChooser(RuntimeComponent):
 		projectJsonDat = self.op('load_project_json')
 		projectJsonDat.text = projectJson
 		projectJsonDat.par.writepulse.pulse()
-
-@dataclass
-class _PatternInfo:
-	name: str
-	data: str = None
-	thumb: str = None
-	project: str = None
