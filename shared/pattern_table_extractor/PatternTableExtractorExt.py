@@ -12,7 +12,8 @@ if False:
 class PatternTableExtractor(common.ExtensionBase):
 	def Extract(self):
 		inputPatternJson = self.op('input_pattern_json').text
-		pattern = PPattern.parseJsonStr(inputPatternJson)
+		pattern = PPattern.parseJsonStr(inputPatternJson or '{}')
+		self._BuildInfoTable(self.op('set_info'), pattern)
 		self._BuildShapeTable(self.op('set_shapes'), pattern.shapes)
 		self._BuildShapeTable(self.op('set_paths'), pattern.paths)
 		pointTable = self.op('set_points')
@@ -20,6 +21,25 @@ class PatternTableExtractor(common.ExtensionBase):
 		self._AddPointsToTable(pointTable, pattern.shapes, 'shape')
 		self._AddPointsToTable(pointTable, pattern.paths, 'path')
 		self._BuildGroupTable(self.op('set_groups'), pattern.groups)
+
+	@staticmethod
+	def _BuildInfoTable(dat: 'DAT', pattern: PPattern):
+		dat.clear()
+		dat.appendCol([
+			'width',
+			'height',
+			'scale',
+			'offset_x',
+			'offset_y',
+		])
+		vals = [
+			pattern.width,
+			pattern.height,
+			pattern.scale if pattern.scale is not None else 1,
+			pattern.offset.x if pattern.offset else 0,
+			pattern.offset.y if pattern.offset else 0,
+		]
+		dat.appendCol([formatValue(v) for v in vals])
 
 	@staticmethod
 	def _BuildShapeTable(dat: 'DAT', shapes: Iterable[PShape]):
