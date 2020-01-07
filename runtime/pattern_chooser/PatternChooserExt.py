@@ -59,4 +59,5 @@ class PatternChooser(RuntimeComponent):
 		projectJson = project.toJsonStr(minify=False)
 		projectJsonDat = self.op('load_project_json')
 		projectJsonDat.text = projectJson
+		projectJsonDat.par.file = self.op('selected_pattern')[1, 'projectPath']
 		projectJsonDat.par.writepulse.pulse()
