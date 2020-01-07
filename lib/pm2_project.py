@@ -17,6 +17,7 @@ class POverrideShapeStateSpec(PShapeStateGenSpec):
 
 @dataclass
 class PRenderSettings(DataObject):
+	useCustomRes: Optional[bool] = None
 	renderWidth: Optional[int] = None
 	renderHeight: Optional[int] = None
 	wireEnable: Optional[bool] = None
