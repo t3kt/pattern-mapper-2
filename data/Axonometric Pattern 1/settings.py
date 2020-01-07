@@ -9,8 +9,9 @@ def settings():
 		),
 		dedup=PDuplicateMergeSettings(
 			ignoreDepth=True,
-			# tolerance=0.0001,
+			# tolerance=0.000001,
 			equivalence=ShapeEquivalence.points,
+			primaryScopes=[PScope(groups=['RightFaces', 'LeftFaces', 'UpFaces'])]
 		),
 		grouping=PGroupingSettings(
 			groupGenerators=[

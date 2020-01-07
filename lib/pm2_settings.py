@@ -117,6 +117,7 @@ class PSequencingSettings(DataObject):
 class PDuplicateMergeSettings(DataObject):
 	tolerance: Optional[float] = None
 	equivalence: Optional[ShapeEquivalence] = None
+	primaryScopes: List[PScope] = None
 	scopes: List[PScope] = dataclasses.field(default_factory=list)
 	ignoreDepth: Optional[bool] = None
 

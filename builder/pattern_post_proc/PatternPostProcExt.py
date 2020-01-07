@@ -3,9 +3,9 @@ from collections import deque
 import common
 from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
-from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence
+from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence, PScope
 from pm2_builder_shared import PatternProcessorBase, PatternAccessor
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Set
 
 # noinspection PyUnreachableCode
 if False:
@@ -38,23 +38,31 @@ class _PostProcessor(common.LoggableSubComponent):
 		dedup = _ShapeDeduplicator(self, self.pattern, self.settings.dedup)
 		dedup.mergeDuplicates()
 
+def _createScopes(scopeSpecs: List[PScope]):
+	if not scopeSpecs:
+		return None
+	return [
+		common.ValueSequence.FromSpec(scope.groups, cyclic=False)
+		for scope in scopeSpecs
+	]
+
 class _ShapeDeduplicator(common.LoggableSubComponent):
 	def __init__(self, hostObj, pattern: PPattern, dedupSettings: PDuplicateMergeSettings):
 		super().__init__(hostObj, logprefix='ShapeDedup')
 		self.pattern = pattern
 		self.patternAccessor = PatternAccessor(pattern)
 		self.comparator = _ShapeComparator(dedupSettings)
-		if not dedupSettings.scopes:
-			self.scopes = None
+		self.primaryScopes = _createScopes(dedupSettings.primaryScopes)
+		if not self.primaryScopes:
+			self.primaryShapeIndices = None
 		else:
-			self.scopes = [
-				common.ValueSequence.FromSpec(scope.groups, cyclic=False)
-				for scope in dedupSettings.scopes
-			]
+			self.primaryShapeIndices = set()  # type: Set[int]
+		self.scopes = _createScopes(dedupSettings.scopes)
 		self.dupRemappers = []  # type: List[_ShapeIndexRemapper]
 
 	@simpleloggedmethod
 	def mergeDuplicates(self):
+		self._loadPrimaryShapes()
 		self._loadDuplicates()
 		self._LogEvent('Found {} remapper scopes'.format(len(self.dupRemappers)))
 		modified = False
@@ -65,6 +73,15 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 					modified = True
 		if modified:
 			self._removeDuplicateShapes()
+
+	def _loadPrimaryShapes(self):
+		if self.primaryShapeIndices is None:
+			return
+		for scope in self.primaryScopes:
+			shapeIndices = self.patternAccessor.getShapeIndicesByGroupPattern(scope)
+			if shapeIndices:
+				self.primaryShapeIndices.update(set(shapeIndices))
+		self._LogEvent('Found {} primary shapes'.format(len(self.primaryShapeIndices)))
 
 	def _loadDuplicates(self):
 		if not self.scopes:
@@ -77,8 +94,24 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 				if shapes:
 					self.dupRemappers.append(self._loadDupRemapperForShapes(shapes))
 
+	def _primaryShapesFirst(self, shapes: Iterable[PShape]):
+		if not self.primaryShapeIndices:
+			return list(shapes)
+		resultShapes = [
+			shape
+			for shape in shapes
+			if shape.shapeIndex in self.primaryShapeIndices
+		]
+		resultShapes += [
+			shape
+			for shape in shapes
+			if shape.shapeIndex not in self.primaryShapeIndices
+		]
+		return resultShapes
+
 	def _loadDupRemapperForShapes(self, shapes: List[PShape]):
 		remapper = _ShapeIndexRemapper(self, 'DeDup')
+		shapes = self._primaryShapesFirst(shapes)
 		for i, shape1 in enumerate(shapes):
 			if shape1.shapeIndex in remapper:
 				continue
@@ -98,7 +131,8 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 		remainingShapes = []
 		removedShapeCount = 0
 		remapper = _ShapeIndexRemapper(self, 'ReIndex')
-		for shape in self.pattern.shapes:
+		shapes = self._primaryShapesFirst(self.pattern.shapes)
+		for shape in shapes:
 			if shape.dupCount == -1:
 				removedShapeCount += 1
 			else:

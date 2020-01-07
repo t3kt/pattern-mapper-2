@@ -50,7 +50,7 @@ class _SvgParser(common.LoggableSubComponent):
 		elemName = _elemName(elem, indexInParent)
 		if elemId is None:
 			elemId = elem.get('id', '')
-		if elemId.startswith('-') or elem.get('display') == 'none':
+		if elemId.startswith('-') or elemId.startswith('~') or elem.get('display') == 'none':
 			return
 		tagName = _localName(elem.tag)
 		if tagName == 'path':
