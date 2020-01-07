@@ -58,6 +58,7 @@ class StateGeneratorsPanel(RuntimeComponent):
 	def OnCreateGeneratorClick(self):
 		manager = self._StateManager
 		manager.AddStateGenerator(POverrideShapeStateSpec())
+		self.op('gen_marker_replicator').par.recreatemissing.pulse()
 
 	def OnStateGenMarkerClick(self, comp: 'COMP'):
 		if comp.par.parentshortcut == 'stateGenMarker':
@@ -65,4 +66,7 @@ class StateGeneratorsPanel(RuntimeComponent):
 		else:
 			marker = comp.parent.stateGenMarker
 		index = marker.digits - 1
-		self.par.Selectedgen = index
+		if index == int(self.par.Selectedgen):
+			self.par.Selectedgen = -1
+		else:
+			self.par.Selectedgen = index
