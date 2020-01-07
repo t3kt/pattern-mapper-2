@@ -108,11 +108,15 @@ class PatternAccessor:
 				return group
 
 	def getShapesByPathRegex(self, pathPattern: str) -> List[PShape]:
-		return [
-			shape
-			for shape in self.pattern.shapes
-			if re.match(pathPattern, shape.shapePath)
-		]
+		try:
+			return [
+				shape
+				for shape in self.pattern.shapes
+				if re.match(pathPattern, shape.shapePath)
+			]
+		except TypeError as e:
+			print('Invalid path regex: {!r}, {}'.format(pathPattern, e))
+			return []
 
 	def getShapesByIndices(self, shapeIndices: Iterable[int]) -> List[PShape]:
 		shapeIndices = set(shapeIndices)
