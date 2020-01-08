@@ -3,13 +3,62 @@
     "fillEnable": true,
     "renderHeight": 2000,
     "renderWidth": 2000,
+    "useCustomRes": false,
     "wireEnable": true
   },
   "stateGenerators": [
     {
       "_t": "override",
-      "amount": 1.0,
+      "amount": 0.0,
+      "enable": false,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 0.15609322488307953,
       "enable": true,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 1.0,
+      "enable": false,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 1.0,
+      "enable": false,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 1.0,
+      "enable": false,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 1.0,
+      "enable": false,
+      "groupName": "*",
+      "invertMask": false,
+      "shapeState": {}
+    },
+    {
+      "_t": "override",
+      "amount": 1.0,
+      "enable": false,
       "groupName": "*",
       "invertMask": false,
       "shapeState": {}
