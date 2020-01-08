@@ -50,7 +50,7 @@ class PatternStateManager(RuntimeSubsystem):
 			attrs=OPAttrs(
 				nodePos=(200, 500 - (i * 150)),
 				inputs=[
-					existingGenerators[-1] if existingGenerators else dest.op('input_shape_states'),
+					existingGenerators[-1].outputConnectors[0] if existingGenerators else dest.op('input_shape_states'),
 				],
 			),
 		)  # type: _GeneratorT
