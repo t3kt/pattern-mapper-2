@@ -13,10 +13,9 @@ def settings():
 		grouping=PGroupingSettings(
 			groupGenerators=
 			[
-				PPathGroupGenSpec(
-					baseName=n,
-					paths=['^svg/g\\[id={}\\]/.*'.format(n.replace('.', '\\.'))],
-					groupAtPathDepth=groupAt,
+				PIdGroupGenSpec(
+					ids=[n],
+					# TODO: fix the grouping depth thing
 				)
 				for n, groupAt in [
 					('1.a', 2),
