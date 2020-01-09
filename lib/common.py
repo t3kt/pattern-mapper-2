@@ -1,3 +1,5 @@
+from colorsys import rgb_to_hsv
+
 import math
 
 import datetime
@@ -610,3 +612,7 @@ def vectorToSpherical(vec: 'tdu.Vector'):
 	theta = math.acos(vec.z / r) * 180 / math.pi
 	phi = math.atan2(vec.y, vec.z) * 180 / math.pi
 	return r, theta, phi
+
+
+def colorToHsv(color: 'tdu.Color'):
+	return rgb_to_hsv(color.r / 255, color.g / 255, color.b / 255)

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Iterable, Set, List
-from colorsys import rgb_to_hsv
 import re
 
 import common
@@ -57,12 +56,9 @@ class GeneratorBase(common.LoggableSubComponent, ABC):
 			suffix = self.suffixes[index]
 		return (name or '') + str(suffix)
 
-def _colorToHsv(color: 'tdu.Color'):
-	return rgb_to_hsv(color.r / 255, color.g / 255, color.b / 255)
-
 def _getAlpha(shape: PShape): return shape.color.a if shape.color else 255
 def _getValue(shape: PShape):
-	return _colorToHsv(shape.color)[2] if shape.color else 0
+	return common.colorToHsv(shape.color)[2] if shape.color else 0
 def _getZero(_): return 0
 
 _attrGetters = {

@@ -52,6 +52,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			'closed',
 			'point_count',
 			'color_r', 'color_g', 'color_b', 'color_a',
+			'color_h', 'color_s', 'color_v',
 			'center_x', 'center_y', 'center_z',
 			'polarCenter_dist', 'polarCenter_theta', 'polarCenter_phi',
 			'depthLayer',
@@ -69,7 +70,12 @@ class PatternTableExtractor(common.ExtensionBase):
 				shape.closed,
 				len(shape.points),
 			]
-			vals += list(shape.color) if shape.color else ['', '', '', '']
+			if not shape.color:
+				vals += ['', '', '', '', '', '', '']
+			else:
+				vals += [shape.color.r / 255, shape.color.g / 255, shape.color.b / 255, shape.color.a / 255]
+				hsv = common.colorToHsv(shape.color)
+				vals += [hsv[0] / 255, hsv[1] / 255, hsv[2] / 255]
 			if not shape.center:
 				vals += ['', '', '', '', '', '']
 			else:
