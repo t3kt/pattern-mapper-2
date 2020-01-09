@@ -53,6 +53,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			'point_count',
 			'color_r', 'color_g', 'color_b', 'color_a',
 			'center_x', 'center_y', 'center_z',
+			'polarCenter_dist', 'polarCenter_theta', 'polarCenter_phi',
 			'depthLayer',
 			'rotateAxis',
 			'isTriangle',
@@ -69,7 +70,11 @@ class PatternTableExtractor(common.ExtensionBase):
 				len(shape.points),
 			]
 			vals += list(shape.color) if shape.color else ['', '', '', '']
-			vals += list(shape.center) if shape.center else ['', '', '']
+			if not shape.center:
+				vals += ['', '', '', '', '', '']
+			else:
+				vals += list(shape.center)
+				vals += common.vectorToSpherical(shape.center)
 			vals += [
 				shape.depthLayer,
 				shape.rotateAxis,

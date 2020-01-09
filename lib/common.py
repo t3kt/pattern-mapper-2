@@ -1,3 +1,5 @@
+import math
+
 import datetime
 import typing
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
@@ -594,3 +596,17 @@ def createFromTemplate(
 	if attrs:
 		attrs.applyTo(comp)
 	return comp
+
+# def createMenuSource(**namesAndLabels):
+# 	names = []
+# 	labels = []
+# 	for name, label in namesAndLabels.items():
+# 		names.append(name)
+# 		labels.append(label)
+# 	return op.TDModules.mod.TDFunctions.parMenu(names, labels)
+
+def vectorToSpherical(vec: 'tdu.Vector'):
+	r = vec.length()
+	theta = math.acos(vec.z / r) * 180 / math.pi
+	phi = math.atan2(vec.y, vec.z) * 180 / math.pi
+	return r, theta, phi
