@@ -262,42 +262,6 @@ def _stringListify(val):
 		return [str(v) for v in val]
 	return [str(val)]
 
-class SerializableParams(common.ExtensionBase):
-	def __init__(
-			self,
-			ownerComp,
-			includePars: Union[str, Iterable[str]]):
-		super().__init__(ownerComp)
-		self.includePars = _stringListify(includePars)
-
-	@staticmethod
-	def _isExcluded(par):
-		return par.isOP or not par.isCustom or par.label.startswith(':')
-
-	def GetParDict(self) -> Dict[str, Any]:
-		return {
-			par.name: par.eval()
-			for par in self.ownerComp.pars(*self.includePars)
-			if not self._isExcluded(par)
-		}
-
-	def SetParDict(self, vals: Dict[str, Any]):
-		vals = vals or {}
-		unsupported = set(vals.keys())
-		for par in self.ownerComp.pars(*self.includePars):
-			if self._isExcluded(par):
-				continue
-			if par.name not in vals:
-				val = None
-			else:
-				unsupported.remove(par.name)
-				val = vals.get(par.name)
-			if val is None:
-				par.val = par.default
-			else:
-				par.val = val
-		self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
-
 class SerializableComponent(common.ExtensionBase):
 	def __init__(
 			self,
