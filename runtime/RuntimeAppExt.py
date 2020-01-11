@@ -12,6 +12,7 @@ if False:
 	from runtime.pattern_chooser.PatternChooserExt import PatternChooser
 	from runtime.pattern_renderer.PatternRendererExt import PatternRenderer
 	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
+	from runtime.source_manager.SourceManagerExt import SourceManager
 
 class RuntimeApp(common.ExtensionBase):
 
@@ -50,9 +51,13 @@ class RuntimeApp(common.ExtensionBase):
 	def _StateManager(self) -> 'PatternStateManager': return self.op('pattern_state_manager')
 
 	@property
+	def _SourceManager(self) -> 'SourceManager': return self.op('source_manager')
+
+	@property
 	def _SubSystems(self) -> Iterable[RuntimeSubsystem]:
 		yield self._Renderer
 		yield self._StateManager
+		yield self._SourceManager
 
 	@simpleloggedmethod
 	def _LoadProject(self, project: PProject):

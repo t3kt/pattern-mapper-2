@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 from common import DataObject, TypeMap
 from pm2_state import PShapeState
@@ -24,6 +24,16 @@ class PRenderSettings(DataObject):
 	fillEnable: Optional[bool] = None
 
 @dataclass
+class PComponentSettings(DataObject):
+	compType: Optional[str] = None
+	pars: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class PSourcesSettings(DataObject):
+	sources: List[PComponentSettings] = field(default_factory=list)
+	pass
+
+@dataclass
 class PProject(DataObject):
 	stateGenerators: List[PShapeStateGenSpec] = field(
 		default_factory=list,
@@ -32,4 +42,5 @@ class PProject(DataObject):
 				override=POverrideShapeStateSpec,
 			)
 		})
+	sources: List[PSourcesSettings] = None
 	render: Optional[PRenderSettings] = None
