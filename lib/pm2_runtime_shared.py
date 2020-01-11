@@ -2,7 +2,6 @@ from abc import abstractmethod, ABC
 from typing import Dict, Any, Union, Iterable
 
 import common
-from common import simpleloggedmethod
 from pm2_project import PProject, PShapeStateGenSpec, PComponentSpec
 from pm2_state import PShapeState, PAppearance, PTextureAttrs, UVMode, PTransform
 
@@ -272,7 +271,8 @@ class SerializableParams(common.ExtensionBase):
 		self.includePars = _stringListify(includePars)
 
 	@staticmethod
-	def _isExcluded(par): return par.isOP or not par.isCustom
+	def _isExcluded(par):
+		return par.isOP or not par.isCustom or par.label.startswith(':')
 
 	def GetParDict(self) -> Dict[str, Any]:
 		return {
@@ -297,6 +297,50 @@ class SerializableParams(common.ExtensionBase):
 			else:
 				par.val = val
 		self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
+
+class SerializableComponent(common.ExtensionBase):
+	def __init__(
+			self,
+			ownerComp,
+			includePars: Union[str, Iterable[str]]):
+		super().__init__(ownerComp)
+		self.includePars = _stringListify(includePars)
+
+	@staticmethod
+	def _isExcluded(par):
+		return par.isOP or not par.isCustom or par.label.startswith(':')
+
+	def GetParDict(self) -> Dict[str, Any]:
+		return {
+			par.name: par.eval()
+			for par in self.ownerComp.pars(*self.includePars)
+			if not self._isExcluded(par)
+		}
+
+	def SetParDict(self, vals: Dict[str, Any]):
+		vals = vals or {}
+		unsupported = set(vals.keys())
+		for par in self.ownerComp.pars(*self.includePars):
+			if self._isExcluded(par):
+				continue
+			if par.name not in vals:
+				val = None
+			else:
+				unsupported.remove(par.name)
+				val = vals.get(par.name)
+			if val is None:
+				par.val = par.default
+			else:
+				par.val = val
+		self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
+
+	def GetComponentSpec(self):
+		return PComponentSpec(
+			compType=self.par.Comptype.eval(),
+			pars=self.GetParDict())
+
+	def SetComponentSpec(self, spec: PComponentSpec):
+		self.SetParDict(spec.pars)
 
 class ShapeStateGeneratorBase(ShapeStateExt, ABC):
 	@abstractmethod

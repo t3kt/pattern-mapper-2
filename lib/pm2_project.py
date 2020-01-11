@@ -41,5 +41,5 @@ class PProject(DataObject):
 				override=POverrideShapeStateSpec,
 			)
 		})
-	sources: List[PSourcesSettings] = None
+	sources: PSourcesSettings = None
 	render: Optional[PRenderSettings] = None
