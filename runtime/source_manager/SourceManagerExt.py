@@ -29,7 +29,7 @@ class SourceManager(RuntimeSubsystem):
 
 	def _GetTemplate(self, compType: str):
 		templates = self.op('template_table')
-		cell = templates[compType, 1]
+		cell = templates[compType, 'path']
 		template = self.op(cell)
 		if not template:
 			raise Exception('Unsupported component type: {!r}'.format(compType))
