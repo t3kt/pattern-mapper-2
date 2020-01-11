@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from typing import Dict, Any, Union, Iterable
 
 import common
 from common import simpleloggedmethod
@@ -146,6 +147,150 @@ class ShapeStateExt(common.ExtensionBase):
 		setattr(self.par, prefix + 'texoffsetz', val.z)
 		setattr(self.par, prefix + 'texrotate', texture.rotate or 0)
 		setattr(self.par, prefix + 'texscale', texture.scale if texture.scale is not None else 1)
+
+def _appearanceAttrs(namePrefix: str, labelPrefix: str):
+	attrs = dict(
+		opacity='Opacity',
+		colorr='Color Red',
+		colorg='Color Green',
+		colorb='Color Blue',
+		colora='Color Alpha',
+		texopacity='Texture Opacity',
+		texsource='Texture Source',
+		texuvmode='Texture UV Mode',
+		texoffsetx='Texture Offset X',
+		texoffsetY='Texture Offset Y',
+		texoffsetz='Texture Offset Z',
+		texrotate='Texture Rotate',
+		texscalex='Texture Scale X',
+		texscaley='Texture Scale Y',
+		texscalez='Texture Scale Z',
+	)
+	return {
+		namePrefix + name: labelPrefix + label
+		for name, label in attrs.items()
+	}
+def _transformAttrs(namePrefix: str, labelPrefix: str):
+	attrs = dict(
+		tx='Translate X',
+		tY='Translate Y',
+		tz='Translate Z',
+		rx='Rotate X',
+		rY='Rotate Y',
+		rz='Rotate Z',
+		sx='Scale X',
+		sY='Scale Y',
+		sz='Scale Z',
+		px='Pivot X',
+		pY='Pivot Y',
+		pz='Pivot Z',
+	)
+	return {
+		namePrefix + name: labelPrefix + label
+		for name, label in attrs.items()
+	}
+
+# ShapeStateChansMenuSource = common.createMenuSource(
+# 	**common.mergeDicts(
+# 		_appearanceAttrs('Fill', 'Fill '),
+# 		_appearanceAttrs('Wire', 'Wire '),
+# 		_transformAttrs('Local', 'Local '),
+# 		_transformAttrs('Global', 'Global '),
+# 	)
+# )
+
+# def ShapeAttrMenuSource(primary=True, definition=False, text=False):
+# 	attrs = dict(
+# 		shapeIndex='shapeIndex',
+# 		shapeName='shapeName',
+# 		path='path',
+# 		parentPath='parentPath',
+# 		closed='closed',
+# 		point_count='point_count',
+# 		color_r='color_r',
+# 		color_g='color_g',
+# 		color_b='color_b',
+# 		color_a='color_a',
+# 		center_x='center_x',
+# 		center_y='center_y',
+# 		center_z='center_z',
+# 		depthLayer='depthLayer',
+# 		rotateAxis='rotateAxis',
+# 		isTriangle='isTriangle',
+# 		pathLength='pathLength',
+# 		dupCount='dupCount',
+# 	)
+# 	return common.mergeDicts(
+# 		primary and dict(
+#
+# 		),
+# 		definition and dict(
+# 			shapeIndex='shapeIndex',
+# 			closed='closed',
+# 			point_count='point_count',
+# 		),
+# 		dict(
+# 			color_r='color_r',
+# 			color_g='color_g',
+# 			color_b='color_b',
+# 			color_a='color_a',
+# 			center_x='center_x',
+# 			center_y='center_y',
+# 			center_z='center_z',
+# 			depthLayer='depthLayer',
+# 			rotateAxis='rotateAxis',
+# 			isTriangle='isTriangle',
+# 			pathLength='pathLength',
+# 			dupCount='dupCount',
+# 		),
+# 		(not numericOnly) and dict(
+# 			shapeName='shapeName',
+# 			path='path',
+# 			parentPath='parentPath',
+# 		)
+# 	)
+#
+# ShapeAttrMenuSource = common.createMenuSource(
+# 	shapeIndex='Shape Index',
+# 	#shapeName='Shape Name',
+#
+# )
+
+class SerializableParams(common.ExtensionBase):
+	def __init__(self, ownerComp, includePars: Union[str, Iterable[str]]):
+		super().__init__(ownerComp)
+		if isinstance(includePars, str):
+			self.includePars = [includePars]
+		else:
+			self.includePars = includePars
+
+	@staticmethod
+	def _isExcluded(par):
+		return par.isOP or not par.isCustom or par.name == 'Pattern'
+
+	def GetParDict(self) -> Dict[str, Any]:
+		return {
+			par.name: par.eval()
+			for par in self.ownerComp.pars(*self.includePars)
+			if not self._isExcluded(par)
+		}
+
+	def SetParDict(self, vals: Dict[str, Any]):
+		vals = vals or {}
+		unsupported = set(vals.keys())
+		for par in self.ownerComp.pars(*self.includePars):
+			if self._isExcluded(par):
+				continue
+			if par.name not in vals:
+				val = None
+			else:
+				unsupported.remove(par.name)
+				val = vals.get(par.name)
+			if val is None:
+				par.val = par.default
+			else:
+				par.val = val
+		self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
 
 class ShapeStateGeneratorBase(ShapeStateExt, ABC):
 	@abstractmethod
