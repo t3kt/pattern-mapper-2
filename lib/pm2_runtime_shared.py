@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, Iterable
 
 import common
 from common import simpleloggedmethod
-from pm2_project import PProject, PShapeStateGenSpec
+from pm2_project import PProject, PShapeStateGenSpec, PComponentSpec
 from pm2_state import PShapeState, PAppearance, PTextureAttrs, UVMode, PTransform
 
 # noinspection PyUnreachableCode
@@ -256,17 +256,23 @@ def _transformAttrs(namePrefix: str, labelPrefix: str):
 #
 # )
 
+def _stringListify(val):
+	if isinstance(val, str):
+		return val.split(' ')
+	if isinstance(val, (list, tuple)):
+		return [str(v) for v in val]
+	return [str(val)]
+
 class SerializableParams(common.ExtensionBase):
-	def __init__(self, ownerComp, includePars: Union[str, Iterable[str]]):
+	def __init__(
+			self,
+			ownerComp,
+			includePars: Union[str, Iterable[str]]):
 		super().__init__(ownerComp)
-		if isinstance(includePars, str):
-			self.includePars = [includePars]
-		else:
-			self.includePars = includePars
+		self.includePars = _stringListify(includePars)
 
 	@staticmethod
-	def _isExcluded(par):
-		return par.isOP or not par.isCustom or par.name == 'Pattern'
+	def _isExcluded(par): return par.isOP or not par.isCustom
 
 	def GetParDict(self) -> Dict[str, Any]:
 		return {

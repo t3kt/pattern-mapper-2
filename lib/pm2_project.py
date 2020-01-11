@@ -24,14 +24,13 @@ class PRenderSettings(DataObject):
 	fillEnable: Optional[bool] = None
 
 @dataclass
-class PComponentSettings(DataObject):
+class PComponentSpec(DataObject):
 	compType: Optional[str] = None
 	pars: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class PSourcesSettings(DataObject):
-	sources: List[PComponentSettings] = field(default_factory=list)
-	pass
+	sources: List[PComponentSpec] = field(default_factory=list)
 
 @dataclass
 class PProject(DataObject):
