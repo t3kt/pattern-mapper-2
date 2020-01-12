@@ -1,8 +1,7 @@
 from typing import Optional, Union
 
-from common import loggedmethod
 from pm2_project import POverrideShapeStateSpec
-from pm2_runtime_shared import RuntimeComponent, ShapeStateExt, ShapeStateGeneratorBase
+from pm2_runtime_shared import RuntimeComponent, ShapeStateGeneratorBase
 
 # noinspection PyUnreachableCode
 if False:

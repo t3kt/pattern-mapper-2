@@ -1,6 +1,6 @@
 from typing import Union, List
 
-from common import createFromTemplate, OPAttrs, simpleloggedmethod
+from common import createFromTemplate, OPAttrs, simpleloggedmethod, loggedmethod
 from pm2_project import PProject, PComponentSpec, PSourcesSettings
 from pm2_runtime_shared import RuntimeSubsystem, SerializableComponent
 
@@ -42,6 +42,7 @@ class SourceManager(RuntimeSubsystem):
 	def _Sources(self) -> List[_SourceT]:
 		return self._SourcesHolder.ops('src__*')
 
+	@loggedmethod
 	def AddSource(self, spec: PComponentSpec):
 		template = self._GetTemplate(spec.compType)
 		if not template:
