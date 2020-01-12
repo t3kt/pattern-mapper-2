@@ -258,6 +258,8 @@ def _valFromJson(jVal, valType: type, field: dataclasses.Field):
 		return None
 	if typing_inspect.is_optional_type(valType):
 		return _valFromJson(jVal, typing_inspect.get_args(valType)[0], field)
+	if valType is Any:
+		return jVal
 	try:
 		if valType is tdu.Vector:
 			return tdu.Vector(jVal[0], jVal[1], jVal[2] if len(jVal) > 2 else 0)
