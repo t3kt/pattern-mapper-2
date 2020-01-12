@@ -7,9 +7,9 @@ def settings():
 			rescale=PRescaleSettings(bound=BoundType.frame),
 			fixTriangleCenters=True,
 		),
-		dedup=PDuplicateMergeSettings(
-			ignoreDepth=True,
-		),
+		# dedup=PDuplicateMergeSettings(
+		# 	ignoreDepth=True,
+		# ),
 		grouping=PGroupingSettings(
 			groupGenerators=[
 				PIdGroupGenSpec(
