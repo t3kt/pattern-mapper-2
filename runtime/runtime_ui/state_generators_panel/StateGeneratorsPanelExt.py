@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
-from pm2_project import POverrideShapeStateSpec
+from common import loggedmethod
+from pm2_project import  PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, ShapeStateGeneratorBase
 
 # noinspection PyUnreachableCode
@@ -54,10 +55,10 @@ class StateGeneratorsPanel(RuntimeComponent):
 	# 			editorPar.bindExpr = ''
 	# 			editorPar.val = editorPar.default
 
-	def OnCreateGeneratorClick(self):
-		manager = self._StateManager
-		manager.AddStateGenerator(POverrideShapeStateSpec())
-		self.op('gen_marker_replicator').par.recreatemissing.pulse()
+	@loggedmethod
+	def OnCreateMenuItemClick(self, info: dict):
+		compType = info['item']
+		self._StateManager.AddStateGenerator(PComponentSpec(compType=compType))
 
 	def OnStateGenMarkerClick(self, comp: 'COMP'):
 		if comp.par.parentshortcut == 'stateGenMarker':

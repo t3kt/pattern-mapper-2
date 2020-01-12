@@ -34,13 +34,11 @@ class PSourcesSettings(DataObject):
 	sources: List[PComponentSpec] = field(default_factory=list)
 
 @dataclass
+class PStateGenSettings(DataObject):
+	generators: List[PComponentSpec] = field(default_factory=list)
+
+@dataclass
 class PProject(DataObject):
-	stateGenerators: List[PShapeStateGenSpec] = field(
-		default_factory=list,
-		metadata={
-			'TypeMap': TypeMap(
-				override=POverrideShapeStateSpec,
-			)
-		})
-	sources: PSourcesSettings = None
+	state: Optional[PStateGenSettings] = None
+	sources: Optional[PSourcesSettings] = None
 	render: Optional[PRenderSettings] = None

@@ -289,7 +289,7 @@ class SerializableParams(common.ExtensionBase):
 
 	@staticmethod
 	def _isExcluded(par):
-		return par.isOP or not par.isCustom or par.label.startswith(':')
+		return par.isOP or not par.isCustom or par.label.startswith(':') or par.mode is not ParMode.CONSTANT
 
 	def GetParDict(self) -> Dict[str, Any]:
 		return {
@@ -345,6 +345,7 @@ class SerializableComponent(SerializableParams):
 			subCompPars=self._GetSubCompParDicts())
 
 	def SetComponentSpec(self, spec: PComponentSpec):
+		spec = spec or PComponentSpec()
 		self.SetParDict(spec.pars)
 		self._SetSubCompParDicts(spec.subCompPars or {})
 
