@@ -296,7 +296,8 @@ class SerializableComponent(common.ExtensionBase):
 				par.val = par.default
 			else:
 				par.val = val
-		self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
+		if unsupported:
+			self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
 
 	def GetComponentSpec(self):
 		return PComponentSpec(
