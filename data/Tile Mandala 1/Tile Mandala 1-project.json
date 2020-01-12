@@ -1,0 +1,28 @@
+{
+  "render": {
+    "fillEnable": true,
+    "renderHeight": 1080,
+    "renderWidth": 1920,
+    "useCustomRes": false,
+    "wireEnable": true
+  },
+  "sources": {
+    "sources": [
+      {
+        "compType": "gradientgen",
+        "pars": {
+          "Enableanimation": true,
+          "Interp": "linear",
+          "Period": 0.5,
+          "Phase": 0.0,
+          "Ramptype": "circular",
+          "Resolutionh": 256.0,
+          "Resolutionw": 256.0,
+          "Reverse": false,
+          "Reversespeed": false,
+          "Speed": 0.10000000149011612
+        }
+      }
+    ]
+  }
+}
