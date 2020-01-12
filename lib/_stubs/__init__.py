@@ -677,14 +677,22 @@ class tdu:
 
 	ArcBall = _ArcBall
 
-# noinspection DuplicatedCode
-JustifyType = _Expando()
-JustifyType.TOPLEFT, JustifyType.TOPCENTER, JustifyType.TOPRIGHT, JustifyType.CENTERLEFT = 0, 0, 0, 0
-JustifyType.CENTER = 0
-JustifyType.CENTERRIGHT, JustifyType.BOTTOMLEFT, JustifyType.BOTTOMCENTER, JustifyType.BOTTOMRIGHT = 0, 0, 0, 0
+class JustifyType(_E.Enum):
+	TOPLEFT = 0
+	TOPCENTER = 0
+	TOPRIGHT = 0
+	CENTERLEFT = 0
+	CENTER = 0
+	CENTERRIGHT = 0
+	BOTTOMLEFT = 0
+	BOTTOMCENTER = 0
+	BOTTOMRIGHT = 0
 
-ParMode = _Expando()
-ParMode.CONSTANT = ParMode.EXPRESSION = ParMode.EXPORT = 0
+class ParMode(_E.Enum):
+	CONSTANT = 0
+	EXPRESSION = 1
+	EXPORT = 2
+	BIND = 3
 
 ExpandoStub = _Expando
 
