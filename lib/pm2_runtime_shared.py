@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
-from typing import Dict, Any, Union, Iterable
+from dataclasses import dataclass, field
+from typing import Dict, Any, Union, Iterable, List
 
 import common
 from pm2_project import PProject, PShapeStateGenSpec, PComponentSpec
@@ -41,6 +42,22 @@ if False:
 # 		)
 # 	]
 # 	pass
+
+@dataclass
+class _ParGroup:
+	name: str
+	label: str
+	switchName: str
+	parNames: List[str]
+
+@dataclass
+class _ParPage:
+	name: str
+	label: str
+	parGroups: List[_ParGroup]
+
+def _appearanceParPage(namePrefix: str, labelPrefix: str):
+	pass
 
 class ShapeStateExt(common.ExtensionBase):
 	def SetShapeState(self, shapeState: PShapeState):
@@ -262,7 +279,7 @@ def _stringListify(val):
 		return [str(v) for v in val]
 	return [str(val)]
 
-class SerializableComponent(common.ExtensionBase):
+class SerializableParams(common.ExtensionBase):
 	def __init__(
 			self,
 			ownerComp,
@@ -299,13 +316,40 @@ class SerializableComponent(common.ExtensionBase):
 		if unsupported:
 			self._LogEvent('Unsupported settings ignored: {}'.format(unsupported))
 
+class SerializableComponent(SerializableParams):
+	@property
+	def _SubStateComps(self) -> List['SerializableParamsOrCOMP']:
+		return self.ownerComp.findChildren(maxDepth=1, tags=['subState'])
+
+	def _GetSubCompParDicts(self):
+		return {
+			comp.name: comp.GetParDict()
+			for comp in self._SubStateComps
+		}
+
+	def _SetSubCompParDicts(self, vals: Dict[str, Dict[str, Any]]):
+		unsupportedComps = set(vals.keys())
+		for comp in self._SubStateComps:
+			if comp.name not in vals:
+				comp.SetParDict({})
+			else:
+				unsupportedComps.remove(comp.name)
+				comp.SetParDict(vals[comp.name])
+		if unsupportedComps:
+			self._LogEvent('Unsupported sub-components ignored: {}'.format(unsupportedComps))
+
 	def GetComponentSpec(self):
 		return PComponentSpec(
 			compType=self.par.Comptype.eval(),
-			pars=self.GetParDict())
+			pars=self.GetParDict(),
+			subCompPars=self._GetSubCompParDicts())
 
 	def SetComponentSpec(self, spec: PComponentSpec):
 		self.SetParDict(spec.pars)
+		self._SetSubCompParDicts(spec.subCompPars or {})
+
+SerializableComponentOrCOMP = Union['COMP', SerializableComponent]
+SerializableParamsOrCOMP = Union['COMP', SerializableParams]
 
 class ShapeStateGeneratorBase(ShapeStateExt, ABC):
 	@abstractmethod

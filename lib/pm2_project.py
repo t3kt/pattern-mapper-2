@@ -27,6 +27,7 @@ class PRenderSettings(DataObject):
 class PComponentSpec(DataObject):
 	compType: Optional[str] = None
 	pars: Dict[str, Any] = field(default_factory=dict)
+	subCompPars: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
 @dataclass
 class PSourcesSettings(DataObject):

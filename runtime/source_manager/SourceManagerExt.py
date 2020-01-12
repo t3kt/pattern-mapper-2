@@ -1,15 +1,13 @@
-from typing import Union, List
+from typing import List
 
 from common import createFromTemplate, OPAttrs, simpleloggedmethod, loggedmethod
 from pm2_project import PProject, PComponentSpec, PSourcesSettings
-from pm2_runtime_shared import RuntimeSubsystem, SerializableComponent
+from pm2_runtime_shared import RuntimeSubsystem, SerializableComponentOrCOMP
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
-
-_SourceT = Union['COMP', SerializableComponent]
 
 class SourceManager(RuntimeSubsystem):
 	@simpleloggedmethod
@@ -39,7 +37,7 @@ class SourceManager(RuntimeSubsystem):
 	def _SourcesHolder(self): return self.op('sources')
 
 	@property
-	def _Sources(self) -> List[_SourceT]:
+	def _Sources(self) -> List[SerializableComponentOrCOMP]:
 		return self._SourcesHolder.ops('src__*')
 
 	@loggedmethod
@@ -57,7 +55,7 @@ class SourceManager(RuntimeSubsystem):
 			attrs=OPAttrs(
 				nodePos=(200, 500 - (i * 150)),
 			),
-		)  # type: _SourceT
+		)  # type: SerializableComponentOrCOMP
 		comp.SetComponentSpec(spec)
 
 	def _ClearSources(self):
