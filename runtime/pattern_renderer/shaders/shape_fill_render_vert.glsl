@@ -41,9 +41,14 @@ void main() {
 
 	oVert.attrs.appearance = loadAppearance();
 	Transform localTransform = loadTransform(sLocalData);
+	localTransform.pivot += centerPos;
 	Transform globalTransform = loadTransform(sGlobalData);
 
 	vec4 worldSpacePos = TDDeform(P);
+
+	applyTransform(worldSpacePos, localTransform, rotateAxis);
+	applyTransform(worldSpacePos, globalTransform, vec3(0));
+
 	gl_Position = TDWorldToProj(worldSpacePos);
 
 	#else
