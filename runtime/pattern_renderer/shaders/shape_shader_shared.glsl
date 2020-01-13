@@ -10,10 +10,17 @@ struct Appearance {
 	float opacity;
 	float texOpacity;
 	flat int texSource;
-	flat int texUVMode;
-	vec3 texOffset;
-	float texRotate;
-	float texScale;
+};
+
+#define UVMODE_LOCAL  0
+#define UVMODE_GLOBAL 1
+#define UVMODE_PATH 2
+
+struct UVAttrs {
+	flat int uvMode;
+	vec3 offset;
+	float rotate;
+	float scale;
 };
 
 struct VertexAttrs {

@@ -17,13 +17,17 @@ Appearance loadAppearance() {
 	data.color = texelFetch(sAppearanceData, ivec2(shapeIndex, 0), 0);
 	vec4 opacityTexOpacitySourceMode = texelFetch(sAppearanceData, ivec2(shapeIndex, 1), 0);
 	data.opacity = opacityTexOpacitySourceMode.r;
-	data.texOpacity = opacityTexOpacitySourceMode.g;
-	data.texSource = int(opacityTexOpacitySourceMode.b);
-	data.texUVMode = int(opacityTexOpacitySourceMode.a);
-	data.texOffset = texelFetch(sAppearanceData, ivec2(shapeIndex, 2), 0).rgb;
+	return data;
+}
+
+UVAttrs loadUVAttrs() {
+	UVAttrs data;
+	vec4 opacityTexOpacitySourceMode = texelFetch(sAppearanceData, ivec2(shapeIndex, 1), 0);
+	data.uvMode = int(opacityTexOpacitySourceMode.a);
+	data.offset = texelFetch(sAppearanceData, ivec2(shapeIndex, 2), 0).rgb;
 	vec2 texRotateScale = texelFetch(sAppearanceData, ivec2(shapeIndex, 3), 0).rg;
-	data.texRotate = texRotateScale.r;
-	data.texScale = texRotateScale.g;
+	data.rotate = texRotateScale.r;
+	data.scale = texRotateScale.g;
 	return data;
 }
 
@@ -36,13 +40,35 @@ Transform loadTransform(sampler2D sampler) {
 	return data;
 }
 
+vec3 getTexCoord(int uvMode) {
+	switch (uvMode) {
+		case UVMODE_LOCAL: return uv[2];
+		case UVMODE_GLOBAL: return uv[1];
+		case UVMODE_PATH: return uv[0];
+		default: return vec3(0);
+	}
+}
+
 void main() {
 	#ifndef TD_PICKING_ACTIVE
 
 	oVert.attrs.appearance = loadAppearance();
+	oVert.attrs.color = Cd;
+
 	Transform localTransform = loadTransform(sLocalData);
 	localTransform.pivot += centerPos;
 	Transform globalTransform = loadTransform(sGlobalData);
+
+	UVAttrs uvAttrs = loadUVAttrs();
+	vec4 texCoord = vec4(getTexCoord(uvAttrs.uvMode), 0);
+	scaleRotateTranslate(
+		texCoord,
+		vec3(uvAttrs.scale),
+		vec3(0, 0, uvAttrs.rotate),
+		uvAttrs.offset,
+		vec3(0.5),
+		vec3(0));
+	oVert.attrs.texCoord = texCoord.xyz;
 
 	vec4 worldSpacePos = TDDeform(P);
 
