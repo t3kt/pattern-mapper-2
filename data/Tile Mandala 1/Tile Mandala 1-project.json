@@ -23,6 +23,54 @@
           "Speed": 0.10000000149011612
         },
         "subCompPars": {}
+      },
+      {
+        "compType": "gradientgen",
+        "pars": {
+          "Enableanimation": false,
+          "Interp": "linear",
+          "Period": 1.0,
+          "Phase": 0.0,
+          "Ramptype": "horizontal",
+          "Resolutionh": 256.0,
+          "Resolutionw": 256.0,
+          "Reverse": false,
+          "Reversespeed": false,
+          "Speed": 0.10000000149011612
+        },
+        "subCompPars": {}
+      },
+      {
+        "compType": "gradientgen",
+        "pars": {
+          "Enableanimation": false,
+          "Interp": "linear",
+          "Period": 1.0,
+          "Phase": 0.0,
+          "Ramptype": "horizontal",
+          "Resolutionh": 256.0,
+          "Resolutionw": 256.0,
+          "Reverse": false,
+          "Reversespeed": false,
+          "Speed": 0.10000000149011612
+        },
+        "subCompPars": {}
+      },
+      {
+        "compType": "gradientgen",
+        "pars": {
+          "Enableanimation": false,
+          "Interp": "linear",
+          "Period": 1.0,
+          "Phase": 0.0,
+          "Ramptype": "horizontal",
+          "Resolutionh": 256.0,
+          "Resolutionw": 256.0,
+          "Reverse": false,
+          "Reversespeed": false,
+          "Speed": 0.10000000149011612
+        },
+        "subCompPars": {}
       }
     ]
   },
