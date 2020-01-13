@@ -1,4 +1,4 @@
-#include "shape_fill_shader_shared"
+#include "shape_shader_shared"
 
 in Vertex {
 	VertexAttrs attrs;

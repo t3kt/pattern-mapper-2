@@ -5,10 +5,23 @@ struct Transform {
 	vec3 pivot;
 };
 
+struct Appearance {
+	vec4 color;
+	float opacity;
+	float texOpacity;
+	flat int texSource;
+	flat int texUVMode;
+	vec3 texOffset;
+	float texRotate;
+	float texScale;
+};
+
 struct VertexAttrs {
 	vec4 color;
 	vec3 worldSpacePos;
 	flat int shapeIndex;
+	vec3 texCoord;
+	Appearance appearance;
 };
 
 // https://gist.github.com/onedayitwillmake/3288507
