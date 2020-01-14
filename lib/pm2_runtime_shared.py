@@ -289,7 +289,17 @@ class SerializableParams(common.ExtensionBase):
 
 	@staticmethod
 	def _isExcluded(par):
-		return par.isOP or not par.isCustom or par.label.startswith(':') or par.mode is not ParMode.CONSTANT
+		if not par.isCustom:
+			return True
+		if par.mode is not ParMode.CONSTANT:
+			return True
+		if par.readOnly:
+			return True
+		if par.label.startswith(':') or par.page.name.startswith(':'):
+			return True
+		if par.isOP:
+			return True
+		return False
 
 	def GetParDict(self) -> Dict[str, Any]:
 		return {
