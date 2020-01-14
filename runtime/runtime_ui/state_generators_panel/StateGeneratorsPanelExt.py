@@ -38,6 +38,17 @@ class StateGeneratorsPanel(RuntimeComponent):
 			return None
 		return op(genTable[index + 1, 'path'])
 
+	@property
+	def PropertiesOP(self):
+		subCompsTable = self.op('sub_state_comps')
+		compDropMenu = self.op('comp_dropmenu')
+		compName = compDropMenu.par.Value0.eval()
+		compCell = subCompsTable[compName, 'path']
+		# if subCompsTable.numRows < 2:
+		if not compCell:
+			return self.SelectedGenerator
+		return op(compCell) or self.SelectedGenerator
+
 	# @loggedmethod
 	# def BindEditors(self):
 	# 	gen = self.SelectedGenerator
