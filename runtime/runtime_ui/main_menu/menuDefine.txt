@@ -6,6 +6,8 @@ File
 									getRecentFiles
 	Quit		onQuit				True		
 Edit									
-Settings									
-	Show Groups		onSetting			parent.ui.par.Showgroups.eval()			
-	Show Preview		onSetting			parent.ui.par.Showpreview.eval()			
+View									
+	Groups		onView			parent.ui.par.Showgroups.eval()			
+	Preview		onView	True		parent.ui.par.Showpreview.eval()			
+	Recorder		onView			parent.runtime.op('recorder/window').isOpen			
+	Output Window		onView			parent.runtime.op('output_window').isOpen			

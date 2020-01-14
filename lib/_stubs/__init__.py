@@ -769,6 +769,22 @@ class COMP(OP):
 	def sortCustomPages(self, *pages): pass
 	def appendCustomPage(self, name: str) -> 'Page': pass
 
+class windowCOMP(COMP):
+	scalingMonitorIndex: int
+	isBorders: bool
+	isFill: bool
+	isOpen: bool
+	width: int
+	height: int
+	x: int
+	y: int
+	contentX: int
+	contentY: int
+	contentWidth: int
+	contentHeight: int
+
+	def setForeground(self) -> bool: pass
+
 class SOP(OP): pass
 class TOP(OP): pass
 class MAT(OP): pass

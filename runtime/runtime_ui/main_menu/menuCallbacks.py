@@ -24,20 +24,20 @@ if False:
 # exampleMenuDefine callbacks
 
 def onFileAction(info):
-	ext.MainMenu.OnFileAction(info['item'])
+	ext.MainMenu.OnMenuItemClick('File', info['item'])
 
 def onEditAction(info):
-	ext.MainMenu.OnEditAction(info['item'])
+	ext.MainMenu.OnMenuItemClick('Edit', info['item'])
+
+
+def onView(info):
+	ext.MainMenu.OnMenuItemClick('View', info['item'])
 
 def onQuit(info):
 	"""
 	A simple menu item callback, named in the Top Menu DAT table
 	"""
 	debug('QUIT!')
-
-
-def onSetting(info):
-	ext.MainMenu.OnSettingAction(info['item'])
 
 
 # end examples
@@ -49,7 +49,6 @@ def onSelect(info):
 	"""
 	User selects a menu option
 	"""
-	debug(info)
 
 def onRollover(info):
 	"""
