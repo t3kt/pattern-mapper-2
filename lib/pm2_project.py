@@ -22,6 +22,7 @@ class PRenderSettings(DataObject):
 	renderHeight: Optional[int] = None
 	wireEnable: Optional[bool] = None
 	fillEnable: Optional[bool] = None
+	wireWidth: Optional[float] = None
 
 @dataclass
 class PComponentSpec(DataObject):

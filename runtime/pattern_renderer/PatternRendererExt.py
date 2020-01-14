@@ -11,6 +11,7 @@ class PatternRenderer(RuntimeSubsystem):
 		self.par.Renderresh = render.renderHeight or self.par.Renderresh.default
 		self.par.Fillenable = render.fillEnable is not False
 		self.par.Wireenable = render.wireEnable is not False
+		self.par.Wirewidth = render.wireWidth if render.wireWidth is not None else self.par.Wirewidth.default
 
 	@simpleloggedmethod
 	def WriteToProject(self, project: PProject):
@@ -20,4 +21,5 @@ class PatternRenderer(RuntimeSubsystem):
 		render.renderHeight = int(self.par.Renderresh)
 		render.fillEnable = bool(self.par.Fillenable)
 		render.wireEnable = bool(self.par.Wireenable)
+		render.wireWidth = float(self.par.Wirewidth)
 		project.render = render
