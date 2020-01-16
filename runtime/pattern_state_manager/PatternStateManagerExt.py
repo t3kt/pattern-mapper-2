@@ -2,7 +2,7 @@ from typing import List
 
 from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
 from pm2_project import PProject, PComponentSpec, PStateGenSettings
-from pm2_runtime_shared import RuntimeSubsystem, SerializableComponentOrCOMP
+from pm2_runtime_shared import RuntimeSubsystem, SerializableComponentOrCOMP, SerializableParams
 
 # noinspection PyUnreachableCode
 if False:
@@ -10,12 +10,17 @@ if False:
 	from _stubs import *
 
 class PatternStateManager(RuntimeSubsystem):
+	@property
+	def _StateFilter(self) -> 'SerializableParams':
+		return self.op('state_channel_filter')
+
 	@simpleloggedmethod
 	def ReadFromProject(self, project: PProject):
 		self._ClearStateGenerators()
 		if project.state and project.state.generators:
 			for spec in project.state.generators:
 				self.AddStateGenerator(spec)
+		self._StateFilter.SetParDict(project.state.filterPars if project.state and project.state.filterPars else {})
 
 	@simpleloggedmethod
 	def WriteToProject(self, project: PProject):
@@ -23,7 +28,10 @@ class PatternStateManager(RuntimeSubsystem):
 		for gen in self._Generators:
 			spec = gen.GetComponentSpec()
 			specs.append(spec)
-		project.state = PStateGenSettings(generators=specs)
+		project.state = PStateGenSettings(
+			generators=specs,
+			filterPars=self._StateFilter.GetParDict(),
+		)
 
 	@property
 	def _GeneratorChain(self):

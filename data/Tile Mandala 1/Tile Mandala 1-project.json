@@ -76,6 +76,31 @@
     ]
   },
   "state": {
+    "filterPars": {
+      "Enable": true,
+      "Filterlag1": 0.2,
+      "Filterlag2": 0.2,
+      "Filterovershoot1": 0.1,
+      "Filterovershoot2": 0.1,
+      "Filtertype": "gauss",
+      "Filterwidth": 2.0,
+      "Includefillcolor": false,
+      "Includefillopacity": true,
+      "Includefilltex": false,
+      "Includefilltextransform": false,
+      "Includeglobalpivot": true,
+      "Includeglobalrotate": false,
+      "Includeglobalscale": false,
+      "Includeglobaltranslate": false,
+      "Includelocalpivot": true,
+      "Includelocalrotate": true,
+      "Includelocalscale": true,
+      "Includelocaltranslate": false,
+      "Includewirecolor": false,
+      "Includewireopacity": true,
+      "Includewiretex": false,
+      "Includewiretextransform": false
+    },
     "generators": [
       {
         "compType": "mappedstateoverride",

@@ -37,6 +37,7 @@ class PSourcesSettings(DataObject):
 @dataclass
 class PStateGenSettings(DataObject):
 	generators: List[PComponentSpec] = field(default_factory=list)
+	filterPars: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class PProject(DataObject):
