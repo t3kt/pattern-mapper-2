@@ -1,0 +1,17 @@
+group	subgroup	switch	params	filterparams
+Fill	opacity	Includefillopacity	Fillopacity	Fillopacity
+Fill	color	Includefillcolor	Fillcolor[rgba]	Fillcolor[rgba]
+Fill	tex	Includefilltex	Filltexopacity Filltexsource Filltexuvmode	Filltexopacity
+Fill	textransform	Includefilltextransform	Filltexoffset[xyz] Filltexrotate Filltexscale	Filltexoffset[xyz] Filltexrotate Filltexscale
+Wire	opacity	Includewireopacity	Wireopacity	Wireopacity
+Wire	color	Includewirecolor	Wirecolor[rgba]	Wirecolor[rgba]
+Wire	tex	Includewiretex	Wiretexopacity Wiretexsource Wiretexuvmode	Wiretexopacity
+Wire	textransform	Includewiretextransform	Wiretexoffset[xyz] Wiretexrotate Wiretexscale	Wiretexoffset[xyz] Wiretexrotate Wiretexscale
+Local	translate	Includelocaltranslate	Localt[xyz]	Localt[xyz]
+Local	rotate	Includelocalrotate	Localr[xyz]	Localr[xyz]
+Local	scale	Includelocalscale	Locals[xyz]	Locals[xyz]
+Local	pivot	Includelocalpivot	Localp[xyz]	Localp[xyz]
+Global	translate	Includeglobaltranslate	Globalt[xyz]	Globalt[xyz]
+Global	rotate	Includeglobalrotate	Globalr[xyz]	Globalr[xyz]
+Global	scale	Includeglobalscale	Globals[xyz]	Globals[xyz]
+Global	pivot	Includeglobalpivot	Globalp[xyz]	Globalp[xyz]
