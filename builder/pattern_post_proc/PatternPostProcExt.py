@@ -3,8 +3,8 @@ from collections import deque
 import common
 from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
-from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence, PScope
-from pm2_builder_shared import PatternProcessorBase, PatternAccessor
+from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence
+from pm2_builder_shared import PatternProcessorBase, PatternAccessor, createScopes
 from typing import Dict, Iterable, List, Set
 
 # noinspection PyUnreachableCode
@@ -38,26 +38,18 @@ class _PostProcessor(common.LoggableSubComponent):
 		dedup = _ShapeDeduplicator(self, self.pattern, self.settings.dedup)
 		dedup.mergeDuplicates()
 
-def _createScopes(scopeSpecs: List[PScope]):
-	if not scopeSpecs:
-		return None
-	return [
-		common.ValueSequence.FromSpec(scope.groups, cyclic=False)
-		for scope in scopeSpecs
-	]
-
 class _ShapeDeduplicator(common.LoggableSubComponent):
 	def __init__(self, hostObj, pattern: PPattern, dedupSettings: PDuplicateMergeSettings):
 		super().__init__(hostObj, logprefix='ShapeDedup')
 		self.pattern = pattern
 		self.patternAccessor = PatternAccessor(pattern)
 		self.comparator = _ShapeComparator(dedupSettings)
-		self.primaryScopes = _createScopes(dedupSettings.primaryScopes)
+		self.primaryScopes = createScopes(dedupSettings.primaryScopes)
 		if not self.primaryScopes:
 			self.primaryShapeIndices = None
 		else:
 			self.primaryShapeIndices = set()  # type: Set[int]
-		self.scopes = _createScopes(dedupSettings.scopes)
+		self.scopes = createScopes(dedupSettings.scopes)
 		self.dupRemappers = []  # type: List[_ShapeIndexRemapper]
 
 	@simpleloggedmethod
@@ -90,7 +82,7 @@ class _ShapeDeduplicator(common.LoggableSubComponent):
 			self.dupRemappers = []
 			for scope in self.scopes:
 				shapeIndices = self.patternAccessor.getShapeIndicesByGroupPattern(scope)
-				shapes = [shape for shape in self.pattern.shapes if shape.shapeIndex in shapeIndices]
+				shapes = self.patternAccessor.getShapesByIndices(shapeIndices)
 				if shapes:
 					self.dupRemappers.append(self._loadDupRemapperForShapes(shapes))
 

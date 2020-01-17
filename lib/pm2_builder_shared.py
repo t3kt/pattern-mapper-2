@@ -5,7 +5,7 @@ import re
 import common
 from common import loggedmethod
 from pm2_model import PPattern, PShape, PGroup
-from pm2_settings import PSettings, PGenSpecBase, ShapeSourceAttr
+from pm2_settings import PSettings, PGenSpecBase, ShapeSourceAttr, PScope
 
 # noinspection PyUnreachableCode
 if False:
@@ -121,3 +121,11 @@ class PatternAccessor:
 			for shape in self.pattern.shapes
 			if shape.shapeIndex in shapeIndices
 		]
+
+def createScopes(scopeSpecs: List[PScope]):
+	if not scopeSpecs:
+		return None
+	return [
+		common.ValueSequence.FromSpec(scope.groups, cyclic=False)
+		for scope in scopeSpecs
+	]
