@@ -77,11 +77,11 @@
   },
   "state": {
     "filterPars": {
-      "Enable": true,
-      "Filterlag1": 0.2,
-      "Filterlag2": 0.2,
-      "Filterovershoot1": 0.1,
-      "Filterovershoot2": 0.1,
+      "Enable": false,
+      "Filterlag1": 0.20000000298023224,
+      "Filterlag2": 0.20000000298023224,
+      "Filterovershoot1": 0.10000000149011612,
+      "Filterovershoot2": 0.10000000149011612,
       "Filtertype": "gauss",
       "Filterwidth": 2.0,
       "Includefillcolor": false,
@@ -255,7 +255,7 @@
       {
         "compType": "groupstateoverride",
         "pars": {
-          "Enableoverride": true,
+          "Enableoverride": false,
           "Fillcolora": 0.800000011920929,
           "Fillcolorb": 0.699999988079071,
           "Fillcolorg": 0.4000000059604645,
@@ -281,7 +281,7 @@
           "Globaltx": 0.0,
           "Globalty": 0.0,
           "Globaltz": 0.0,
-          "Includefillcolor": true,
+          "Includefillcolor": false,
           "Includefillopacity": true,
           "Includefilltex": true,
           "Includefilltextransform": false,
@@ -505,7 +505,7 @@
           "Globaltx": 0.0,
           "Globalty": 0.0,
           "Globaltz": 0.0,
-          "Includefillcolor": true,
+          "Includefillcolor": false,
           "Includefillopacity": false,
           "Includefilltex": false,
           "Includefilltextransform": false,
