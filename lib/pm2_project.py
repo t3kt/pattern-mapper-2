@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 
-from common import DataObject, TypeMap
+from common import DataObject
 from pm2_state import PShapeState
 
 @dataclass
@@ -23,6 +23,7 @@ class PRenderSettings(DataObject):
 	wireEnable: Optional[bool] = None
 	fillEnable: Optional[bool] = None
 	wireWidth: Optional[float] = None
+	textures: List[Dict[str, Any]] = field(default_factory=list)
 
 @dataclass
 class PComponentSpec(DataObject):

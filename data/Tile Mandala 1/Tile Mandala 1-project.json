@@ -3,6 +3,36 @@
     "fillEnable": true,
     "renderHeight": 2000,
     "renderWidth": 2000,
+    "textures": [
+      {
+        "Extendu": "hold",
+        "Extendv": "hold",
+        "Extendw": "hold",
+        "Filter": "nearest",
+        "Sourcename": "src__4"
+      },
+      {
+        "Extendu": "hold",
+        "Extendv": "hold",
+        "Extendw": "hold",
+        "Filter": "nearest",
+        "Sourcename": "src__4"
+      },
+      {
+        "Extendu": "hold",
+        "Extendv": "hold",
+        "Extendw": "hold",
+        "Filter": "nearest",
+        "Sourcename": "src__4"
+      },
+      {
+        "Extendu": "hold",
+        "Extendv": "hold",
+        "Extendw": "hold",
+        "Filter": "nearest",
+        "Sourcename": "src__4"
+      }
+    ],
     "useCustomRes": true,
     "wireEnable": true,
     "wireWidth": 6.0
@@ -70,6 +100,18 @@
           "Reverse": false,
           "Reversespeed": false,
           "Speed": 0.10000000149011612
+        },
+        "subCompPars": {}
+      },
+      {
+        "compType": "syphonspoutsource",
+        "pars": {
+          "Enable": true,
+          "Fit": "fitbest",
+          "Resolutionh": 1080.0,
+          "Resolutionw": 1920.0,
+          "Sourcename": "Arena - Composition",
+          "Useinputres": true
         },
         "subCompPars": {}
       }
