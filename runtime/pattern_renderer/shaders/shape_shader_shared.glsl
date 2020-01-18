@@ -1,3 +1,10 @@
+#ifdef MACOS
+#define STRUCT_FLAT(x)	x
+#else
+#define STRUCT_FLAT(x) flat x
+#endif
+
+
 struct Transform {
 	vec3 translate;
 	vec3 rotate;
@@ -9,7 +16,7 @@ struct Appearance {
 	vec4 color;
 	float opacity;
 	float texOpacity;
-	flat int texSource;
+	STRUCT_FLAT(int texSource);
 };
 
 #define UVMODE_LOCAL  0
@@ -17,7 +24,7 @@ struct Appearance {
 #define UVMODE_PATH 2
 
 struct UVAttrs {
-	flat int uvMode;
+	STRUCT_FLAT(int uvMode);
 	vec3 offset;
 	float rotate;
 	float scale;
@@ -26,7 +33,7 @@ struct UVAttrs {
 struct VertexAttrs {
 	vec4 color;
 	vec3 worldSpacePos;
-	flat int shapeIndex;
+	STRUCT_FLAT(int shapeIndex);
 	vec3 texCoord;
 	Appearance appearance;
 };

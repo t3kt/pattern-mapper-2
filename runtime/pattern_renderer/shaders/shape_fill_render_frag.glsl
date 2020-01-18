@@ -9,14 +9,12 @@ in Vertex {
 	VertexAttrs attrs;
 } iVert;
 
-sampler2D getTexture() {
-	switch (iVert.attrs.appearance.texSource) {
-		case 0: return sTexture0;
-		case 1: return sTexture1;
-		case 2: return sTexture2;
-		case 3: return sTexture3;
-		default: return sTexture0;
-	}
+void applyTexture(inout vec4 color, in sampler2D tex) {
+	vec2 coord = iVert.attrs.texCoord.xy;
+	coord = vec2(0.5);
+	vec4 texColor = texture(tex, coord);
+	color = mix(color, texColor, iVert.attrs.appearance.texOpacity);
+	color = texColor;
 }
 
 out vec4 fragColor;
@@ -29,15 +27,22 @@ void main() {
 		color = vec4(0);
 	} else {
 		color = iVert.attrs.appearance.color;
-//		if (iVert.attrs.appearance.color.a > 0) {
-//			color.rgb = mix(color.rgb, iVert.attrs.appearance.color.rgb, iVert.attrs.appearance.color.a);
-//		}
+		if (iVert.attrs.appearance.color.a > 0) {
+			color.rgb = mix(color.rgb, iVert.attrs.appearance.color.rgb, iVert.attrs.appearance.color.a);
+		}
 		if (iVert.attrs.appearance.texOpacity > 0) {
-//			vec2 coord = iVert.attrs.texCoord.xy;
-//			coord = vec2(0.5);
-//			vec4 texColor = texture(getTexture(), coord);
-//			color = mix(color, texColor, iVert.attrs.appearance.texOpacity);
-//			color = texColor;
+			int texSrc = iVert.attrs.appearance.texSource;
+			if (texSrc == 0) {
+				applyTexture(color, sTexture0);
+			} else if (texSrc == 1) {
+				applyTexture(color, sTexture1);
+			} else if (texSrc == 2) {
+				applyTexture(color, sTexture2);
+			} else if (texSrc == 3) {
+				applyTexture(color, sTexture3);
+			} else {
+				applyTexture(color, sTexture0);
+			}
 		}
 		color.a *= iVert.attrs.appearance.opacity;
 	}
