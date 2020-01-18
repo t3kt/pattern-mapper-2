@@ -62,7 +62,7 @@ class PGroupGenSpec(PGenSpecBase):
 	attrs: Optional[PGroupGenAttrs] = None
 
 @dataclass
-class PPathGroupGenSpec(PGroupGenSpec):
+class PXmlPathGroupGenSpec(PGroupGenSpec):
 	paths: List[str] = dataclasses.field(default_factory=list)
 	groupAtPathDepth: Optional[int] = None
 
@@ -76,7 +76,7 @@ class PGroupingSettings(DataObject):
 		default_factory=list,
 		metadata={
 			'TypeMap': TypeMap(
-				path=PPathGroupGenSpec,
+				xmlPath=PXmlPathGroupGenSpec,
 				id=PIdGroupGenSpec,
 			)
 		}

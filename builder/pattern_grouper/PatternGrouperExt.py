@@ -71,14 +71,14 @@ class _GroupGenerator(GeneratorBase):
 
 	@classmethod
 	def fromSpec(cls, hostObj, groupGenSpec: PGroupGenSpec):
-		if isinstance(groupGenSpec, PPathGroupGenSpec):
+		if isinstance(groupGenSpec, PXmlPathGroupGenSpec):
 			return _PathGroupGenerator(hostObj, groupGenSpec)
 		if isinstance(groupGenSpec, PIdGroupGenSpec):
 			return _IdGroupGenerator(hostObj, groupGenSpec)
 		raise Exception('Unsupported group gen spec type: {}'.format(type(groupGenSpec)))
 
 class _PathGroupGenerator(_GroupGenerator):
-	def __init__(self, hostObj, groupGenSpec: PPathGroupGenSpec, logPrefix='PathGroupGen'):
+	def __init__(self, hostObj, groupGenSpec: PXmlPathGroupGenSpec, logPrefix='PathGroupGen'):
 		super().__init__(hostObj, groupGenSpec, logPrefix=logPrefix)
 		self.pathPatterns = common.ValueSequence.FromSpec(groupGenSpec.paths, cyclic=False)
 		self.groupAtPathDepth = groupGenSpec.groupAtPathDepth
@@ -146,7 +146,7 @@ class _PathGroupGenerator(_GroupGenerator):
 def _IdGroupGenerator(hostObj, groupGenSpec: PIdGroupGenSpec):
 	return _PathGroupGenerator(
 		hostObj,
-		PPathGroupGenSpec(
+		PXmlPathGroupGenSpec(
 			baseName=groupGenSpec.baseName,
 			suffixes=groupGenSpec.suffixes or groupGenSpec.ids,
 			attrs=groupGenSpec.attrs,

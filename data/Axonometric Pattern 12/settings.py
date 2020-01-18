@@ -12,16 +12,16 @@ def settings():
 		),
 		grouping=PGroupingSettings(
 			groupGenerators=[
-				# PPathGroupGenSpec(
+				# PXmlPathGroupGenSpec(
 				# 	baseName='DepthLayer1',
 				# 	paths=['^.*/g\[id=DepthLayer1\]'],
 				# 	depthLayer =
 				# ),
-				# PPathGroupGenSpec(
+				# PXmlPathGroupGenSpec(
 				# 	baseName='Corners',
 				# 	paths=[r'^.*/g\[id=.*Corner\]'],
 				# ),
-				# PPathGroupGenSpec(
+				# PXmlPathGroupGenSpec(
 				# 	baseName='Edges',
 				# 	paths=[r'^.*/g\[id=.*Edges\]'],
 				# ),
