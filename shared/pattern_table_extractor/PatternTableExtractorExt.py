@@ -2,7 +2,7 @@ from typing import Iterable
 
 import common
 from common import formatValue
-from pm2_model import PPattern, PShape, PGroup
+from pm2_model import PPattern, PShape, PGroup, PSequence
 
 # noinspection PyUnreachableCode
 if False:
@@ -21,6 +21,8 @@ class PatternTableExtractor(common.ExtensionBase):
 		self._AddPointsToTable(pointTable, pattern.shapes, 'shape')
 		self._AddPointsToTable(pointTable, pattern.paths, 'path')
 		self._BuildGroupTable(self.op('set_groups'), pattern.groups)
+		self._BuildSequenceTable(self.op('set_sequences'), pattern.sequences)
+		self._BuildSequenceStepTable(self.op('set_sequence_steps'), pattern.sequences)
 
 	@staticmethod
 	def _BuildInfoTable(dat: 'DAT', pattern: PPattern):
@@ -131,7 +133,7 @@ class PatternTableExtractor(common.ExtensionBase):
 				group.groupName,
 				group.groupPath,
 				len(group.shapeIndices),
-				' '.join(map(str, group.shapeIndices)),
+				_formatIndexList(group.shapeIndices),
 			]
 			dat.appendRow([formatValue(v) for v in vals])
 
@@ -148,3 +150,47 @@ class PatternTableExtractor(common.ExtensionBase):
 				for shapeIndex in allShapeIndices
 			]
 			dat.appendCol([groupName] + vals)
+
+	@staticmethod
+	def _BuildSequenceTable(dat: 'DAT', sequences: Iterable[PSequence]):
+		dat.clear()
+		dat.appendRow([
+			'sequenceName',
+			'sequenceLength',
+			'step_count',
+			'allShapeIndices',
+		])
+		for sequence in sequences:
+			allShapeIndices = set()
+			maxIndex = 0
+			for step in sequence.steps:
+				allShapeIndices.update(set(step.shapeIndices))
+				if step.sequenceIndex > maxIndex:
+					maxIndex = step.sequenceIndex
+			dat.appendRow([
+				sequence.sequenceName,
+				(1 + maxIndex) if sequence.steps else 0,
+				len(sequence.steps),
+				_formatIndexList(allShapeIndices),
+			])
+
+	@staticmethod
+	def _BuildSequenceStepTable(dat: 'DAT', sequences: Iterable[PSequence]):
+		dat.clear()
+		dat.appendRow([
+			'sequenceName',
+			'stepIndex',
+			'shapeIndices',
+		])
+		for sequence in sequences:
+			for step in sequence.steps:
+				dat.appendRow([
+					sequence.sequenceName,
+					step.sequenceIndex,
+					_formatIndexList(step.shapeIndices),
+				])
+
+def _formatIndexList(indices: Iterable[int]):
+	if not indices:
+		return ''
+	return ' '.join(map(str, sorted(indices)))
