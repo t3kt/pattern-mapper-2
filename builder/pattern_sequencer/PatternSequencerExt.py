@@ -3,6 +3,11 @@ from pm2_settings import *
 from pm2_builder_shared import PatternProcessorBase, GeneratorBase, shapeAttrGetter, createScopes, PatternAccessor
 from typing import Optional, Dict, Any
 
+# noinspection PyUnreachableCode
+if False:
+	# noinspection PyUnresolvedReferences
+	from _stubs import *
+
 class PatternSequencer(PatternProcessorBase):
 	def _ProcessPattern(
 			self,
@@ -42,6 +47,8 @@ class _SequenceGenerator(GeneratorBase):
 	def fromSpec(cls, hostObj, seqGenSpec: PSequenceGenSpec):
 		if isinstance(seqGenSpec, PAttrSequenceGenSpec):
 			return _AttrSequenceGenerator(hostObj, seqGenSpec)
+		if isinstance(seqGenSpec, PPathSequenceGenSpec):
+			return _PathSequenceGenerator(hostObj, seqGenSpec)
 		raise Exception('Unsupported sequence gen spec type: {}'.format(type(seqGenSpec)))
 
 class _AttrSequenceGenerator(_SequenceGenerator):
@@ -91,3 +98,72 @@ class _AttrSequenceGenerator(_SequenceGenerator):
 			steps=steps,
 		)
 
+class _PathSequenceGenerator(_SequenceGenerator):
+	def __init__(self, hostObj, seqGenSpec: PPathSequenceGenSpec):
+		super().__init__(hostObj, seqGenSpec, 'PathSeqGen')
+		self.scopes = createScopes(seqGenSpec.scopes)
+		self.pathPath = seqGenSpec.pathPath
+		self.patternAccessor = None  # type: PatternAccessor
+		self.pathShape = None  # type: PShape
+
+	def generateSequences(self, pattern: PPattern):
+		self.patternAccessor = PatternAccessor(pattern)
+		self.pathShape = self.patternAccessor.getPathByPath(self.pathPath)
+		if not self.pathShape:
+			self._LogEvent('Path not found: {}'.format(self.pathPath))
+			return
+		if not self.scopes:
+			sequences = [self._generateSeqForShapes(pattern.shapes, None)]
+		else:
+			sequences = []
+			for scopeIndex, scope in enumerate(self.scopes):
+				shapeIndices = self.patternAccessor.getShapeIndicesByGroupPattern(scope)
+				shapes = self.patternAccessor.getShapesByIndices(shapeIndices)
+				sequence = self._generateSeqForShapes(shapes, scopeIndex)
+				if sequence is not None:
+					sequences.append(sequence)
+		if not sequences:
+			return
+		pattern.sequences += sequences
+
+	def _generateSeqForShapes(self, shapes: List[PShape], scopeIndex: Optional[int]):
+		steps = []
+		for testPointIndex, testPoint in enumerate(self.pathShape.points):
+			stepShapeIndices = []
+			for shape in shapes:
+				if _shapeContainsPoint(shape, testPoint.pos):
+					stepShapeIndices.append(shape.shapeIndex)
+			self._LogEvent('Found {} shapes for path point {} ({})'.format(
+				len(stepShapeIndices), testPointIndex, testPoint.pos))
+			steps.append(PSequenceStep(
+				sequenceIndex=testPointIndex,
+				shapeIndices=stepShapeIndices,
+				meta={
+					'pathPath': self.pathPath,
+					'pathPoint': testPointIndex,
+				}
+			))
+		return self._createSequence(
+			sequenceName=self._getName(scopeIndex or 0, isSolo=scopeIndex is None),
+			steps=steps,
+		)
+
+def _shapeContainsPoint(shape: PShape, testPoint: 'tdu.Vector') -> bool:
+	testX, testY = testPoint.x, testPoint.y
+	shapePoints = [(pt.pos.x, pt.pos.y) for pt in shape.points]
+	nShapePoints = len(shapePoints)
+	inside = False
+	p1x, p1y = shapePoints[0]
+	for i in range(nShapePoints + 1):
+		p2x, p2y = shapePoints[i % nShapePoints]
+		if testY > min(p1y, p2y):
+			if testY <= max(p1y, p2y):
+				if testX <= max(p1x, p2x):
+					if p1y != p2y:
+						xints = (testY - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+					else:
+						xints = -99999999
+					if p1x == p2x or testX <= xints:
+						inside = not inside
+		p1x, p1y = p2x, p2y
+	return inside

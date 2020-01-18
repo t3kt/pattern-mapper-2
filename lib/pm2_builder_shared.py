@@ -122,6 +122,13 @@ class PatternAccessor:
 			if shape.shapeIndex in shapeIndices
 		]
 
+	def getPathByPath(self, pathPath: str) -> Optional[PShape]:
+		if not self.pattern.paths:
+			return None
+		for path in self.pattern.paths:
+			if path.shapePath == pathPath:
+				return path
+
 def createScopes(scopeSpecs: List[PScope]):
 	if not scopeSpecs:
 		return None
