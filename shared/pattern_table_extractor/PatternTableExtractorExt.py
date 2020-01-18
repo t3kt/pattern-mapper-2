@@ -1,8 +1,8 @@
-from typing import Iterable
+from typing import Dict, Iterable
 
 import common
 from common import formatValue
-from pm2_model import PPattern, PShape, PGroup, PSequence
+from pm2_model import PPattern, PShape, PGroup, PSequence, PSequenceStep
 
 # noinspection PyUnreachableCode
 if False:
@@ -183,14 +183,27 @@ class PatternTableExtractor(common.ExtensionBase):
 			'shapeIndices',
 		])
 		for sequence in sequences:
-			for step in sequence.steps:
+			if not sequence.steps:
+				continue
+			foundIndices = [step.sequenceIndex for step in sequence.steps]
+			maxIndex = max(foundIndices)
+			stepsByIndex = {
+				step.sequenceIndex: step
+				for step in sequence.steps
+			}  # type: Dict[int, PSequenceStep]
+			for i in range(maxIndex + 1):
+				if i not in stepsByIndex:
+					shapeIndices = ''
+				else:
+					shapeIndices = _formatIndexList(stepsByIndex[i].shapeIndices)
 				dat.appendRow([
 					sequence.sequenceName,
-					step.sequenceIndex,
-					_formatIndexList(step.shapeIndices),
+					i,
+					shapeIndices,
 				])
 
 def _formatIndexList(indices: Iterable[int]):
 	if not indices:
 		return ''
 	return ' '.join(map(str, sorted(indices)))
+
