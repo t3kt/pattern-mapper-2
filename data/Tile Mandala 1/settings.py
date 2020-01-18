@@ -9,6 +9,8 @@ def settings():
 		),
 		# dedup=PDuplicateMergeSettings(
 		# 	ignoreDepth=True,
+		# 	equivalence=ShapeEquivalence.centerRadius,
+		# 	# tolerance=0.000001,
 		# ),
 		grouping=PGroupingSettings(
 			groupGenerators=[
@@ -22,7 +24,19 @@ def settings():
 						'Purple',
 						'Pink',
 					]
+				),
+				PIdGroupGenSpec(
+					ids=['Rings'],
 				)
+			]
+		),
+		sequencing=PSequencingSettings(
+			sequenceGenerators=[
+				PPathSequenceGenSpec(
+					baseName='RingSeq{}'.format(i),
+					pathPath='svg/g[id=RingPaths]/path[id=RingPath{}]'.format(i)
+				)
+				for i in range(1, 25)
 			]
 		),
 	)
