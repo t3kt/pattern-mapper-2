@@ -89,7 +89,7 @@ void scaleRotateTranslate(
 	pos *= rotationXYZ(-radians(rotateAxis));
 
 	pos *= scaleMatrix(scale);
-	pos *= rotationXYZ(rotate);
+	pos *= rotationXYZ(radians(rotate));
 	pos.xyz += translate;
 
 	pos *= rotationXYZ(radians(rotateAxis));
