@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Iterable, Set, List
+from typing import Optional, Iterable, Set, List, Union
 import re
 
 import common
 from common import loggedmethod
-from pm2_model import PPattern, PShape, PGroup
+from pm2_model import PPattern, PShape, PGroup, PSequence
 from pm2_settings import PSettings, PGenSpecBase, ShapeSourceAttr, PScope
 
 # noinspection PyUnreachableCode
@@ -102,6 +102,14 @@ class PatternAccessor:
 		for group in self.pattern.groups:
 			if group.groupName == name:
 				return group
+
+	def getSequenceByName(self, name: str) -> Optional[PSequence]:
+		for sequence in self.pattern.sequences:
+			if sequence.sequenceName == name:
+				return sequence
+
+	def getGroupOrSequenceByName(self, name: str) -> Optional[Union[PGroup, PSequence]]:
+		return self.getGroupByName(name) or self.getSequenceByName(name)
 
 	def getShapesByPathRegex(self, pathPattern: str) -> List[PShape]:
 		try:

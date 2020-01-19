@@ -89,17 +89,23 @@ class PSequenceGenAttrs(DataObject):
 @dataclass
 class PSequenceGenSpec(PGenSpecBase):
 	attrs: Optional[PSequenceGenAttrs] = None
-	scopes: List[PScope] = dataclasses.field(default_factory=list)
 
 @dataclass
 class PAttrSequenceGenSpec(PSequenceGenSpec):
+	scopes: List[PScope] = dataclasses.field(default_factory=list)
 	byAttr: Optional[ShapeSourceAttr] = None
 	roundDigits: Optional[int] = None
 	reverse: Optional[bool] = None
 
 @dataclass
 class PPathSequenceGenSpec(PSequenceGenSpec):
+	scopes: List[PScope] = dataclasses.field(default_factory=list)
 	pathPath: Optional[str] = None
+
+@dataclass
+class PJoinSequenceGenSpec(PSequenceGenSpec):
+	partNames: List[str] = dataclasses.field(default_factory=list)
+	flattenParts: Optional[bool] = None
 
 @dataclass
 class PSequencingSettings(DataObject):
@@ -109,6 +115,7 @@ class PSequencingSettings(DataObject):
 			'TypeMap': TypeMap(
 				attr=PAttrSequenceGenSpec,
 				path=PPathSequenceGenSpec,
+				join=PJoinSequenceGenSpec,
 			)
 		}
 	)

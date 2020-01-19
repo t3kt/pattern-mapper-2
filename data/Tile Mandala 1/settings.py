@@ -1,7 +1,7 @@
 from pm2_settings import *
 
 def settings():
-	return PSettings(
+	settings = PSettings(
 		preProc=PPreProcSettings(
 			recenter=PRecenterSettings(bound=BoundType.frame),
 			rescale=PRescaleSettings(bound=BoundType.frame),
@@ -12,7 +12,8 @@ def settings():
 		# 	equivalence=ShapeEquivalence.centerRadius,
 		# 	# tolerance=0.000001,
 		# ),
-		grouping=PGroupingSettings(
+	)
+	settings.grouping = PGroupingSettings(
 			groupGenerators=[
 				PIdGroupGenSpec(
 					ids=[
@@ -29,14 +30,26 @@ def settings():
 					ids=['Rings'],
 				)
 			]
+		)
+	sequenceGens = []  # type: List[PSequenceGenSpec]
+	sequenceGens += [
+		PPathSequenceGenSpec(
+			baseName='RingSeq{}'.format(i),
+			pathPath='svg/g[id=RingPaths]/path[id=RingPath{}]'.format(i)
+		)
+		for i in range(1, 25)
+	]
+	sequenceGens += [
+		PJoinSequenceGenSpec(
+			baseName='RingsSeqEndOnEnd',
+			partNames=['RingSeq{}'.format(i) for i in range(1, 25)]
 		),
-		sequencing=PSequencingSettings(
-			sequenceGenerators=[
-				PPathSequenceGenSpec(
-					baseName='RingSeq{}'.format(i),
-					pathPath='svg/g[id=RingPaths]/path[id=RingPath{}]'.format(i)
-				)
-				for i in range(1, 25)
-			]
+		PJoinSequenceGenSpec(
+			baseName='RingsSeqFlat',
+			partNames=['RingSeq{}'.format(i) for i in range(1, 25)],
+			flattenParts=True,
 		),
-	)
+	]
+	settings.sequencing = PSequencingSettings(
+			sequenceGenerators=sequenceGens)
+	return settings

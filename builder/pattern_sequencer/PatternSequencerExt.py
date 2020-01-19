@@ -1,7 +1,9 @@
-from pm2_model import PPattern, PSequenceStep, PSequence, PShape
+from common import mergeDicts
+from pm2_model import PPattern, PSequenceStep, PSequence, PShape, PGroup
 from pm2_settings import *
 from pm2_builder_shared import PatternProcessorBase, GeneratorBase, shapeAttrGetter, createScopes, PatternAccessor
 from typing import Optional, Dict, Any
+from itertools import chain
 
 # noinspection PyUnreachableCode
 if False:
@@ -49,6 +51,8 @@ class _SequenceGenerator(GeneratorBase):
 			return _AttrSequenceGenerator(hostObj, seqGenSpec)
 		if isinstance(seqGenSpec, PPathSequenceGenSpec):
 			return _PathSequenceGenerator(hostObj, seqGenSpec)
+		if isinstance(seqGenSpec, PJoinSequenceGenSpec):
+			return _JoinSequenceGenerator(hostObj, seqGenSpec)
 		raise Exception('Unsupported sequence gen spec type: {}'.format(type(seqGenSpec)))
 
 class _AttrSequenceGenerator(_SequenceGenerator):
@@ -103,8 +107,8 @@ class _PathSequenceGenerator(_SequenceGenerator):
 		super().__init__(hostObj, seqGenSpec, 'PathSeqGen')
 		self.scopes = createScopes(seqGenSpec.scopes)
 		self.pathPath = seqGenSpec.pathPath
-		self.patternAccessor = None  # type: PatternAccessor
-		self.pathShape = None  # type: PShape
+		self.patternAccessor = None  # type: Optional[PatternAccessor]
+		self.pathShape = None  # type: Optional[PShape]
 
 	def generateSequences(self, pattern: PPattern):
 		self.patternAccessor = PatternAccessor(pattern)
@@ -167,3 +171,56 @@ def _shapeContainsPoint(shape: PShape, testPoint: 'tdu.Vector') -> bool:
 						inside = not inside
 		p1x, p1y = p2x, p2y
 	return inside
+
+class _JoinSequenceGenerator(_SequenceGenerator):
+	def __init__(self, hostObj, seqGenSpec: PJoinSequenceGenSpec):
+		super().__init__(hostObj, seqGenSpec, 'JoinSeqGen')
+		self.patternAccessor = None  # type: Optional[PatternAccessor]
+		self.partNames = seqGenSpec.partNames
+		self.flatten = seqGenSpec.flattenParts
+
+	def generateSequences(self, pattern: PPattern):
+		self.patternAccessor = PatternAccessor(pattern)
+		if not self.partNames:
+			return
+		steps = []
+		nextIndex = 0
+		for partName in self.partNames:
+			part = self.patternAccessor.getGroupOrSequenceByName(partName)
+			if part is None:
+				nextIndex += 1
+				continue
+			meta = {'basedOn': partName}
+			if self.flatten:
+				meta['flat'] = True
+			if self.flatten or isinstance(part, PGroup):
+				if isinstance(part, PGroup):
+					shapeIndices = part.shapeIndices
+				else:
+					shapeIndices = [
+						shapeIndex
+						for step in part.steps
+						for shapeIndex in step.shapeIndices
+					]
+				steps.append(PSequenceStep(
+					sequenceIndex=nextIndex,
+					shapeIndices=list(sorted(shapeIndices)),
+					meta=meta
+				))
+				nextIndex += 1
+			else:
+				baseIndex = nextIndex
+				for step in part.steps:
+					nextIndex = baseIndex + step.sequenceIndex
+					steps.append(PSequenceStep(
+						sequenceIndex=nextIndex,
+						shapeIndices=list(sorted(step.shapeIndices)),
+						meta=mergeDicts({'basedOnStep': step.sequenceIndex}, meta)
+					))
+		if not steps:
+			return
+		sequence = self._createSequence(
+			self._getName(0, isSolo=True),
+			steps,
+		)
+		pattern.sequences.append(sequence)
