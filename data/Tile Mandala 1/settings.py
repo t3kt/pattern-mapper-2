@@ -42,13 +42,17 @@ def settings():
 	sequenceGens += [
 		PJoinSequenceGenSpec(
 			baseName='RingsSeqEndOnEnd',
-			partNames=['RingSeq{}'.format(i) for i in range(1, 25)]
+			partNames=['RingSeq{}'.format(i) for i in range(1, 25)],
 		),
 		PJoinSequenceGenSpec(
 			baseName='RingsSeqFlat',
 			partNames=['RingSeq{}'.format(i) for i in range(1, 25)],
 			flattenParts=True,
 		),
+		PParallelSequenceGenSpec(
+			baseName='RingsSeqParallel',
+			partNames=['RingSeq{}'.format(i) for i in range(1, 25)],
+		)
 	]
 	settings.sequencing = PSequencingSettings(
 			sequenceGenerators=sequenceGens)

@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from common import mergeDicts
 from pm2_model import PPattern, PSequenceStep, PSequence, PShape, PGroup
 from pm2_settings import *
@@ -53,6 +55,8 @@ class _SequenceGenerator(GeneratorBase):
 			return _PathSequenceGenerator(hostObj, seqGenSpec)
 		if isinstance(seqGenSpec, PJoinSequenceGenSpec):
 			return _JoinSequenceGenerator(hostObj, seqGenSpec)
+		if isinstance(seqGenSpec, PParallelSequenceGenSpec):
+			return _ParallelSequenceGenerator(hostObj, seqGenSpec)
 		raise Exception('Unsupported sequence gen spec type: {}'.format(type(seqGenSpec)))
 
 class _AttrSequenceGenerator(_SequenceGenerator):
@@ -175,24 +179,23 @@ def _shapeContainsPoint(shape: PShape, testPoint: 'tdu.Vector') -> bool:
 class _JoinSequenceGenerator(_SequenceGenerator):
 	def __init__(self, hostObj, seqGenSpec: PJoinSequenceGenSpec):
 		super().__init__(hostObj, seqGenSpec, 'JoinSeqGen')
-		self.patternAccessor = None  # type: Optional[PatternAccessor]
 		self.partNames = seqGenSpec.partNames
 		self.flatten = seqGenSpec.flattenParts
 
 	def generateSequences(self, pattern: PPattern):
-		self.patternAccessor = PatternAccessor(pattern)
+		patternAccessor = PatternAccessor(pattern)
 		if not self.partNames:
 			return
 		steps = []
 		nextIndex = 0
+		usedPartNames = []
 		for partName in self.partNames:
-			part = self.patternAccessor.getGroupOrSequenceByName(partName)
+			part = patternAccessor.getGroupOrSequenceByName(partName)
 			if part is None:
 				nextIndex += 1
 				continue
+			usedPartNames.append(partName)
 			meta = {'basedOn': partName}
-			if self.flatten:
-				meta['flat'] = True
 			if self.flatten or isinstance(part, PGroup):
 				if isinstance(part, PGroup):
 					shapeIndices = part.shapeIndices
@@ -223,4 +226,59 @@ class _JoinSequenceGenerator(_SequenceGenerator):
 			self._getName(0, isSolo=True),
 			steps,
 		)
+		sequence.meta['basedOn'] = ' '.join(usedPartNames)
+		if self.flatten:
+			sequence.meta['flat'] = True
 		pattern.sequences.append(sequence)
+
+class _ParallelSequenceGenerator(_SequenceGenerator):
+	def __init__(self, hostObj, seqGenSpec: PParallelSequenceGenSpec):
+		super().__init__(hostObj, seqGenSpec, 'ParallelSeqGen')
+		self.patternAccessor = None  # type: Optional[PatternAccessor]
+		self.partNames = seqGenSpec.partNames
+
+	def generateSequences(self, pattern: PPattern):
+		patternAccessor = PatternAccessor(pattern)
+		if not self.partNames:
+			return
+		shapesByIndex = {}  # type: Dict[int, List[int]]
+		partNamesByIndex = {}  # type: Dict[int, List[str]]
+		usedPartNames = []
+		for partName in self.partNames:
+			part = patternAccessor.getGroupOrSequenceByName(partName)
+			if part is None:
+				continue
+			usedPartNames.append(partName)
+			if isinstance(part, PGroup):
+				if 0 not in partNamesByIndex:
+					partNamesByIndex[0] = []
+				partNamesByIndex[0].append(partName)
+				if 0 not in shapesByIndex:
+					shapesByIndex[0] = []
+				shapesByIndex[0] += list(part.shapeIndices)
+			else:
+				for step in part.steps:
+					if step.sequenceIndex not in partNamesByIndex:
+						partNamesByIndex[step.sequenceIndex] = []
+					partNamesByIndex[step.sequenceIndex].append('{}.{}'.format(partName, step.sequenceIndex))
+					if step.sequenceIndex not in shapesByIndex:
+						shapesByIndex[step.sequenceIndex] = []
+					shapesByIndex[step.sequenceIndex] += list(step.shapeIndices)
+		maxIndex = max(shapesByIndex.keys())
+		steps = []
+		for i in range(maxIndex + 1):
+			if i in shapesByIndex:
+				steps.append(PSequenceStep(
+					sequenceIndex=i,
+					shapeIndices=list(sorted(set(shapesByIndex[i]))),
+					meta={'basedOn': ' '.join(partNamesByIndex[i])}
+				))
+		if not steps:
+			return
+		sequence = self._createSequence(
+			self._getName(0, isSolo=True),
+			steps,
+		)
+		sequence.meta['basedOn'] = ' '.join(usedPartNames)
+		pattern.sequences.append(sequence)
+

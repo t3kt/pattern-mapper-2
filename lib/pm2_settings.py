@@ -102,10 +102,19 @@ class PPathSequenceGenSpec(PSequenceGenSpec):
 	scopes: List[PScope] = dataclasses.field(default_factory=list)
 	pathPath: Optional[str] = None
 
+class JoinType(Enum):
+	endOnEnd = 'endOnEnd'
+	flatEndOnEnd = 'flatEndOnEnd'
+	parallel = 'parallel'
+
 @dataclass
 class PJoinSequenceGenSpec(PSequenceGenSpec):
 	partNames: List[str] = dataclasses.field(default_factory=list)
 	flattenParts: Optional[bool] = None
+
+@dataclass
+class PParallelSequenceGenSpec(PSequenceGenSpec):
+	partNames: List[str] = dataclasses.field(default_factory=list)
 
 @dataclass
 class PSequencingSettings(DataObject):
@@ -116,6 +125,7 @@ class PSequencingSettings(DataObject):
 				attr=PAttrSequenceGenSpec,
 				path=PPathSequenceGenSpec,
 				join=PJoinSequenceGenSpec,
+				parallel=PParallelSequenceGenSpec,
 			)
 		}
 	)
