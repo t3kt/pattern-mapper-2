@@ -18,6 +18,10 @@ class ComponentManager(RuntimeComponent):
 	def _ComponentsInOrder(self):
 		return list(sorted(self._Components, key=lambda c: c.nodeY))
 
+	@property
+	def _IsChain(self):
+		return self.par.Compstructure == 'chain'
+
 	def WriteComponentSpecs(self) -> List[PComponentSpec]:
 		comps = self._ComponentsInOrder
 		return [

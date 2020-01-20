@@ -34,7 +34,7 @@
       }
     ],
     "useCustomRes": true,
-    "wireEnable": true,
+    "wireEnable": false,
     "wireWidth": 6.0
   },
   "sources": {
@@ -119,13 +119,13 @@
   },
   "state": {
     "filterPars": {
-      "Enable": false,
-      "Filterlag1": 0.20000000298023224,
-      "Filterlag2": 0.20000000298023224,
+      "Enable": true,
+      "Filterlag1": 2.0,
+      "Filterlag2": 0.010000002980232153,
       "Filterovershoot1": 0.10000000149011612,
       "Filterovershoot2": 0.10000000149011612,
-      "Filtertype": "gauss",
-      "Filterwidth": 2.0,
+      "Filtertype": "lag",
+      "Filterwidth": 1.25,
       "Includefillcolor": false,
       "Includefillopacity": true,
       "Includefilltex": false,
@@ -601,10 +601,10 @@
           "Invertmask": false,
           "Overrideamount": 1.0,
           "Play": true,
-          "Playmode": "once",
+          "Playmode": "loop",
           "Sequencename": "RingsSeqEndOnEnd",
           "Specifybasestate": false,
-          "Speed": 0.0,
+          "Speed": 0.36000001430511475,
           "Start": false,
           "Step": 25.0,
           "Steplength": 0.054
