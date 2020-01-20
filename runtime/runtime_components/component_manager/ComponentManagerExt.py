@@ -22,6 +22,7 @@ class ComponentManager(RuntimeComponent):
 	def _IsChain(self):
 		return self.par.Compstructure == 'chain'
 
+	@loggedmethod
 	def WriteComponentSpecs(self) -> List[PComponentSpec]:
 		comps = self._ComponentsInOrder
 		return [
@@ -29,17 +30,20 @@ class ComponentManager(RuntimeComponent):
 			for comp in comps
 		]
 
+	@loggedmethod
 	def ReadComponentSpecs(self, specs: List[PComponentSpec]):
 		self.ClearComponents()
 		for spec in specs:
 			self.AddComponent(spec)
 
+	@loggedmethod
 	def ClearComponents(self):
 		for comp in self._Components:
 			comp.destroy()
 		if self._IsChain:
 			self.op('contents/__sel_chop_out').par.chop = self.op('contents/__chop_in')
 
+	@loggedmethod
 	def AddComponent(self, spec: PComponentSpec):
 		templatePath = self.op('type_table')[spec.compType, 'path']
 		template = self.op(templatePath) if templatePath else None
@@ -77,3 +81,11 @@ class ComponentManager(RuntimeComponent):
 				outputSource = comp.outputConnectors[0].outOP
 			if comp:
 				self.op('contents/__sel_chop_out').par.chop = outputSource
+
+	@loggedmethod
+	def DeleteComponent(self, comp: 'SerializableComponentOrCOMP'):
+		comp.destroy()
+
+	@loggedmethod
+	def RenameComponent(self, comp: 'SerializableComponentOrCOMP', name: str):
+		comp.name = name
