@@ -37,6 +37,43 @@ class ComponentManager(RuntimeComponent):
 	def ClearComponents(self):
 		for comp in self._Components:
 			comp.destroy()
+		if self._IsChain:
+			self.op('contents/__sel_chop_out').par.chop = self.op('contents/__chop_in')
 
 	def AddComponent(self, spec: PComponentSpec):
-		pass
+		templatePath = self.op('type_table')[spec.compType, 'path']
+		template = self.op(templatePath) if templatePath else None
+		if not template:
+			raise Exception('Unsupported comp type: {!r}'.format(spec.compType))
+		dest = self.op('contents')
+		existingComps = self._ComponentsInOrder
+		i = len(existingComps)
+		outName = str(self.par.Chainoutputname)
+		if self._IsChain:
+			inputSource = None
+			if existingComps:
+				if outName:
+					inputSource = existingComps[-1].op(outName)
+				else:
+					inputSource = existingComps[-1].outputConnectors[0]
+			if not inputSource:
+				inputSource = self.op('contents/__chop_in')
+		else:
+			inputSource = None
+		comp = createFromTemplate(
+			template=template,
+			dest=dest,
+			name=spec.name or 'comp_{}'.format(i),
+			attrs=OPAttrs(
+				nodePos=(200, 500 - (i * 150)),
+				inputs=[inputSource] if inputSource else None,
+			)
+		)  # type: SerializableComponentOrCOMP
+		comp.SetComponentSpec(spec)
+		if self._IsChain:
+			if outName:
+				outputSource = comp.op(outName)
+			else:
+				outputSource = comp.outputConnectors[0].outOP
+			if comp:
+				self.op('contents/__sel_chop_out').par.chop = outputSource

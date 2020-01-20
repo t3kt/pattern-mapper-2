@@ -351,6 +351,7 @@ class SerializableComponent(SerializableParams):
 	def GetComponentSpec(self):
 		return PComponentSpec(
 			compType=self.par.Comptype.eval(),
+			name=self.ownerComp.name,
 			pars=self.GetParDict(),
 			subCompPars=self._GetSubCompParDicts())
 
