@@ -206,6 +206,54 @@ def _transformAttrs(namePrefix: str, labelPrefix: str):
 		for name, label in attrs.items()
 	}
 
+class ShapeStateInclusions:
+	def __init__(self, ownerComp):
+		self.ownerComp = ownerComp
+
+	def GetIncludedParams(self, filterOnly=False):
+		params = []
+		# Fill appearance
+		if self.ownerComp.par.Includefillopacity:
+			params.append('Fillopacity')
+		if self.ownerComp.par.Includefillcolor:
+			params.append('Fillcolor[rgba]')
+		if self.ownerComp.par.Includefilltex:
+			params.append('Filltexopacity')
+			if not filterOnly:
+				params.append('Filltexsource Filltexuvmode')
+		if self.ownerComp.par.Includefilltextransform:
+			params.append('Filltexoffset[xyz] Filltexrotate Filltexscale')
+		# Wire appearance
+		if self.ownerComp.par.Includewireopacity:
+			params.append('Wireopacity')
+		if self.ownerComp.par.Includewirecolor:
+			params.append('Wirecolor[rgba]')
+		if self.ownerComp.par.Includewiretex:
+			params.append('Wiretexopacity')
+			if not filterOnly:
+				params.append('Wiretexsource Wiretexuvmode')
+		if self.ownerComp.par.Includewiretextransform:
+			params.append('Wiretexoffset[xyz] Wiretexrotate Wiretexscale')
+		# Local transform
+		if self.ownerComp.par.Includelocaltranslate:
+			params.append('Localt[xyz]')
+		if self.ownerComp.par.Includelocalrotate:
+			params.append('Localr[xyz]')
+		if self.ownerComp.par.Includelocalscale:
+			params.append('Locals[xyz]')
+		if self.ownerComp.par.Includelocalpivot:
+			params.append('Localp[xyz]')
+		# Global transform
+		if self.ownerComp.par.Includeglobaltranslate:
+			params.append('Globalt[xyz]')
+		if self.ownerComp.par.Includeglobalrotate:
+			params.append('Globalr[xyz]')
+		if self.ownerComp.par.Includeglobalscale:
+			params.append('Globals[xyz]')
+		if self.ownerComp.par.Includeglobalpivot:
+			params.append('Globalp[xyz]')
+		return ' '.join(params)
+
 # ShapeStateChansMenuSource = common.createMenuSource(
 # 	**common.mergeDicts(
 # 		_appearanceAttrs('Fill', 'Fill '),

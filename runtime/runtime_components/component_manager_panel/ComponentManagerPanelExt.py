@@ -59,7 +59,7 @@ class ComponentManagerPanel(RuntimeComponent):
 
 	def OnMarkerClick(self, sourceComp: 'COMP', eventType: str):
 		if 'enable_toggle' in sourceComp.path or 'amount_slider' in sourceComp.path:
-			return  
+			return
 		if sourceComp.par.parentshortcut == 'marker':
 			marker = sourceComp
 		else:
