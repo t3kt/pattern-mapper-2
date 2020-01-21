@@ -9,6 +9,7 @@ import pm2_menu as menu
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
 class ComponentManagerPanel(RuntimeComponent):
 	@property
@@ -18,6 +19,10 @@ class ComponentManagerPanel(RuntimeComponent):
 	@property
 	def _TypeTable(self) -> 'DAT':
 		return self.op('type_table')
+
+	@property
+	def _Manager(self) -> 'ComponentManager':
+		return self.par.Manager.eval()
 
 	def OnMarkerReplicate(self, marker: 'COMP'):
 		marker.par.display = True
@@ -92,7 +97,7 @@ class ComponentManagerPanel(RuntimeComponent):
 			if not newName:
 				return
 			self._LogEvent('Renaming {} to {}'.format(targetComp, newName))
-			targetComp.name = newName
+			self._Manager.RenameComponent(targetComp, newName)
 			self._AttachMarkerToComp(marker, targetComp)
 		_ShowPromptDialog(
 			title='Rename',
@@ -100,10 +105,9 @@ class ComponentManagerPanel(RuntimeComponent):
 			ok=_callback
 		)
 
-	@staticmethod
-	def _DeleteComp(marker: 'COMP'):
+	def _DeleteComp(self, marker: 'COMP'):
 		targetComp = marker.par.Targetop.eval()
-		targetComp.destroy()
+		self._Manager.DeleteComponent(targetComp)
 
 	@property
 	def SelectedComp(self) -> Optional['SerializableComponentOrCOMP']:
@@ -123,6 +127,28 @@ class ComponentManagerPanel(RuntimeComponent):
 		if not subName or subName == 'main':
 			return comp
 		return comp.op(subName)
+
+	def OnCreateClick(self):
+		typeTable = self._TypeTable
+		items = [
+			menu.Item(text=typeTable[i, 'label'].val)
+			for i in range(1, typeTable.numRows)
+		]
+		def _callback(info):
+			self._LogEvent('create callback {}'.format(info))
+			index = info['index']
+			typeName = typeTable[index + 1, 'typeName'].val
+			self._CreateComponent(typeName)
+		button = self.op('create_trigger')
+		menu.fromButton(button).Show(
+			items=items,
+			callback=_callback,
+			autoClose=True,
+		)
+
+	def _CreateComponent(self, typeName: str):
+		self._Manager.AddComponent(PComponentSpec(compType=typeName))
+		self.op('marker_replicator').par.recreateall.pulse()
 
 
 def _ShowPromptDialog(

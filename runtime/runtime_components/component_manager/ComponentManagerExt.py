@@ -45,7 +45,7 @@ class ComponentManager(RuntimeComponent):
 
 	@loggedmethod
 	def AddComponent(self, spec: PComponentSpec):
-		templatePath = self.op('type_table')[spec.compType, 'path']
+		templatePath = self.op('type_table')[spec.compType, 'template']
 		template = self.op(templatePath) if templatePath else None
 		if not template:
 			raise Exception('Unsupported comp type: {!r}'.format(spec.compType))
