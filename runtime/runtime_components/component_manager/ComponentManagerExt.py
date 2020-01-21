@@ -56,7 +56,7 @@ class ComponentManager(RuntimeComponent):
 		dest = self.op('contents')
 		existingComps = self._ComponentsInOrder
 		i = len(existingComps)
-		self._LogEvent('Found {} existing components'.format(i))
+		# self._LogEvent('Found {} existing components'.format(i))
 		comp = createFromTemplate(
 			template=template,
 			dest=dest,
