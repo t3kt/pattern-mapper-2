@@ -59,18 +59,19 @@ void main() {
 	localTransform.pivot += centerPos;
 	Transform globalTransform = loadTransform(sGlobalData);
 
+	vec4 worldSpacePos = TDDeform(P);
+
 	UVAttrs uvAttrs = loadUVAttrs();
 	vec4 texCoord = vec4(getTexCoord(uvAttrs.uvMode), 0);
-	scaleRotateTranslate(
-		texCoord,
-		vec3(uvAttrs.scale),
-		vec3(0, 0, uvAttrs.rotate),
-		uvAttrs.offset,
-		vec3(0.5),
-		vec3(0));
+//	vec4 texCoord = worldSpacePos;  // DEBUG
+//	scaleRotateTranslate(
+//		texCoord,
+//		vec3(uvAttrs.scale),
+//		vec3(0, 0, uvAttrs.rotate),
+//		uvAttrs.offset,
+//		vec3(0.5),
+//		vec3(0));
 	oVert.attrs.texCoord = texCoord.xyz;
-
-	vec4 worldSpacePos = TDDeform(P);
 
 	applyTransform(worldSpacePos, localTransform, rotateAxis);
 	applyTransform(worldSpacePos, globalTransform, vec3(0));
