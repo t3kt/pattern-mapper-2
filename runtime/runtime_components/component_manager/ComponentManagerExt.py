@@ -12,11 +12,15 @@ if False:
 class ComponentManager(RuntimeComponent):
 	@property
 	def _Components(self) -> List['SerializableComponentOrCOMP']:
-		return self.ops('contents/comp__*')
+		return [
+			comp
+			for comp in self.ops('contents/*')
+			if comp.isCOMP
+		]
 
 	@property
 	def _ComponentsInOrder(self):
-		return list(sorted(self._Components, key=lambda c: c.nodeY))
+		return list(sorted(self._Components, key=lambda c: -c.nodeY))
 
 	@property
 	def _IsChain(self):
@@ -52,35 +56,31 @@ class ComponentManager(RuntimeComponent):
 		dest = self.op('contents')
 		existingComps = self._ComponentsInOrder
 		i = len(existingComps)
-		outName = str(self.par.Chainoutputname)
-		if self._IsChain:
-			inputSource = None
-			if existingComps:
-				if outName:
-					inputSource = existingComps[-1].op(outName)
-				else:
-					inputSource = existingComps[-1].outputConnectors[0]
-			if not inputSource:
-				inputSource = self.op('contents/__chop_in')
-		else:
-			inputSource = None
+		self._LogEvent('Found {} existing components'.format(i))
 		comp = createFromTemplate(
 			template=template,
 			dest=dest,
 			name=spec.name or 'comp_{}'.format(i),
 			attrs=OPAttrs(
 				nodePos=(200, 500 - (i * 150)),
-				inputs=[inputSource] if inputSource else None,
 			)
 		)  # type: SerializableComponentOrCOMP
+		self._LogEvent('Created component {}, nodeY: {}'.format(comp, comp.nodeY))
 		comp.SetComponentSpec(spec)
 		if self._IsChain:
+			self._RebuildChain()
+
+	def _RebuildChain(self):
+		comps = self._ComponentsInOrder
+		outName = str(self.par.Chainoutputname)
+		prevSource = self.op('contents/__chop_in')
+		for comp in comps:
+			comp.inputConnectors[0].connect(prevSource)
 			if outName:
-				outputSource = comp.op(outName)
+				prevSource = comp.op(outName)
 			else:
-				outputSource = comp.outputConnectors[0].outOP
-			if comp:
-				self.op('contents/__sel_chop_out').par.chop = outputSource
+				prevSource = comp
+		self.op('contents/__sel_chop_out').par.chop = prevSource
 
 	@loggedmethod
 	def DeleteComponent(self, comp: 'SerializableComponentOrCOMP'):

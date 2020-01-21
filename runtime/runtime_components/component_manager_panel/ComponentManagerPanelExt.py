@@ -58,6 +58,8 @@ class ComponentManagerPanel(RuntimeComponent):
 			marker.par.Amountslidervisible = False
 
 	def OnMarkerClick(self, sourceComp: 'COMP', eventType: str):
+		if 'enable_toggle' in sourceComp.path or 'amount_slider' in sourceComp.path:
+			return  
 		if sourceComp.par.parentshortcut == 'marker':
 			marker = sourceComp
 		else:

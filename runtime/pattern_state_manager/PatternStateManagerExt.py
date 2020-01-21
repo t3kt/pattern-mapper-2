@@ -1,78 +1,37 @@
-from typing import List
-
-from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
+from common import loggedmethod, simpleloggedmethod
 from pm2_project import PProject, PComponentSpec, PStateGenSettings
-from pm2_runtime_shared import RuntimeSubsystem, SerializableComponentOrCOMP, SerializableParams
+from pm2_runtime_shared import RuntimeSubsystem, SerializableParams
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
 class PatternStateManager(RuntimeSubsystem):
 	@property
 	def _StateFilter(self) -> 'SerializableParams':
 		return self.op('state_channel_filter')
 
+	@property
+	def _ComponentManager(self) -> 'ComponentManager':
+		return self.op('component_manager')
+
 	@simpleloggedmethod
 	def ReadFromProject(self, project: PProject):
-		self._ClearStateGenerators()
-		if project.state and project.state.generators:
-			for spec in project.state.generators:
-				self.AddStateGenerator(spec)
+		self._ComponentManager.ReadComponentSpecs(
+			project.state.generators if project.state and project.state.generators else [])
 		self._StateFilter.SetParDict(project.state.filterPars if project.state and project.state.filterPars else {})
 
 	@simpleloggedmethod
 	def WriteToProject(self, project: PProject):
-		specs = []
-		for gen in self._Generators:
-			spec = gen.GetComponentSpec()
-			specs.append(spec)
+		specs = self._ComponentManager.WriteComponentSpecs()
 		project.state = PStateGenSettings(
 			generators=specs,
 			filterPars=self._StateFilter.GetParDict(),
 		)
 
-	@property
-	def _GeneratorChain(self):
-		return self.op('generator_chain')
-
-	@property
-	def _Generators(self) -> List[SerializableComponentOrCOMP]:
-		return self._GeneratorChain.ops('gen__*')
-
-	def _GetTemplate(self, compType: str):
-		templates = self.op('template_table')
-		cell = templates[compType, 'path']
-		template = self.op(cell)
-		if not template:
-			raise Exception('Unsupported component type: {!r}'.format(compType))
-		return template
-
 	@loggedmethod
 	def AddStateGenerator(self, spec: PComponentSpec):
-		template = self._GetTemplate(spec.compType)
-		if not template:
-			return
-		existingGenerators = self._Generators
-		i = len(existingGenerators)
-		dest = self._GeneratorChain
-		gen = createFromTemplate(
-			template=template,
-			dest=dest,
-			name='gen__{}'.format(i),
-			attrs=OPAttrs(
-				nodePos=(200, 500 - (i * 150)),
-				inputs=[
-					existingGenerators[-1].outputConnectors[0] if existingGenerators else dest.op('input_shape_states'),
-				],
-			),
-		)  # type: SerializableComponentOrCOMP
-		gen.SetComponentSpec(spec)
-		dest.op('sel_output_shape_states').par.chop = gen.op('shape_states_out')
+		self._ComponentManager.AddComponent(spec)
 
-	def _ClearStateGenerators(self):
-		for gen in self._Generators:
-			gen.destroy()
-		chain = self._GeneratorChain
-		chain.op('sel_output_shape_states').par.chop = chain.op('input_shape_states')
