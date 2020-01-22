@@ -34,8 +34,8 @@ class RuntimeApp(common.ExtensionBase):
 		projectJson = self.op('project_json').text or '{}'
 		project = PProject.parseJsonStr(projectJson)
 		self._LoadProject(project)
-		# self.ClosePatternChooser()
-		# self.ShowUI()
+		self.ClosePatternChooser()
+		self.ShowUI()
 
 	def SaveProject(self):
 		project = self._BuildProject()
