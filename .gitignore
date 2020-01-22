@@ -3,6 +3,11 @@ CrashAutoSave*
 .idea
 *.pyc
 *-log.txt
+pattern-mapper-2-*.tif
+pattern-mapper-2-*.png
+pattern-mapper-2-*.jpg
+pattern-mapper-2-*.mp4
+pattern-mapper-2-*.mov
 
 backup/
 .DS_Store
