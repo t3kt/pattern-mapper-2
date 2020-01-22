@@ -423,6 +423,10 @@ class RuntimeComponent(common.ExtensionBase, ABC):
 	def _RuntimeApp(self) -> 'RuntimeApp':
 		return ext.RuntimeApp
 
+	@property
+	def _AppSettings(self) -> 'COMP':
+		return op.PMSettings
+
 class RuntimeSubsystem(RuntimeComponent):
 	@abstractmethod
 	def ReadFromProject(self, project: PProject): pass

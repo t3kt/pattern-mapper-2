@@ -17,8 +17,8 @@ class MainMenu(RuntimeComponent):
 				'Save': lambda: self._RuntimeApp.SaveProject(),
 			},
 			'View': {
-				'Preview': _parToggler(lambda: self.ownerComp.parent.ui.par.Showpreview),
-				'Groups': _parToggler(lambda: self.ownerComp.parent.ui.par.Showgroups),
+				'Preview': _parToggler(lambda: self._AppSettings.par.Showpreview),
+				'Groups': _parToggler(lambda: self._AppSettings.par.Showgroups),
 				'Recorder': _windowToggler(lambda: self._RuntimeApp.op('recorder/window')),
 				'Output Window': _windowToggler(lambda: self._RuntimeApp.op('output_window')),
 			}

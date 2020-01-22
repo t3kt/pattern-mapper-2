@@ -7,7 +7,7 @@ File
 	Quit		onQuit				True		
 Edit									
 View									
-	Groups		onView			parent.ui.par.Showgroups.eval()			
-	Preview		onView	True		parent.ui.par.Showpreview.eval()			
+	Groups		onView			op.PMSettings.par.Showgroups.eval()			
+	Preview		onView	True		op.PMSettings.par.Showpreview.eval()			
 	Recorder		onView			parent.runtime.op('recorder/window').isOpen			
 	Output Window		onView			parent.runtime.op('output_window').isOpen			
