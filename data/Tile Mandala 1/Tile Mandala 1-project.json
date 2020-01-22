@@ -34,13 +34,14 @@
       }
     ],
     "useCustomRes": true,
-    "wireEnable": false,
+    "wireEnable": true,
     "wireWidth": 6.0
   },
   "sources": {
     "sources": [
       {
         "compType": "gradientgen",
+        "name": "comp_0",
         "pars": {
           "Enableanimation": true,
           "Interp": "linear",
@@ -57,6 +58,7 @@
       },
       {
         "compType": "gradientgen",
+        "name": "comp_1",
         "pars": {
           "Enableanimation": false,
           "Interp": "linear",
@@ -73,8 +75,9 @@
       },
       {
         "compType": "gradientgen",
+        "name": "comp_2",
         "pars": {
-          "Enableanimation": false,
+          "Enableanimation": true,
           "Interp": "linear",
           "Period": 1.0,
           "Phase": 0.0,
@@ -83,12 +86,13 @@
           "Resolutionw": 256.0,
           "Reverse": false,
           "Reversespeed": false,
-          "Speed": 0.10000000149011612
+          "Speed": 0.11999999731779099
         },
         "subCompPars": {}
       },
       {
         "compType": "gradientgen",
+        "name": "comp_3",
         "pars": {
           "Enableanimation": false,
           "Interp": "linear",
@@ -105,6 +109,7 @@
       },
       {
         "compType": "syphonspoutsource",
+        "name": "comp_4",
         "pars": {
           "Enable": true,
           "Fit": "fitbest",
@@ -126,7 +131,7 @@
       "Filterovershoot2": 0.10000000149011612,
       "Filtertype": "lag",
       "Filterwidth": 1.25,
-      "Includefillcolor": false,
+      "Includefillcolor": true,
       "Includefillopacity": true,
       "Includefilltex": false,
       "Includefilltextransform": false,
@@ -146,11 +151,12 @@
     "generators": [
       {
         "compType": "mappedstateoverride",
+        "name": "comp_0",
         "pars": {
-          "Enableoverride": false,
+          "Enableoverride": true,
           "Lookupmode": "mono",
           "Overrideamount": 1.0,
-          "Source": 0
+          "Source": 2
         },
         "subCompPars": {
           "shape_attr_uv_map": {
@@ -175,8 +181,8 @@
           "shape_state_params1": {
             "Fillcolora": 1.0,
             "Fillcolorb": 1.0,
-            "Fillcolorg": 1.0,
-            "Fillcolorr": 1.0,
+            "Fillcolorg": 0.7333333,
+            "Fillcolorr": 0.0,
             "Fillopacity": 1.0,
             "Filltexoffsetx": 0.0,
             "Filltexoffsety": 0.0,
@@ -198,7 +204,7 @@
             "Globaltx": 0.0,
             "Globalty": 0.0,
             "Globaltz": 0.0,
-            "Includefillcolor": false,
+            "Includefillcolor": true,
             "Includefillopacity": false,
             "Includefilltex": false,
             "Includefilltextransform": false,
@@ -208,7 +214,7 @@
             "Includeglobaltranslate": false,
             "Includelocalpivot": false,
             "Includelocalrotate": false,
-            "Includelocalscale": true,
+            "Includelocalscale": false,
             "Includelocaltranslate": false,
             "Includewirecolor": false,
             "Includewireopacity": false,
@@ -280,8 +286,8 @@
             "Localtz": 0.0,
             "Wirecolora": 1.0,
             "Wirecolorb": 1.0,
-            "Wirecolorg": 1.0,
-            "Wirecolorr": 1.0,
+            "Wirecolorg": 0.0,
+            "Wirecolorr": 0.9058824,
             "Wireopacity": 1.0,
             "Wiretexoffsetx": 0.0,
             "Wiretexoffsety": 0.0,
@@ -296,6 +302,7 @@
       },
       {
         "compType": "groupstateoverride",
+        "name": "comp_1",
         "pars": {
           "Enableoverride": false,
           "Fillcolora": 0.800000011920929,
@@ -370,6 +377,7 @@
       },
       {
         "compType": "mappedstateoverride",
+        "name": "comp_2",
         "pars": {
           "Enableoverride": false,
           "Lookupmode": "mono",
@@ -520,6 +528,7 @@
       },
       {
         "compType": "groupstateoverride",
+        "name": "comp_3",
         "pars": {
           "Enableoverride": true,
           "Fillcolora": 1.0,
@@ -594,6 +603,7 @@
       },
       {
         "compType": "sequencestateoverride",
+        "name": "comp_4",
         "pars": {
           "Enableoverride": true,
           "Groups": "*",
@@ -602,11 +612,11 @@
           "Overrideamount": 1.0,
           "Play": true,
           "Playmode": "loop",
-          "Sequencename": "RingsSeqEndOnEnd",
+          "Sequencename": "RingsSeqFlat",
           "Specifybasestate": false,
-          "Speed": 0.36000001430511475,
+          "Speed": 0.05999999865889549,
           "Start": false,
-          "Step": 25.0,
+          "Step": 0.0,
           "Steplength": 0.054
         },
         "subCompPars": {
