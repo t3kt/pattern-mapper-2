@@ -1,5 +1,11 @@
 {
   "Activetab": "stategen",
   "Showgroups": false,
-  "Showpreview": true
+  "Showpreview": true,
+  "uiWindow": {
+    "h": 792,
+    "w": 1039,
+    "x": -1507,
+    "y": 506
+  }
 }
