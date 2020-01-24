@@ -3,8 +3,9 @@ File
 	Open		onFileAction					Alt O	
 	Save		onFileAction						
 	Recent			True					
-									getRecentFiles
-	Quit		onQuit				True		
+				True					getRecentFiles
+	Save Settings		onFileAction	True					
+	Quit		onQuit						
 Edit									
 View									
 	Groups		onView			op.PMSettings.par.Showgroups.eval()			

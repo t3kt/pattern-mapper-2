@@ -369,12 +369,12 @@ class DataObject:
 		return cls.fromJsonDict(_parseJson(jsonStr))
 
 	def toJsonStr(self, minify=True):
-		return _toJson(self.toJsonDict(), minify=minify)
+		return toJson(self.toJsonDict(), minify=minify)
 
 def _parseJson(jsonStr: str):
 	return json.loads(jsonStr) if jsonStr else {}
 
-def _toJson(obj, minify=True):
+def toJson(obj, minify=True):
 	return '{}' if not obj else json.dumps(
 		obj,
 		indent=None if minify else '  ',

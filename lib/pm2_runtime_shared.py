@@ -11,6 +11,7 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 	from runtime.RuntimeAppExt import RuntimeApp
+	from runtime.app_settings.AppSettingsExt import AppSettings
 
 # @dataclass
 # class _ParMapping:
@@ -331,9 +332,9 @@ class SerializableParams(common.ExtensionBase):
 	def __init__(
 			self,
 			ownerComp,
-			includePars: Union[str, Iterable[str]]):
+			includePars: Union[str, Iterable[str]] = None):
 		super().__init__(ownerComp)
-		self.includePars = _stringListify(includePars)
+		self.includePars = _stringListify(includePars or ['*'])
 
 	@staticmethod
 	def _isExcluded(par):
@@ -424,7 +425,7 @@ class RuntimeComponent(common.ExtensionBase, ABC):
 		return ext.RuntimeApp
 
 	@property
-	def _AppSettings(self) -> 'COMP':
+	def _AppSettings(self) -> Union['COMP', 'AppSettings']:
 		return op.PMSettings
 
 class RuntimeSubsystem(RuntimeComponent):

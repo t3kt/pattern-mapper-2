@@ -1,45 +1,32 @@
-"""
-Extension classes enhance TouchDesigner components with python. An
-extension is accessed via ext.ExtensionClassName from any operator
-within the extended component. If the extension is promoted via its
-Promote Extension parameter, all its attributes with capitalized names
-can be accessed externally, e.g. op('yourComp').PromotedFunction().
+import json
+import os.path
 
-Help: search "Extensions" in wiki
-"""
+from common import loggedmethod, toJson
+from pm2_runtime_shared import RuntimeComponent, SerializableParams
 
-from TDStoreTools import StorageManager
-TDF = op.TDModules.mod.TDFunctions
+# noinspection PyUnreachableCode
+if False:
+	# noinspection PyUnresolvedReferences
+	from _stubs import *
 
-class AppSettingsExt:
-	"""
-	AppSettingsExt description
-	"""
+class AppSettings(RuntimeComponent, SerializableParams):
 	def __init__(self, ownerComp):
-		# The component to which this extension is attached
-		self.ownerComp = ownerComp
+		RuntimeComponent.__init__(self, ownerComp)
+		SerializableParams.__init__(self, ownerComp)
 
-		# properties
-		TDF.createProperty(self, 'MyProperty', value=0, dependable=True,
-						   readOnly=False)
+	def GetSettingsJson(self):
+		return toJson(self.GetParDict(), minify=False)
 
-		# attributes:
-		self.a = 0 # attribute
-		self.B = 1 # promoted attribute
+	@loggedmethod
+	def SaveSettings(self):
+		self.op('settings_fileout').par.write.pulse()
 
-		# stored items (persistent across saves and re-initialization):
-		storedItems = [
-			# Only 'name' is required...
-			{'name': 'StoredProperty', 'default': None, 'readOnly': False,
-			 						'property': True, 'dependable': True},
-		]
-		# Uncomment the line below to store StoredProperty. To clear stored
-		# 	items, use the Storage section of the Component Editor
-		
-		# self.stored = StorageManager(self, ownerComp, storedItems)
-
-	def myFunction(self, v):
-		debug(v)
-
-	def PromotedFunction(self, v):
-		debug(v)
+	@loggedmethod
+	def LoadSettings(self):
+		settingsJson = None
+		if self.par.Settingsfile and os.path.exists(self.par.Settingsfile.eval()):
+			dat = self.op('settings_filein')
+			dat.par.refreshpulse.pulse()
+			settingsJson = dat.text
+		settingsDict = json.loads(settingsJson or '{}')
+		self.SetParDict(settingsDict)

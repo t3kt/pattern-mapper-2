@@ -15,6 +15,7 @@ class MainMenu(RuntimeComponent):
 			'File': {
 				'Open': lambda: self._RuntimeApp.ShowPatternChooser(),
 				'Save': lambda: self._RuntimeApp.SaveProject(),
+				'Save Settings': lambda: self._AppSettings.SaveSettings(),
 			},
 			'View': {
 				'Preview': _parToggler(lambda: self._AppSettings.par.Showpreview),
