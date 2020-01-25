@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from enum import Enum
+
 from typing import Optional, List, Dict, Any
 
 from common import DataObject
@@ -41,8 +43,30 @@ class PStateGenSettings(DataObject):
 	generators: List[PComponentSpec] = field(default_factory=list)
 	filterPars: Dict[str, Any] = field(default_factory=dict)
 
+class ControlTargetCategory(Enum):
+	stategen = 'stategen'
+	source = 'source'
+
+@dataclass
+class PControlBinding(DataObject):
+	enable: Optional[bool] = False
+	control: Optional[str] = None
+	targetCategory: Optional[ControlTargetCategory] = None
+	targetName: Optional[str] = None
+	targetParam: Optional[str] = None
+	rangeLow: Optional[float] = None
+	rangeHigh: Optional[float] = None
+	limitLow: Optional[float] = None
+	limitHigh: Optional[float] = None
+
+@dataclass
+class PControlsSettings(DataObject):
+	controls: List[PComponentSpec] = field(default_factory=list)
+	bindings: List[PControlBinding] = field(default_factory=list)
+
 @dataclass
 class PProject(DataObject):
 	state: Optional[PStateGenSettings] = None
 	sources: Optional[PSourcesSettings] = None
 	render: Optional[PRenderSettings] = None
+	control: Optional[PControlsSettings] = None

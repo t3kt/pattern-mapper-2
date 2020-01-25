@@ -371,6 +371,25 @@ class DataObject:
 	def toJsonStr(self, minify=True):
 		return toJson(self.toJsonDict(), minify=minify)
 
+	@classmethod
+	def fieldNames(cls):
+		return [
+			field.name
+			for field in dataclasses.fields(cls)
+		]
+
+	def writeRowInTable(self, dat: 'DAT', row: Union[None, int, str] = None):
+		if row is None:
+			row = dat.numRows
+			dat.appendRow([])
+		obj = self.toJsonDict()
+		for key, val in obj.items():
+			dat[row, key] = formatValue(val)
+
+	def readRowFromTable(self, dat: 'DAT', row: Union[int, str]):
+		raise NotImplementedError()
+
+
 def _parseJson(jsonStr: str):
 	return json.loads(jsonStr) if jsonStr else {}
 
