@@ -58,13 +58,10 @@ class ControlManager(RuntimeSubsystem):
 		}
 		for binding in bindings:
 			if not binding.enable:
-				# dat.appendRow(['DISABLED'])
 				continue
 			if not binding.control or not controlTable[binding.control, 0]:
-				# dat.appendRow(['CONTROL NOT FOUND'])
 				continue
 			if not binding.targetCategory or not binding.targetName or not binding.targetParam:
-				# dat.appendRow(['NO TARGET'])
 				continue
 			targetParam = None  # type: Optional[Par]
 			if binding.targetCategory is not None and binding.targetCategory.name in categoryContainers:
@@ -73,27 +70,14 @@ class ControlManager(RuntimeSubsystem):
 				if hasattr(targetComp.par, binding.targetParam):
 					targetParam = getattr(targetComp.par, binding.targetParam)
 			if targetParam is None:
-				# dat.appendRow(['TARGET PARAM NOT FOUND'])
 				continue
-			if binding.limitLow is not None:
-				limitLow = binding.limitLow
-			elif targetParam.clampMin:
-				limitLow = targetParam.min
-			else:
-				limitLow = -999999
-			if binding.limitHigh is not None:
-				limitHigh = binding.limitHigh
-			elif targetParam.clampMax:
-				limitHigh = targetParam.max
-			else:
-				limitHigh = 999999
 			dat.appendRow([
 				'{}:{}'.format(targetParam.owner.path, targetParam.name),
 				targetParam.owner.path,
 				targetParam.name,
 				binding.control,
-				binding.rangeLow if binding.rangeLow is not None else targetParam.normMin,
-				binding.rangeHigh if binding.rangeHigh is not None else targetParam.normMax,
-				limitLow,
-				limitHigh,
+				binding.rangeLow if binding.rangeLow is not None else 0,
+				binding.rangeHigh if binding.rangeHigh is not None else 1,
+				binding.limitLow if binding.limitLow is not None else 0,
+				binding.limitHigh if binding.limitHigh is not None else 1,
 			])
