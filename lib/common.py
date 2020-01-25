@@ -386,9 +386,24 @@ class DataObject:
 		for key, val in obj.items():
 			dat[row, key] = formatValue(val)
 
-	def readRowFromTable(self, dat: 'DAT', row: Union[int, str]):
-		raise NotImplementedError()
-
+	@classmethod
+	def readRowFromTable(cls, dat: 'DAT', row: Union[int, str]):
+		vals = {}
+		for field in dataclasses.fields(cls):
+			cell = dat[row, field.name]
+			if cell is None or cell.val == '':
+				vals[field.name] = None
+			else:
+				valType = field.type
+				if typing_inspect.is_optional_type(valType):
+					valType = typing_inspect.get_args(valType)[0]
+				valTypeOrigin = typing_inspect.get_origin(valType) or valType
+				if valTypeOrigin is bool and cell.val in ('1', '0'):
+					vals[field.name] = bool(int(cell))
+				else:
+					vals[field.name] = valTypeOrigin(cell)
+		# noinspection PyArgumentList
+		return cls(**vals)
 
 def _parseJson(jsonStr: str):
 	return json.loads(jsonStr) if jsonStr else {}

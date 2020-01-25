@@ -1,4 +1,56 @@
 {
+  "control": {
+    "bindings": [
+      {
+        "control": "ctrl1",
+        "enable": true,
+        "targetCategory": "stategen",
+        "targetName": "seq1",
+        "targetParam": "Overrideamount"
+      },
+      {
+        "control": "ctrl1",
+        "enable": true,
+        "targetCategory": "stategen",
+        "targetName": "colormap1",
+        "targetParam": "Overrideamount"
+      }
+    ],
+    "controls": [
+      {
+        "compType": "floatctrl",
+        "name": "ctrl1",
+        "pars": {
+          "Basevalue": 0.0,
+          "Filterenable": false,
+          "Filterlag1": 0.2,
+          "Filterlag2": 0.2,
+          "Filterovershoot1": 0.1,
+          "Filterovershoot2": 0.1,
+          "Filtertype": "gauss",
+          "Filterwidth": 1.0,
+          "Label": "Control 1"
+        },
+        "subCompPars": {}
+      },
+      {
+        "compType": "floatctrl",
+        "name": "ctrl2",
+        "pars": {
+          "Basevalue": 0.0,
+          "Filterenable": false,
+          "Filterlag1": 0.2,
+          "Filterlag2": 0.2,
+          "Filterovershoot1": 0.1,
+          "Filterovershoot2": 0.1,
+          "Filtertype": "gauss",
+          "Filterwidth": 1.0,
+          "Label": "Control 2"
+        },
+        "subCompPars": {}
+      }
+    ]
+  },
   "render": {
     "fillEnable": true,
     "renderHeight": 2000,
@@ -126,9 +178,9 @@
     "filterPars": {
       "Enable": true,
       "Filterlag1": 2.0,
-      "Filterlag2": 0.010000002980232153,
-      "Filterovershoot1": 0.10000000149011612,
-      "Filterovershoot2": 0.10000000149011612,
+      "Filterlag2": 0.01,
+      "Filterovershoot1": 0.1,
+      "Filterovershoot2": 0.1,
       "Filtertype": "lag",
       "Filterwidth": 1.25,
       "Includefillcolor": true,
@@ -151,7 +203,7 @@
     "generators": [
       {
         "compType": "mappedstateoverride",
-        "name": "comp_0",
+        "name": "colormap1",
         "pars": {
           "Enableoverride": true,
           "Lookupmode": "mono",
@@ -607,7 +659,7 @@
       },
       {
         "compType": "sequencestateoverride",
-        "name": "comp_4",
+        "name": "seq1",
         "pars": {
           "Enableoverride": true,
           "Groups": "*",

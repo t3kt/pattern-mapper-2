@@ -9,6 +9,7 @@ from pm2_runtime_shared import RuntimeSubsystem
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.control_manager.ControlManagerExt import ControlManager
 	from runtime.pattern_chooser.PatternChooserExt import PatternChooser
 	from runtime.pattern_renderer.PatternRendererExt import PatternRenderer
 	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
@@ -39,25 +40,29 @@ class RuntimeApp(common.ExtensionBase):
 
 	def SaveProject(self):
 		project = self._BuildProject()
-		self._Chooser.SaveProject(project)
+		self.Chooser.SaveProject(project)
 
 	@property
-	def _Renderer(self) -> 'PatternRenderer': return self.op('pattern_renderer')
+	def Renderer(self) -> 'PatternRenderer': return self.op('pattern_renderer')
 
 	@property
-	def _Chooser(self) -> 'PatternChooser': return self.op('pattern_chooser')
+	def Chooser(self) -> 'PatternChooser': return self.op('pattern_chooser')
 
 	@property
-	def _StateManager(self) -> 'PatternStateManager': return self.op('pattern_state_manager')
+	def StateManager(self) -> 'PatternStateManager': return self.op('pattern_state_manager')
 
 	@property
-	def _SourceManager(self) -> 'SourceManager': return self.op('source_manager')
+	def SourceManager(self) -> 'SourceManager': return self.op('source_manager')
+
+	@property
+	def ControlManager(self) -> 'ControlManager': return self.op('control_manager')
 
 	@property
 	def _SubSystems(self) -> Iterable[RuntimeSubsystem]:
-		yield self._Renderer
-		yield self._StateManager
-		yield self._SourceManager
+		yield self.Renderer
+		yield self.StateManager
+		yield self.SourceManager
+		yield self.ControlManager
 
 	@simpleloggedmethod
 	def _LoadProject(self, project: PProject):
