@@ -120,6 +120,9 @@ class ComponentManagerPanel(RuntimeComponent):
 		cell = compTable[1 + index, 'path']
 		return op(cell) if cell else None
 
+	def SelectComponent(self, index: int):
+		self.par.Selectedcomp = index
+
 	@property
 	def PropertiesOp(self) -> Optional['COMP']:
 		subName = self.op('comp_dropmenu').par.Value0.eval()
