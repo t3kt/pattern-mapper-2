@@ -11,9 +11,11 @@ if False:
 
 class ControlManager(RuntimeSubsystem):
 	def ReadFromProject(self, project: PProject):
+		self.par.Enablebindings = False
 		settings = project.control or PControlsSettings()
 		self._ComponentManager.ReadComponentSpecs(settings.controls or [])
 		self._LoadBindings(settings.bindings)
+		run('op({!r}).par.Enablebindings = True'.format(self.ownerComp.path), delayFrames=2)
 
 	def WriteToProject(self, project: PProject):
 		project.control = PControlsSettings(
