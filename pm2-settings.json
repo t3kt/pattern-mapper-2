@@ -1,11 +1,11 @@
 {
-  "Activetab": "stategen",
-  "Showgroups": false,
+  "Activesidepanel": "none",
+  "Activetab": "controlsettings",
   "Showpreview": true,
   "uiWindow": {
-    "h": 792,
-    "w": 1039,
-    "x": -1507,
-    "y": 506
+    "h": 805,
+    "w": 1045,
+    "x": -1722,
+    "y": 498
   }
 }

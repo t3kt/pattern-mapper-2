@@ -8,7 +8,8 @@ File
 	Quit		onQuit						
 Edit									
 View									
-	Groups		onView			op.PMSettings.par.Showgroups.eval()			
+	Groups		onView			op.PMSettings.par.Activesidepanel == 'groups'			
+	Bind Controls		onView	True		op.PMSettings.par.Activesidepanel == 'controls'			
 	Preview		onView	True		op.PMSettings.par.Showpreview.eval()			
 	Recorder		onView			parent.runtime.op('recorder/window').isOpen			
 	Output Window		onView			parent.runtime.op('output_window').isOpen			

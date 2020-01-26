@@ -19,7 +19,8 @@ class MainMenu(RuntimeComponent):
 			},
 			'View': {
 				'Preview': _parToggler(lambda: self._AppSettings.par.Showpreview),
-				'Groups': _parToggler(lambda: self._AppSettings.par.Showgroups),
+				'Groups': _parMenuToggler(lambda: self._AppSettings.par.Activesidepanel, 'groups', 'none'),
+				'Bind Controls': _parMenuToggler(lambda: self._AppSettings.par.Activesidepanel, 'controls', 'none'),
 				'Recorder': _windowToggler(lambda: self._RuntimeApp.op('recorder/window')),
 				'Output Window': _windowToggler(lambda: self._RuntimeApp.op('output_window')),
 			}
@@ -51,6 +52,15 @@ def _parToggler(getPar: Callable[[], 'Par']):
 	def action():
 		par = getPar()
 		par.val = not par.val
+	return action
+
+def _parMenuToggler(getPar: Callable[[], 'Par'], value: str, noneValue: str = 'none'):
+	def action():
+		par = getPar()
+		if par.eval() == value:
+			par.val = noneValue
+		else:
+			par.val = value
 	return action
 
 def _windowToggler(getWindow: Callable[[], 'windowCOMP']):
