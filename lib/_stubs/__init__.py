@@ -238,7 +238,6 @@ class Par:
 	label: str
 
 	startSection: bool
-	displayOnly: bool
 	readOnly: bool
 	tuplet: '_ParTupletT'
 	tupletName: str
@@ -784,6 +783,22 @@ class windowCOMP(COMP):
 	contentHeight: int
 
 	def setForeground(self) -> bool: pass
+
+class timeCOMP(COMP):
+	frame: float
+	seconds: float
+	rate: float
+	play: bool
+	timecode: str
+	start: float
+	end: float
+	rangeStart: float
+	rangeEnd: float
+	loop: bool
+	independent: bool
+	tempo: float
+	signature1: int
+	signature2: int
 
 class SOP(OP): pass
 class TOP(OP): pass
