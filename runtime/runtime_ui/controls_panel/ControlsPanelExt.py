@@ -13,8 +13,9 @@ class ControlsPanel(RuntimeComponent):
 
 	@loggedmethod
 	def RebuildControls(self, table: 'DAT'):
-		return
+		# return
 		self._ClearControls()
+		return
 		for i in range(1, table.numRows):
 			self._AddControl(table, i)
 
@@ -29,7 +30,7 @@ class ControlsPanel(RuntimeComponent):
 		panel.par.Targetop = op(table[i, 'path'])
 		panel.par.display = True
 		panel.par.alignorder = i
-		panel.par.w.expr = 'me.panelParent().width / 4'
-		panel.par.h.expr = 'me.panelParent().height / 4'
+		# panel.par.w.expr = 'me.panelParent().width / 4'
+		# panel.par.h.expr = 'me.panelParent().height / 4'
 		panel.nodeX = 200
 		panel.nodeY = -150 * i

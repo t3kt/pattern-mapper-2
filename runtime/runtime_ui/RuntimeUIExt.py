@@ -11,7 +11,7 @@ if False:
 class RuntimeUI(RuntimeComponent):
 	@loggedmethod
 	def Initialize(self):
-		# self.Controls.Initialize()
+		self.Controls.Initialize()
 		pass
 
 	@loggedmethod
