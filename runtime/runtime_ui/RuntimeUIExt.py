@@ -7,12 +7,13 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 	from runtime.runtime_ui.controls_panel.ControlsPanelExt import ControlsPanel
+	from runtime.runtime_ui.preview_panel.PreviewPanelExt import PreviewPanel
 
 class RuntimeUI(RuntimeComponent):
 	@loggedmethod
 	def Initialize(self):
 		self.Controls.Initialize()
-		pass
+		self.Preview.Initialize()
 
 	@loggedmethod
 	def EditControlSettings(self, index: int):
@@ -22,3 +23,6 @@ class RuntimeUI(RuntimeComponent):
 
 	@property
 	def Controls(self) -> 'ControlsPanel': return self.op('settings_panel/controls_panel')
+
+	@property
+	def Preview(self) -> 'PreviewPanel': return self.op('preview_panel')
