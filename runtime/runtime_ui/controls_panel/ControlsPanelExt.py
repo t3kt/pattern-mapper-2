@@ -8,6 +8,10 @@ if False:
 
 class ControlsPanel(RuntimeComponent):
 	@loggedmethod
+	def Initialize(self):
+		self._ClearControls()
+
+	@loggedmethod
 	def RebuildControls(self, table: 'DAT'):
 		return
 		self._ClearControls()

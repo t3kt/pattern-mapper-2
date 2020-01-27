@@ -1,11 +1,12 @@
 {
-  "Activesidepanel": "none",
-  "Activetab": "controlsettings",
+  "Activesidepanel": "controls",
+  "Activetab": "control",
+  "Autoinitialize": true,
   "Showpreview": true,
   "uiWindow": {
-    "h": 805,
-    "w": 1045,
-    "x": -1722,
-    "y": 498
+    "h": 0,
+    "w": 0,
+    "x": 0,
+    "y": 0
   }
 }

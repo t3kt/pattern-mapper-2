@@ -9,6 +9,10 @@ if False:
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
 class SourceManager(RuntimeSubsystem):
+	@loggedmethod
+	def Initialize(self):
+		self._ComponentManager.ClearComponents()
+
 	@property
 	def _ComponentManager(self) -> 'ComponentManager':
 		return self.op('component_manager')

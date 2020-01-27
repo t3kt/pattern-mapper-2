@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Union
 
 import common
 from common import loggedmethod, simpleloggedmethod
@@ -14,8 +14,28 @@ if False:
 	from runtime.pattern_renderer.PatternRendererExt import PatternRenderer
 	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
 	from runtime.source_manager.SourceManagerExt import SourceManager
+	from runtime.runtime_ui.RuntimeUIExt import RuntimeUI
+	from runtime.app_settings.AppSettingsExt import AppSettings
 
 class RuntimeApp(common.ExtensionBase):
+	def OnStartup(self):
+		self._LogBegin('OnStartup')
+		try:
+			self.Settings.Initialize()
+			if self.Settings.par.Autoinitialize:
+				self.Initialize()
+		finally:
+			self._LogEnd('OnStartup')
+
+	def Initialize(self):
+		self._LogBegin('Initialize')
+		try:
+			self.SourceManager.Initialize()
+			self.ControlManager.Initialize()
+			self.UI.Initialize()
+			self.ShowPatternChooser()
+		finally:
+			self._LogEnd('Initialize')
 
 	def ShowPatternChooser(self):
 		self.op('pattern_chooser_window').par.winopen.pulse()
@@ -41,6 +61,12 @@ class RuntimeApp(common.ExtensionBase):
 	def SaveProject(self):
 		project = self._BuildProject()
 		self.Chooser.SaveProject(project)
+
+	@property
+	def Settings(self) -> Union['COMP', 'AppSettings']: return op.PMSettings
+
+	@property
+	def UI(self) -> 'RuntimeUI': return self.op('runtime_ui')
 
 	@property
 	def Renderer(self) -> 'PatternRenderer': return self.op('pattern_renderer')

@@ -10,6 +10,11 @@ if False:
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
 class ControlManager(RuntimeSubsystem):
+	@loggedmethod
+	def Initialize(self):
+		self._LoadBindings([])
+		self._ComponentManager.ClearComponents()
+
 	def ReadFromProject(self, project: PProject):
 		self.par.Enablebindings = False
 		settings = project.control or PControlsSettings()

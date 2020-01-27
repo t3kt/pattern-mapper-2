@@ -14,6 +14,10 @@ class AppSettings(RuntimeComponent, SerializableParams):
 		RuntimeComponent.__init__(self, ownerComp)
 		SerializableParams.__init__(self, ownerComp)
 
+	@loggedmethod
+	def Initialize(self):
+		self.LoadSettings()
+
 	@property
 	def _UIWindow(self) -> 'windowCOMP':
 		return op.PMUIWindow
