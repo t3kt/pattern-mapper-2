@@ -9,6 +9,12 @@ if False:
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
 class PatternStateManager(RuntimeSubsystem):
+	@loggedmethod
+	def Initialize(self):
+		# hack for mysterious input disconnection bug
+		self.op('state_channel_filter').par.reinitnet.pulse()
+		pass
+
 	@property
 	def _StateFilter(self) -> 'SerializableParams':
 		return self.op('state_channel_filter')

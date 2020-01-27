@@ -30,6 +30,7 @@ class RuntimeApp(common.ExtensionBase):
 	def Initialize(self):
 		self._LogBegin('Initialize')
 		try:
+			self.StateManager.Initialize()
 			self.SourceManager.Initialize()
 			self.ControlManager.Initialize()
 			self.UI.Initialize()
