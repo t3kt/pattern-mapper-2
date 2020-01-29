@@ -342,7 +342,7 @@ class SerializableParams(common.ExtensionBase):
 			return True
 		if par.mode is not ParMode.CONSTANT:
 			return True
-		if par.readOnly:
+		if par.readOnly or not par.enable:
 			return True
 		if par.label.startswith(':') or par.page.name.startswith(':'):
 			return True
