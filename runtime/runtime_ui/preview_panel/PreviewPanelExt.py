@@ -24,8 +24,19 @@ class PreviewPanel(RuntimeComponent):
 			return
 		self.state.par.Previewmode = 'group'
 		self.state.par.Highlightgroups = ' '.join(map(str, groupNames))
+		self.state.par.Highlightsequences = ''
+
+	@loggedmethod
+	def PreviewSequences(self, sequenceNames: List[str]):
+		if not sequenceNames:
+			self.Reset()
+			return
+		self.state.par.Previewmode = 'sequence'
+		self.state.par.Highlightgroups = ''
+		self.state.par.Highlightsequences = ' '.join(map(str, sequenceNames))
 
 	@loggedmethod
 	def Reset(self):
 		self.state.par.Previewmode = 'default'
 		self.state.par.Highlightgroups = ''
+		self.state.par.Highlightsequences = ''

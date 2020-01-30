@@ -7,9 +7,9 @@ if False:
 	from runtime.runtime_ui.RuntimeUIExt import RuntimeUI
 
 class GroupsPanel(RuntimeComponent):
-	def OnPreviewChange(self, highlightedGroupsDat: 'DAT'):
+	def OnPreviewChange(self, highlightedDat: 'DAT'):
 		runtimeUI = self._RuntimeApp.UI  # type: RuntimeUI
-		if highlightedGroupsDat.numRows == 0:
+		if highlightedDat.numRows == 0:
 			runtimeUI.Preview.Reset()
 		else:
-			runtimeUI.Preview.PreviewGroups([c.val for c in highlightedGroupsDat.col(0)])
+			runtimeUI.Preview.PreviewGroups([c.val for c in highlightedDat.col(0)])
