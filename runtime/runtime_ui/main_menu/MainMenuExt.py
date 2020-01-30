@@ -20,6 +20,7 @@ class MainMenu(RuntimeComponent):
 			'View': {
 				'Preview': _parToggler(lambda: self._AppSettings.par.Showpreview),
 				'Groups': _parMenuToggler(lambda: self._AppSettings.par.Activesidepanel, 'groups', 'none'),
+				'Sequences': _parMenuToggler(lambda: self._AppSettings.par.Activesidepanel, 'sequences', 'none'),
 				'Bind Controls': _parMenuToggler(lambda: self._AppSettings.par.Activesidepanel, 'controls', 'none'),
 				'Recorder': _windowToggler(lambda: self._RuntimeApp.op('recorder/window')),
 				'Output Window': _windowToggler(lambda: self._RuntimeApp.op('output_window')),
