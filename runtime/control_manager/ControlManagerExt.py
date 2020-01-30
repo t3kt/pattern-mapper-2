@@ -108,7 +108,7 @@ class ControlManager(RuntimeSubsystem):
 			if binding.targetCategory is not None and binding.targetCategory.name in categoryContainers:
 				container = categoryContainers[binding.targetCategory.name]
 				targetComp = container.op(binding.targetName)
-				if hasattr(targetComp.par, binding.targetParam):
+				if targetComp and hasattr(targetComp.par, binding.targetParam):
 					targetParam = getattr(targetComp.par, binding.targetParam)
 			if targetParam is None:
 				continue
