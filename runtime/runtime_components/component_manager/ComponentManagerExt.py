@@ -89,3 +89,4 @@ class ComponentManager(RuntimeComponent):
 	@loggedmethod
 	def RenameComponent(self, comp: 'SerializableComponentOrCOMP', name: str):
 		comp.name = name
+		self._RebuildChain()
