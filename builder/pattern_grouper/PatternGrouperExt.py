@@ -151,7 +151,7 @@ def _IdGroupGenerator(hostObj, groupGenSpec: PIdGroupGenSpec):
 			suffixes=groupGenSpec.suffixes or groupGenSpec.ids,
 			attrs=groupGenSpec.attrs,
 			paths=[
-				'^.*/g\\[id={}\\]'.format(elemId)
+				'^.*/(g|path)\\[id={}\\]'.format(elemId)
 				for elemId in groupGenSpec.ids
 			] if groupGenSpec.ids else [],
 		),
