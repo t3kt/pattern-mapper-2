@@ -1,7 +1,7 @@
 from pm2_settings import *
 
 def settings():
-	return PSettings(
+	settings = PSettings(
 		preProc=PPreProcSettings(
 			recenter=PRecenterSettings(bound=BoundType.frame),
 			rescale=PRescaleSettings(bound=BoundType.frame),
@@ -23,20 +23,25 @@ def settings():
 				),
 			]
 		),
-		sequencing=PSequencingSettings(
-			sequenceGenerators=
-			[
-				PPathSequenceGenSpec(
-					baseName='BlueRadialPathCW{}'.format(i),
-					pathPath='svg/g[id=BlueRadialPathsCW]/path[id=BlueRadialPath{}]'.format(i)
-				)
-				for i in range(1, 9)
-			] + [
-				PPathSequenceGenSpec(
-					baseName='BlueRadialPathCCW{}'.format(i),
-					pathPath='svg/g[id=BlueRadialPathsCCW]/path[id=BlueRadialPath{}]'.format(i)
-				)
-				for i in range(1, 9)
-			]
-		),
+		sequencing=PSequencingSettings(sequenceGenerators=[]),
 	)
+	seqGens = []
+	for direction in ['CW', 'CCW']:
+		seqGens += [
+			PPathSequenceGenSpec(
+				baseName='BlueRadialPath{}{}'.format(direction, i),
+				pathPath='svg/g[id=BlueRadialPaths{}]/path[id=BlueRadialPath{}]'.format(direction, i))
+			for i in range(1, 9)
+		]
+		seqGens.append(
+			PJoinSequenceGenSpec(
+				'BlueRadialPathsEndOnEnd{}'.format(direction),
+				partNames=['BlueRadialPath{}{}'.format(direction, i) for i in range(1, 9)]
+			))
+		seqGens.append(
+			PParallelSequenceGenSpec(
+				'BlueRadialPathsParallel{}'.format(direction),
+				partNames=['BlueRadialPath{}{}'.format(direction, i) for i in range(1, 9)]
+			))
+	settings.sequencing.sequenceGenerators = seqGens
+	return settings
