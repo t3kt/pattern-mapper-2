@@ -1,6 +1,7 @@
 from typing import Callable, Optional
 
 from common import loggedmethod
+from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
 import pm2_menu as menu
@@ -11,7 +12,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
-class ComponentManagerPanel(RuntimeComponent):
+class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 	@property
 	def _CompTable(self) -> 'DAT':
 		return self.op('comp_table')
@@ -99,7 +100,7 @@ class ComponentManagerPanel(RuntimeComponent):
 			if not newName:
 				return
 			self._LogEvent('Renaming {} to {}'.format(targetComp, newName))
-			self._Manager.RenameComponent(targetComp, newName)
+			self._SendMessage(Message(name=CommonMessages.rename, data=[targetComp.name, newName]))
 			self._AttachMarkerToComp(marker, targetComp)
 		_ShowPromptDialog(
 			title='Rename',
@@ -109,7 +110,7 @@ class ComponentManagerPanel(RuntimeComponent):
 
 	def _DeleteComp(self, marker: 'COMP'):
 		targetComp = marker.par.Targetop.eval()
-		self._Manager.DeleteComponent(targetComp)
+		self._SendMessage(Message(name=CommonMessages.delete, data=targetComp.name))
 
 	@property
 	def SelectedComp(self) -> Optional['SerializableComponentOrCOMP']:
@@ -152,8 +153,14 @@ class ComponentManagerPanel(RuntimeComponent):
 		)
 
 	def _CreateComponent(self, typeName: str):
-		self._Manager.AddComponent(PComponentSpec(compType=typeName))
+		self._SendMessage(Message(name=CommonMessages.add, data=PComponentSpec(compType=typeName)))
 		self.op('marker_replicator').par.recreateall.pulse()
+
+	def _SendMessage(self, message: Message):
+		self._Manager.HandleMessage(message)
+
+	def HandleMessage(self, message: Message):
+		pass
 
 
 def _ShowPromptDialog(

@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 
 from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
+from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
 
@@ -9,7 +10,7 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class ComponentManager(RuntimeComponent):
+class ComponentManager(RuntimeComponent, MessageHandler):
 	@property
 	def _Components(self) -> List['SerializableComponentOrCOMP']:
 		return [
@@ -90,3 +91,26 @@ class ComponentManager(RuntimeComponent):
 	def RenameComponent(self, comp: 'SerializableComponentOrCOMP', name: str):
 		comp.name = name
 		self._RebuildChain()
+
+	def _GetComponentByName(self, name: str) -> Optional['COMP']:
+		if not name:
+			return None
+		comp = self.op('contents/' + name)
+		if comp and comp.isCOMP:
+			return comp
+
+	def HandleMessage(self, message: Message):
+		if message.name == CommonMessages.add:
+			self.AddComponent(message.data)
+		elif message.name == CommonMessages.delete:
+			comp = self._GetComponentByName(message.data)
+			if not comp:
+				return
+			self.DeleteComponent(comp)
+		elif message.name == CommonMessages.clear:
+			self.ClearComponents()
+		elif message.name == CommonMessages.rename:
+			comp = self._GetComponentByName(message.data[0])
+			if not comp:
+				return
+			self.RenameComponent(comp, message.data[1])

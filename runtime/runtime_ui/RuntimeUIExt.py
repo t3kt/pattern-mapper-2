@@ -1,4 +1,5 @@
 from common import loggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_runtime_shared import RuntimeComponent
 
 # noinspection PyUnreachableCode
@@ -10,7 +11,7 @@ if False:
 	from runtime.runtime_ui.preview_panel.PreviewPanelExt import PreviewPanel
 	from runtime.RuntimeAppExt import RuntimeApp
 
-class RuntimeUI(RuntimeComponent):
+class RuntimeUI(RuntimeComponent, MessageHandler):
 	@loggedmethod
 	def Initialize(self):
 		self.Controls.Initialize()
@@ -58,3 +59,6 @@ class RuntimeUI(RuntimeComponent):
 	@property
 	def _UIWindow(self) -> 'windowCOMP':
 		return op.PMUIWindow
+
+	def HandleMessage(self, message: Message):
+		pass
