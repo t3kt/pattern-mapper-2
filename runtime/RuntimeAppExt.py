@@ -3,7 +3,6 @@ from typing import Iterable, Union
 import common
 from common import loggedmethod, simpleloggedmethod
 from pm2_project import PProject
-from pm2_runtime_shared import RuntimeSubsystem
 
 # noinspection PyUnreachableCode
 if False:
@@ -16,6 +15,7 @@ if False:
 	from runtime.source_manager.SourceManagerExt import SourceManager
 	from runtime.runtime_ui.RuntimeUIExt import RuntimeUI
 	from runtime.app_settings.AppSettingsExt import AppSettings
+	from pm2_runtime_shared import RuntimeSubsystem
 
 class RuntimeApp(common.ExtensionBase):
 	def OnStartup(self):
@@ -85,7 +85,7 @@ class RuntimeApp(common.ExtensionBase):
 	def ControlManager(self) -> 'ControlManager': return self.op('control_manager')
 
 	@property
-	def _SubSystems(self) -> Iterable[RuntimeSubsystem]:
+	def _SubSystems(self) -> Iterable['RuntimeSubsystem']:
 		yield self.Renderer
 		yield self.StateManager
 		yield self.SourceManager
