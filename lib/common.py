@@ -3,8 +3,7 @@ from colorsys import rgb_to_hsv
 import math
 
 import datetime
-import typing
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, Union
 import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
@@ -114,7 +113,7 @@ class LoggableBase:
 
 class ExtensionBase(LoggableBase):
 	def __init__(self, ownerComp):
-		self.ownerComp = ownerComp  # type: OP
+		self.ownerComp = ownerComp  # type: COMP
 		self.enablelogging = True
 		self.par = ownerComp.par
 		self.path = ownerComp.path
@@ -416,7 +415,7 @@ def toJson(obj, minify=True):
 		sort_keys=True,
 	)
 
-def _enumByName(cls: typing.Type[Enum], name: str, default: Enum = None):
+def _enumByName(cls: Type[Enum], name: str, default: Enum = None):
 	if name is None or name == '':
 		return default
 	try:
@@ -566,12 +565,13 @@ def configurePar(
 @dataclass
 class OPAttrs:
 	order: Optional[float] = None
-	nodePos: Optional[Tuple[float, float]] = None
+	nodePos: Optional[Union[Tuple[float, float], List[float]]] = None
 	tags: Optional[List[str]] = None
 	panelParent: Optional['COMP'] = None
 	parVals: Optional[Dict[str, Any]] = None
 	parExprs: Optional[Dict[str, str]] = None
 	inputs: Optional[List] = None  # TODO: use a more specific type parameter
+	cloneImmune: Optional[bool] = None
 
 	def overrideWith(self, other: 'OPAttrs') -> 'OPAttrs':
 		if not other:
@@ -597,6 +597,8 @@ class OPAttrs:
 				self.parExprs = dict(other.parExprs)
 		if other.inputs is not None:
 			self.inputs = list(other.inputs)
+		if other.cloneImmune is not None:
+			self.cloneImmune = other.cloneImmune
 		return self
 
 	def applyTo(self, o: 'OP'):
@@ -617,6 +619,8 @@ class OPAttrs:
 		if self.inputs:
 			for i, source in enumerate(self.inputs):
 				o.inputConnectors[i].connect(source)
+		if self.cloneImmune:
+			o.cloneImmune = self.cloneImmune
 
 	@classmethod
 	def merged(cls, *attrs: 'OPAttrs'):
@@ -634,6 +638,17 @@ def createFromTemplate(
 	if attrs:
 		attrs.applyTo(comp)
 	return comp
+
+
+def createOP(
+		opType: Type['OP'],
+		dest: 'COMP',
+		name: str,
+		attrs: OPAttrs = None):
+	o = dest.create(opType, name)
+	if attrs:
+		attrs.applyTo(o)
+	return o
 
 # def createMenuSource(**namesAndLabels):
 # 	names = []

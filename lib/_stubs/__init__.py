@@ -807,7 +807,7 @@ class MAT(OP): pass
 _AnyOpT = _T.Union[OP, DAT, COMP, CHOP, SOP, MAT]
 
 baseCOMP = panelCOMP = COMP
-evaluateDAT = mergeDAT = nullDAT = parameterexecuteDAT = tableDAT = textDAT = scriptDAT = DAT
+evaluateDAT = mergeDAT = nullDAT = parameterexecuteDAT = parameterDAT = tableDAT = textDAT = scriptDAT = DAT
 parameterCHOP = nullCHOP = selectCHOP = CHOP
 scriptSOP = SOP
 animationCOMP = COMP
