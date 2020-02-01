@@ -16,11 +16,18 @@ class CommonMessages:
 	deleted = 'deleted'
 	renamed = 'renamed'
 	cleared = 'cleared'
+	parVal = 'parVal'
+	parEnable = 'parEnable'
+	parMode = 'parMode'
+
 	# Actions
 	add = 'add'
 	delete = 'delete'
 	rename = 'rename'
 	clear = 'clear'
+	setPar = 'setPar'
+	# queryPars = 'queryPars'
+	# queryParStates = 'queryParStates'
 
 class MessageNamespaces:
 	stateGen = 'stateGen'

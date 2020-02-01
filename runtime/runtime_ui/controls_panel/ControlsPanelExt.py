@@ -42,4 +42,5 @@ class ControlsPanel(RuntimeComponent, MessageHandler):
 		return self.op('component_manager_panel')
 
 	def HandleMessage(self, message: Message):
-		self._ComponentManagerPanel.HandleMessage(message)
+		# self._ComponentManagerPanel.HandleMessage(message)
+		self._LogEvent('WARNING currently ignoring messages!')

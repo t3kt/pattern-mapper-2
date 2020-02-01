@@ -700,6 +700,8 @@ class Cell(_T.SupportsInt, _T.SupportsAbs, _T.SupportsFloat, _T.SupportsBytes):
 	row: int
 	col: int
 
+	def offset(self, r: int, c: int) -> _T.Optional['Cell']: pass
+
 _NameOrIndex = _T.Union[str, int, 'Cell', 'Channel']
 _NamesOrIndices = _T.Iterable[_NameOrIndex]
 

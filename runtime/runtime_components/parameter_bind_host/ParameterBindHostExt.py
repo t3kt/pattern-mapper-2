@@ -1,14 +1,16 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from common import ExtensionBase, createOP, OPAttrs, formatValue
+from pm2_messaging import Message, MessageHandler, CommonMessages
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.RuntimeAppExt import RuntimeApp
 
-class ParameterBindHost(ExtensionBase):
+class ParameterBindHost(ExtensionBase, MessageHandler):
 	def Reset(self):
 		table = self._GetTable(autoInit=False)
 		if not table or table.numRows < 2:
@@ -126,9 +128,12 @@ class ParameterBindHost(ExtensionBase):
 				])
 
 	def _BuildParSelectors(self, compInfos: List['_ComponentInfo']):
-		for o in self.ownerComp.ops('getparchop__*', 'getpardat__*'):
+		for o in self.ownerComp.ops('getparchop__*', 'getpardat__*', 'getparstate__*'):
 			o.destroy()
 		for i, compInfo in enumerate(compInfos):
+			numericNames = [par.name for par in compInfo.numericParams]
+			textNames = [par.name for par in compInfo.textParams]
+			renameTo = compInfo.channelPath + ':*'
 			if compInfo.numericParams:
 				createOP(
 					parameterCHOP,
@@ -137,8 +142,8 @@ class ParameterBindHost(ExtensionBase):
 					OPAttrs(
 						parVals={
 							'ops': compInfo.comp.path,
-							'parameters': ' '.join([par.name for par in compInfo.numericParams]),
-							'renameto': compInfo.channelPath + ':*',
+							'parameters': ' '.join(numericNames),
+							'renameto': renameTo,
 						},
 						nodePos=(400, 200 - (i * 150)),
 						cloneImmune=True,
@@ -152,19 +157,85 @@ class ParameterBindHost(ExtensionBase):
 					OPAttrs(
 						parVals={
 							'ops': compInfo.comp.path,
-							'parameters': ' '.join([par.name for par in compInfo.textParams]),
+							'parameters': ' '.join(textNames),
 							'header': False,
-							'renameto': compInfo.channelPath + ':*',
+							'renameto': renameTo,
 						},
 						nodePos=(600, 200 - (i * 150)),
 						cloneImmune=True,
 					),
 				)
+			createOP(
+				parameterDAT,
+				self.ownerComp,
+				'getparstate__{}'.format(i),
+				OPAttrs(
+					parVals={
+						'ops': compInfo.comp.path,
+						'parameters': ' '.join(numericNames + textNames),
+						'renameto': renameTo,
+						'header': True,
+						'name': True,
+						'value': False,
+						'mode': True,
+						'enabled': True,
+					},
+					nodePos=(800, 200 - (i * 150)),
+					cloneImmune=True,
+				),
+			)
 
 	def RebuildParameters(self):
 		compInfos = self._GetComponentInfos()
 		self._BuildParamTable(compInfos)
 		self._BuildParSelectors(compInfos)
+
+	def _SendMessage(self, name: str, data=None):
+		handler = self.par.Messagehandler.eval()  # type: MessageHandler
+		if not handler:
+			return
+		handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+
+	def HandleMessage(self, message: Message):
+		if not self.par.Enable:
+			return
+		namespace = str(self.par.Messagenamespace)
+		if namespace and message.namespace != namespace:
+			return
+		if message.name == CommonMessages.setPar:
+			self._SetParVal(channelName=message.data[0], val=message.data[1])
+
+	def _GetParByChannel(self, channelName: str) -> Optional['Par']:
+		paramTable = self.ownerComp.op('param_table')  # type: DAT
+		compPath = paramTable[channelName, 'component']
+		comp = op(compPath) if compPath else None
+		if comp is None:
+			return None
+		parName = paramTable[channelName, 'param']
+		par = getattr(comp.par, parName.val, None) if parName else None
+		return par
+
+	def _SetParVal(self, channelName: str, val: Any):
+		par = self._GetParByChannel(channelName)
+		if par is None:
+			self._LogEvent('WARNING parameter not found: {}'.format(channelName))
+			return
+		if par.enable and (par.mode == ParMode.CONSTANT or par.mode == ParMode.BIND):
+			par.val = val
+		else:
+			self._LogEvent('WARNING parameter cannot be set: {} (mode: {}, enable: {})'.format(
+				channelName, par.mode, par.enable))
+
+	def SendParVal(self, channelName: str, val: Any):
+		self._SendMessage(CommonMessages.parVal, [channelName, val])
+
+	def OnNumericParChannelChange(self, channel: 'Channel', val: float):
+		self.SendParVal(channel.name, val)
+
+	def OnTextParCellChange(self, cells: List['Cell']):
+		for cell in cells:
+			if cell.col == 1:
+				self.SendParVal(cell.offset(0, -1).val, cell.val)
 
 def _shouldIncludePar(par: 'Par'):
 	if par.readOnly or not par.enable:
