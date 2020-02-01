@@ -570,36 +570,9 @@ class OPAttrs:
 	panelParent: Optional['COMP'] = None
 	parVals: Optional[Dict[str, Any]] = None
 	parExprs: Optional[Dict[str, str]] = None
+	parBindExprs: Optional[Dict[str, str]] = None
 	inputs: Optional[List] = None  # TODO: use a more specific type parameter
 	cloneImmune: Optional[bool] = None
-
-	def overrideWith(self, other: 'OPAttrs') -> 'OPAttrs':
-		if not other:
-			return self
-		if other.order is not None:
-			self.order = other.order
-		self.nodePos = other.nodePos or self.nodePos
-		if other.tags:
-			if self.tags is not None:
-				self.tags += other.tags
-			else:
-				self.tags = list(other.tags)
-		self.panelParent = other.panelParent or self.panelParent
-		if other.parVals:
-			if self.parVals is not None:
-				self.parVals.update(other.parVals)
-			else:
-				self.parVals = dict(other.parVals)
-		if other.parExprs:
-			if self.parExprs is not None:
-				self.parExprs.update(other.parExprs)
-			else:
-				self.parExprs = dict(other.parExprs)
-		if other.inputs is not None:
-			self.inputs = list(other.inputs)
-		if other.cloneImmune is not None:
-			self.cloneImmune = other.cloneImmune
-		return self
 
 	def applyTo(self, o: 'OP'):
 		if self.order is not None:
@@ -616,18 +589,14 @@ class OPAttrs:
 		if self.parExprs:
 			for key, val in self.parExprs.items():
 				getattr(o.par, key).expr = val
+		if self.parBindExprs:
+			for key, val in self.parBindExprs.items():
+				getattr(o.par, key).bindExpr = val
 		if self.inputs:
 			for i, source in enumerate(self.inputs):
 				o.inputConnectors[i].connect(source)
 		if self.cloneImmune:
 			o.cloneImmune = self.cloneImmune
-
-	@classmethod
-	def merged(cls, *attrs: 'OPAttrs'):
-		result = cls()
-		for a in attrs:
-			result.overrideWith(a)
-		return result
 
 def createFromTemplate(
 		template: 'OP',

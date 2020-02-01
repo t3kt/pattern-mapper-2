@@ -1,6 +1,6 @@
 from typing import Callable, Optional
 
-from common import loggedmethod
+from common import loggedmethod, createFromTemplate, OPAttrs
 from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
@@ -11,7 +11,6 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
-	from runtime.RuntimeAppExt import RuntimeApp
 
 class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 	@property
@@ -25,24 +24,6 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 	@property
 	def _Manager(self) -> 'ComponentManager':
 		return self.par.Manager.eval()
-
-	def OnMarkerReplicate(self, marker: 'COMP'):
-		marker.par.display = True
-		i = marker.digits
-		compTable = self._CompTable
-		targetComp = op(compTable[i, 'path'])
-		subLabelParName = str(self.par.Sublabelpar)
-		subLabelPar = getattr(targetComp.par, subLabelParName) if subLabelParName else None
-		if subLabelPar is None:
-			marker.par.Sublabelvisible = False
-		else:
-			marker.par.Sublabelvisible = True
-			marker.par.Sublabeltext = subLabelPar
-		typeTable = self._TypeTable
-		typeName = compTable[i, 'compType']
-		marker.par.Targetcomptype = typeName
-		marker.par.Typelabeltext = typeTable[typeName, 'label']
-		self._AttachMarkerToComp(marker, targetComp)
 
 	def _AttachMarkerToComp(self, marker: 'COMP', targetComp: 'COMP'):
 		marker.par.Targetop = targetComp
@@ -156,26 +137,83 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		self._SendMessage(CommonMessages.add, data=PComponentSpec(compType=typeName))
 		self.op('marker_replicator').par.recreateall.pulse()
 
+	@loggedmethod
+	def _OnComponentsCleared(self):
+		for o in self.ownerComp.ops('comp__*'):
+			o.destroy()
+		self.par.Selectedcomp = -1
+
+	@loggedmethod
+	def _OnComponentAdded(self, spec: PComponentSpec, compPath: str):
+		marker = createFromTemplate(
+			template=self.op('marker_template'),
+			dest=self.ownerComp,
+			name='comp__0',
+			attrs=OPAttrs(
+				parVals={
+					'display': True,
+					'Targetname': spec,
+					'Sublabelvisible': False,
+					'Sublabeltext': '',  # TODO: sub label text
+					'Targetcomptype': spec.compType,
+					'Typelabeltext': self._TypeTable[spec.compType, 'label'] or '',
+				},
+				parExprs={
+					'alignorder': '20000 - me.nodeY',
+				},
+			))  # type: COMP
+		i = marker.digits
+		marker.nodeX = 400
+		marker.nodeY = 500 - (i * 200)
+		# TODO: get rid of this direct binding
+		self._AttachMarkerToComp(marker, op(compPath))
+
+	def _GetMarkerByName(self, name: str) -> Optional['COMP']:
+		markerTable = self.op('markers_by_name')  # type: DAT
+		pathCell = markerTable[name, 1]
+		return self.op(pathCell) if pathCell else None
+
+	@loggedmethod
+	def _OnComponentDeleted(self, name: str):
+		marker = self._GetMarkerByName(name)
+		if not marker:
+			return
+		marker.destroy()
+		# TODO : handle selection update if needed
+		pass
+
+	@loggedmethod
+	def _OnComponentRenamed(self, oldName: str, newName: str):
+		marker = self._GetMarkerByName(oldName)
+		if not marker:
+			return
+		marker.par.Targetname = newName
+		# TODO : handle selection update if needed
+		pass
+
 	def _SendMessage(self, name: str, data=None):
-		runtimeApp = self._RuntimeApp  # type: RuntimeApp
-		runtimeApp.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+		handler = self.par.Messagehandler.eval()  # type: MessageHandler
+		if not handler:
+			return
+		handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
 		namespace = str(self.par.Messagenamespace)
 		if not namespace or message.namespace != namespace:
 			return
 		if message.name == CommonMessages.added:
-			spec = message.data  # type: PComponentSpec
-			pass
+			spec = message.data[0]  # type: PComponentSpec
+			compPath = message.data[1]
+			self._OnComponentAdded(spec, compPath)
 		elif message.name == CommonMessages.deleted:
 			name = message.data
+			self._OnComponentDeleted(name)
 			pass
 		elif message.name == CommonMessages.cleared:
-			pass
+			self._OnComponentsCleared()
 		elif message.name == CommonMessages.renamed:
 			oldName, newName = message.data
-			pass
-		pass
+			self._OnComponentRenamed(oldName, newName)
 
 
 def _ShowPromptDialog(

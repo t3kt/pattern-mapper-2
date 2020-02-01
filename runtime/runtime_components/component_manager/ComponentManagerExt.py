@@ -73,7 +73,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		comp.SetComponentSpec(spec)
 		if self._IsChain:
 			self._RebuildChain()
-		self._SendMessage(CommonMessages.added, spec)
+		self._SendMessage(CommonMessages.added, [spec, comp.path])
 
 	def _RebuildChain(self):
 		comps = self._ComponentsInOrder
@@ -108,8 +108,10 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			return comp
 
 	def _SendMessage(self, name: str, data=None):
-		runtimeApp = self._RuntimeApp  # type: RuntimeApp
-		runtimeApp.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+		handler = self.par.Messagehandler.eval()  # type: MessageHandler
+		if not handler:
+			return
+		handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
 		namespace = str(self.par.Messagenamespace)
