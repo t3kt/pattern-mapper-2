@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
+from common import createFromTemplate, OPAttrs, loggedmethod
 from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
@@ -9,6 +9,7 @@ from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.RuntimeAppExt import RuntimeApp
 
 class ComponentManager(RuntimeComponent, MessageHandler):
 	@property
@@ -47,6 +48,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			comp.destroy()
 		if self._IsChain:
 			self.op('contents/__sel_chop_out').par.chop = self.op('contents/__chop_in')
+		self._SendMessage(CommonMessages.cleared)
 
 	@loggedmethod
 	def AddComponent(self, spec: PComponentSpec):
@@ -66,10 +68,12 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 				nodePos=(200, 500 - (i * 150)),
 			)
 		)  # type: SerializableComponentOrCOMP
+		spec.name = comp.name  # handle the case where the name wasn't unique and was automatically changed
 		self._LogEvent('Created component {}, nodeY: {}'.format(comp, comp.nodeY))
 		comp.SetComponentSpec(spec)
 		if self._IsChain:
 			self._RebuildChain()
+		self._SendMessage(CommonMessages.added, spec)
 
 	def _RebuildChain(self):
 		comps = self._ComponentsInOrder
@@ -85,12 +89,16 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 
 	@loggedmethod
 	def DeleteComponent(self, comp: 'SerializableComponentOrCOMP'):
+		name = comp.name
 		comp.destroy()
+		self._SendMessage(CommonMessages.deleted, name)
 
 	@loggedmethod
 	def RenameComponent(self, comp: 'SerializableComponentOrCOMP', name: str):
+		oldName = comp.name
 		comp.name = name
 		self._RebuildChain()
+		self._SendMessage(CommonMessages.renamed, data=[oldName, name])
 
 	def _GetComponentByName(self, name: str) -> Optional['COMP']:
 		if not name:
@@ -99,7 +107,14 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		if comp and comp.isCOMP:
 			return comp
 
+	def _SendMessage(self, name: str, data=None):
+		runtimeApp = self._RuntimeApp  # type: RuntimeApp
+		runtimeApp.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+
 	def HandleMessage(self, message: Message):
+		namespace = str(self.par.Messagenamespace)
+		if not namespace or message.namespace != namespace:
+			return
 		if message.name == CommonMessages.add:
 			self.AddComponent(message.data)
 		elif message.name == CommonMessages.delete:

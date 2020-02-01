@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from common import loggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject, PControlBinding, PControlsSettings, ControlTargetCategory
 from pm2_runtime_shared import RuntimeSubsystem
 
@@ -9,7 +10,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
-class ControlManager(RuntimeSubsystem):
+class ControlManager(RuntimeSubsystem, MessageHandler):
 	@loggedmethod
 	def Initialize(self):
 		self._LoadBindings([])
@@ -122,3 +123,6 @@ class ControlManager(RuntimeSubsystem):
 				binding.limitLow if binding.limitLow is not None else 0,
 				binding.limitHigh if binding.limitHigh is not None else 1,
 			])
+
+	def HandleMessage(self, message: Message):
+		self._ComponentManager.HandleMessage(message)

@@ -22,6 +22,11 @@ class CommonMessages:
 	rename = 'rename'
 	clear = 'clear'
 
+class MessageNamespaces:
+	stateGen = 'stateGen'
+	source = 'source'
+	control = 'control'
+
 class MessageHandler(ABC):
 	@abstractmethod
 	def HandleMessage(self, message: Message):

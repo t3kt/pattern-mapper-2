@@ -1,10 +1,11 @@
 from typing import List
 
 from common import simpleloggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject, PRenderSettings
 from pm2_runtime_shared import RuntimeSubsystem, SerializableParamsOrCOMP
 
-class PatternRenderer(RuntimeSubsystem):
+class PatternRenderer(RuntimeSubsystem, MessageHandler):
 	@property
 	def _TextureDefinitions(self) -> List['SerializableParamsOrCOMP']:
 		return self.ops('texture_def_*')
@@ -37,3 +38,6 @@ class PatternRenderer(RuntimeSubsystem):
 			for texDef in self._TextureDefinitions
 		]
 		project.render = render
+
+	def HandleMessage(self, message: Message):
+		pass

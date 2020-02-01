@@ -9,6 +9,8 @@ if False:
 	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 	from runtime.runtime_ui.controls_panel.ControlsPanelExt import ControlsPanel
 	from runtime.runtime_ui.preview_panel.PreviewPanelExt import PreviewPanel
+	from runtime.runtime_ui.sources_panel.SourcesPanelExt import SourcesPanel
+	from runtime.runtime_ui.state_generators_panel.StateGeneratorsPanelExt import StateGeneratorsPanel
 	from runtime.RuntimeAppExt import RuntimeApp
 
 class RuntimeUI(RuntimeComponent, MessageHandler):
@@ -25,6 +27,12 @@ class RuntimeUI(RuntimeComponent, MessageHandler):
 
 	@property
 	def Controls(self) -> 'ControlsPanel': return self.op('settings_panel/controls_panel')
+
+	@property
+	def Sources(self) -> 'SourcesPanel': return self.op('settings_panel/sources_panel')
+
+	@property
+	def StateGenerators(self) -> 'StateGeneratorsPanel': return self.op('settings_panel/state_generators_panel')
 
 	@property
 	def Preview(self) -> 'PreviewPanel': return self.op('preview_panel')
@@ -61,4 +69,17 @@ class RuntimeUI(RuntimeComponent, MessageHandler):
 		return op.PMUIWindow
 
 	def HandleMessage(self, message: Message):
-		pass
+		self._LogBegin('UI MESSAGE: {}'.format(message))
+		try:
+			self.Controls.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		try:
+			self.Sources.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		try:
+			self.StateGenerators.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		self._LogEnd('END UI MESSAGE: {}'.format(message))

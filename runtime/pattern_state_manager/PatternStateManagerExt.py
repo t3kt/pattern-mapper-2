@@ -1,4 +1,5 @@
 from common import loggedmethod, simpleloggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject, PComponentSpec, PStateGenSettings
 from pm2_runtime_shared import RuntimeSubsystem, SerializableParams
 
@@ -8,7 +9,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
-class PatternStateManager(RuntimeSubsystem):
+class PatternStateManager(RuntimeSubsystem, MessageHandler):
 	@loggedmethod
 	def Initialize(self):
 		# hack for mysterious input disconnection bug
@@ -40,4 +41,7 @@ class PatternStateManager(RuntimeSubsystem):
 	@loggedmethod
 	def AddStateGenerator(self, spec: PComponentSpec):
 		self._ComponentManager.AddComponent(spec)
+
+	def HandleMessage(self, message: Message):
+		self._ComponentManager.HandleMessage(message)
 

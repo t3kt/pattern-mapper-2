@@ -1,12 +1,14 @@
 from common import loggedmethod
+from pm2_messaging import MessageHandler, Message
 from pm2_runtime_shared import RuntimeComponent
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
+	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 
-class ControlsPanel(RuntimeComponent):
+class ControlsPanel(RuntimeComponent, MessageHandler):
 	@loggedmethod
 	def Initialize(self):
 		self._ClearControls()
@@ -34,3 +36,10 @@ class ControlsPanel(RuntimeComponent):
 		# panel.par.h.expr = 'me.panelParent().height / 4'
 		panel.nodeX = 200
 		panel.nodeY = -150 * i
+
+	@property
+	def _ComponentManagerPanel(self) -> 'ComponentManagerPanel':
+		return self.op('component_manager_panel')
+
+	def HandleMessage(self, message: Message):
+		self._ComponentManagerPanel.HandleMessage(message)

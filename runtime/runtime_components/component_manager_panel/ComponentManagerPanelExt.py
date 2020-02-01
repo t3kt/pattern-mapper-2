@@ -11,6 +11,7 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
+	from runtime.RuntimeAppExt import RuntimeApp
 
 class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 	@property
@@ -73,7 +74,6 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 	def _OnMarkerSelect(self, marker: 'COMP'):
 		index = marker.digits - 1
 		selectedPar = self.par.Selectedcomp
-		self._LogEvent('index: {!r} selectedPar: {!r}'.format(index, selectedPar))
 		if index == selectedPar:
 			selectedPar.val = -1
 		else:
@@ -100,7 +100,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 			if not newName:
 				return
 			self._LogEvent('Renaming {} to {}'.format(targetComp, newName))
-			self._SendMessage(Message(name=CommonMessages.rename, data=[targetComp.name, newName]))
+			self._SendMessage(CommonMessages.rename, data=[targetComp.name, newName])
 			self._AttachMarkerToComp(marker, targetComp)
 		_ShowPromptDialog(
 			title='Rename',
@@ -110,7 +110,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 
 	def _DeleteComp(self, marker: 'COMP'):
 		targetComp = marker.par.Targetop.eval()
-		self._SendMessage(Message(name=CommonMessages.delete, data=targetComp.name))
+		self._SendMessage(CommonMessages.delete, data=targetComp.name)
 
 	@property
 	def SelectedComp(self) -> Optional['SerializableComponentOrCOMP']:
@@ -141,7 +141,6 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 			for i in range(1, typeTable.numRows)
 		]
 		def _callback(info):
-			self._LogEvent('create callback {}'.format(info))
 			index = info['index']
 			typeName = typeTable[index + 1, 'typeName'].val
 			self._CreateComponent(typeName)
@@ -153,11 +152,12 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		)
 
 	def _CreateComponent(self, typeName: str):
-		self._SendMessage(Message(name=CommonMessages.add, data=PComponentSpec(compType=typeName)))
+		self._SendMessage(CommonMessages.add, data=PComponentSpec(compType=typeName))
 		self.op('marker_replicator').par.recreateall.pulse()
 
-	def _SendMessage(self, message: Message):
-		self._Manager.HandleMessage(message)
+	def _SendMessage(self, name: str, data=None):
+		runtimeApp = self._RuntimeApp  # type: RuntimeApp
+		runtimeApp.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
 		pass

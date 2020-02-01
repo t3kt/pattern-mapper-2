@@ -2,6 +2,7 @@ from typing import Iterable, Union
 
 import common
 from common import loggedmethod, simpleloggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject
 
 # noinspection PyUnreachableCode
@@ -17,7 +18,7 @@ if False:
 	from runtime.app_settings.AppSettingsExt import AppSettings
 	from pm2_runtime_shared import RuntimeSubsystem
 
-class RuntimeApp(common.ExtensionBase):
+class RuntimeApp(common.ExtensionBase, MessageHandler):
 	def OnStartup(self):
 		self._LogBegin('OnStartup')
 		try:
@@ -101,3 +102,23 @@ class RuntimeApp(common.ExtensionBase):
 		for comp in self._SubSystems:
 			comp.WriteToProject(project)
 		return project
+
+	def HandleMessage(self, message: Message):
+		self._LogBegin('RUNTIME MESSAGE: {}'.format(message))
+		try:
+			self.StateManager.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		try:
+			self.SourceManager.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		try:
+			self.ControlManager.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		try:
+			self.Renderer.HandleMessage(message)
+		except Exception as error:
+			self._LogEvent('ERROR: {}'.format(error))
+		self._LogEnd('END RUNTIME MESSAGE: {}'.format(message))

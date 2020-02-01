@@ -1,4 +1,5 @@
 from common import simpleloggedmethod, loggedmethod
+from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject, PComponentSpec, PSourcesSettings
 from pm2_runtime_shared import RuntimeSubsystem
 
@@ -8,7 +9,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
-class SourceManager(RuntimeSubsystem):
+class SourceManager(RuntimeSubsystem, MessageHandler):
 	@loggedmethod
 	def Initialize(self):
 		self._ComponentManager.ClearComponents()
@@ -30,3 +31,6 @@ class SourceManager(RuntimeSubsystem):
 	@loggedmethod
 	def AddSource(self, spec: PComponentSpec):
 		self._ComponentManager.AddComponent(spec)
+
+	def HandleMessage(self, message: Message):
+		self._ComponentManager.HandleMessage(message)

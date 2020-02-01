@@ -1,7 +1,8 @@
 from typing import Optional, Union
 
 from common import loggedmethod
-from pm2_project import  PComponentSpec
+from pm2_messaging import MessageHandler, Message
+from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, ShapeStateGeneratorBase
 
 # noinspection PyUnreachableCode
@@ -9,8 +10,9 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
+	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 
-class StateGeneratorsPanel(RuntimeComponent):
+class StateGeneratorsPanel(RuntimeComponent, MessageHandler):
 	@property
 	def _StateManager(self) -> 'PatternStateManager':
 		return self.par.Statemanager.eval()
@@ -49,23 +51,6 @@ class StateGeneratorsPanel(RuntimeComponent):
 			return self.SelectedGenerator
 		return op(compCell) or self.SelectedGenerator
 
-	# @loggedmethod
-	# def BindEditors(self):
-	# 	gen = self.SelectedGenerator
-	# 	editor = self.op('state_settings_panel')  # type: Union[COMP, ShapeStateExt]
-	# 	self._LogEvent('selected gen: {}'.format(gen))
-	# 	# if not gen:
-	# 	# 	shapeState = None
-	# 	# else:
-	# 	# 	spec = gen.GetSpec()  # type: POverrideShapeStateSpec
-	# 	# 	shapeState = spec.shapeState
-	# 	for editorPar in editor.pars('Include*', 'Fill*', 'Wire*', 'Local*', 'Global*'):
-	# 		if gen:
-	# 			editorPar.bindExpr = editor.shortcutPath(gen, toParName=editorPar.name)
-	# 		else:
-	# 			editorPar.bindExpr = ''
-	# 			editorPar.val = editorPar.default
-
 	@loggedmethod
 	def OnCreateMenuItemClick(self, info: dict):
 		compType = info['item']
@@ -81,3 +66,10 @@ class StateGeneratorsPanel(RuntimeComponent):
 			self.par.Selectedgen = -1
 		else:
 			self.par.Selectedgen = index
+
+	@property
+	def _ComponentManagerPanel(self) -> 'ComponentManagerPanel':
+		return self.op('component_manager_panel')
+
+	def HandleMessage(self, message: Message):
+		self._ComponentManagerPanel.HandleMessage(message)
