@@ -46,6 +46,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 
 	def _AttachMarkerToComp(self, marker: 'COMP', targetComp: 'COMP'):
 		marker.par.Targetop = targetComp
+		marker.par.Nametext = targetComp.name.replace('_', ' ')
 		enableParName = str(self.par.Enablepar)
 		if hasattr(targetComp.par, enableParName):
 			marker.par.Enabletogglevisible = True
@@ -160,6 +161,20 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		runtimeApp.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
+		namespace = str(self.par.Messagenamespace)
+		if not namespace or message.namespace != namespace:
+			return
+		if message.name == CommonMessages.added:
+			spec = message.data  # type: PComponentSpec
+			pass
+		elif message.name == CommonMessages.deleted:
+			name = message.data
+			pass
+		elif message.name == CommonMessages.cleared:
+			pass
+		elif message.name == CommonMessages.renamed:
+			oldName, newName = message.data
+			pass
 		pass
 
 
