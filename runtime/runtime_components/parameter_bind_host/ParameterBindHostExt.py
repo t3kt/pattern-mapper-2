@@ -204,6 +204,23 @@ class ParameterBindHost(ExtensionBase, MessageHandler):
 			return
 		if message.name == CommonMessages.setPar:
 			self._SetParVal(channelName=message.data[0], val=message.data[1])
+		elif message.name == CommonMessages.queryParVals:
+			self._SendComponentParVals(channelName=message.data)
+
+	def _SendComponentParVals(self, channelName: str):
+		if not self.par.Enable or not self.par.Messagehandler:
+			return
+		channelCell = self.op('comps_by_channel')[channelName, 0]  # type: Cell
+		if not channelCell:
+			self._LogEvent('WARNING unable to find component {}'.format(channelName))
+			return
+		i = channelCell.row - 1
+		numericValsChop = self.op('getparchop__{}'.format(i))  # type: CHOP
+		textValsDat = self.op('getpardat__{}'.format(i))  # type: DAT
+		for chan in numericValsChop.chans():
+			self.SendParVal(chan.name, chan.eval())
+		for nameCell, valueCell in textValsDat.rows():
+			self.SendParVal(nameCell.val, valueCell.val)
 
 	def _GetParByChannel(self, channelName: str) -> Optional['Par']:
 		paramTable = self.ownerComp.op('param_table')  # type: DAT

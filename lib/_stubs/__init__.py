@@ -210,7 +210,7 @@ class Channel:
 	vals: _T.List[float]
 
 	def __getitem__(self, index: int) -> float: pass
-	def eval(self, index) -> float: pass
+	def eval(self, index: _T.Optional[int] = None) -> float: pass
 	def evalFrame(self, frame) -> float: pass
 	def evalSeconds(self, secs) -> float: pass
 	def numpyArray(self) -> numpy.array: pass

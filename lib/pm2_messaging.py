@@ -26,7 +26,7 @@ class CommonMessages:
 	rename = 'rename'
 	clear = 'clear'
 	setPar = 'setPar'
-	# queryPars = 'queryPars'
+	queryParVals = 'queryParVals'
 	# queryParStates = 'queryParStates'
 
 class MessageNamespaces:
