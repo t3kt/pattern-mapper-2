@@ -4,6 +4,10 @@
       {
         "control": "ctrl1",
         "enable": true,
+        "limitHigh": 1.0,
+        "limitLow": 0.0,
+        "rangeHigh": 1.0,
+        "rangeLow": 0.0,
         "targetCategory": "stategen",
         "targetName": "seq1",
         "targetParam": "Overrideamount"
@@ -11,6 +15,10 @@
       {
         "control": "ctrl1",
         "enable": true,
+        "limitHigh": 1.0,
+        "limitLow": 0.0,
+        "rangeHigh": 1.0,
+        "rangeLow": 0.0,
         "targetCategory": "stategen",
         "targetName": "colormap1",
         "targetParam": "Overrideamount"
@@ -21,7 +29,7 @@
         "compType": "floatctrl",
         "name": "ctrl1",
         "pars": {
-          "Basevalue": 0.0,
+          "Basevalue": 0.5770000219345093,
           "Filterenable": false,
           "Filterlag1": 0.2,
           "Filterlag2": 0.2,
@@ -37,7 +45,7 @@
         "compType": "floatctrl",
         "name": "ctrl2",
         "pars": {
-          "Basevalue": 0.0,
+          "Basevalue": 0.14800000190734863,
           "Filterenable": false,
           "Filterlag1": 0.2,
           "Filterlag2": 0.2,
@@ -46,6 +54,22 @@
           "Filtertype": "gauss",
           "Filterwidth": 1.0,
           "Label": "Control 2"
+        },
+        "subCompPars": {}
+      },
+      {
+        "compType": "floatctrl",
+        "name": "comp_2",
+        "pars": {
+          "Basevalue": 0.0,
+          "Filterenable": false,
+          "Filterlag1": 0.2,
+          "Filterlag2": 0.2,
+          "Filterovershoot1": 0.1,
+          "Filterovershoot2": 0.1,
+          "Filtertype": "gauss",
+          "Filterwidth": 1.0,
+          "Label": "Control 3"
         },
         "subCompPars": {}
       }
@@ -158,19 +182,6 @@
           "Speed": 0.10000000149011612
         },
         "subCompPars": {}
-      },
-      {
-        "compType": "syphonspoutsource",
-        "name": "comp_4",
-        "pars": {
-          "Enable": true,
-          "Fit": "fitbest",
-          "Resolutionh": 1080.0,
-          "Resolutionw": 1920.0,
-          "Sourcename": "Arena - Composition",
-          "Useinputres": true
-        },
-        "subCompPars": {}
       }
     ]
   },
@@ -207,7 +218,6 @@
         "pars": {
           "Enableoverride": true,
           "Lookupmode": "mono",
-          "Overrideamount": 1.0,
           "Source": 2
         },
         "subCompPars": {
@@ -665,7 +675,6 @@
           "Groups": "*",
           "Interp": true,
           "Invertmask": false,
-          "Overrideamount": 1.0,
           "Play": true,
           "Playmode": "loop",
           "Sequencename": "RingsSeqFlat",
@@ -797,6 +806,21 @@
             "Wiretexuvmode": "path"
           }
         }
+      },
+      {
+        "compType": "singlefieldoverride",
+        "name": "comp_5",
+        "pars": {
+          "Enableoverride": false,
+          "Groups": "*",
+          "Invertmask": false,
+          "Overrideamount": 1.0,
+          "Statefield": "Localrotate",
+          "Valvectorx": 0.0,
+          "Valvectory": 0.0,
+          "Valvectorz": 0.0
+        },
+        "subCompPars": {}
       }
     ]
   }
