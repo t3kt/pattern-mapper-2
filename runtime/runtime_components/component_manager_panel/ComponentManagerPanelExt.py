@@ -152,7 +152,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 			attrs=OPAttrs(
 				parVals={
 					'display': True,
-					'Targetname': spec,
+					'Targetname': spec.name,
 					'Sublabelvisible': False,
 					'Sublabeltext': '',  # TODO: sub label text
 					'Targetcomptype': spec.compType,
