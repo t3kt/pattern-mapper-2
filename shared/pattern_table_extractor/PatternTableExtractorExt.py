@@ -77,7 +77,7 @@ class PatternTableExtractor(common.ExtensionBase):
 			else:
 				vals += [shape.color.r / 255, shape.color.g / 255, shape.color.b / 255, shape.color.a / 255]
 				hsv = common.colorToHsv(shape.color)
-				vals += [hsv[0] / 255, hsv[1] / 255, hsv[2] / 255]
+				vals += [hsv[0], hsv[1], hsv[2]]
 			if not shape.center:
 				vals += ['', '', '', '', '', '']
 			else:
