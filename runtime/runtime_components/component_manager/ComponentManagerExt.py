@@ -39,6 +39,8 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 	@loggedmethod
 	def ReadComponentSpecs(self, specs: List[PComponentSpec]):
 		self.ClearComponents()
+		if not specs:
+			return
 		for spec in specs:
 			self.AddComponent(spec)
 

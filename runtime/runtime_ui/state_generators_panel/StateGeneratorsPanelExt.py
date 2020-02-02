@@ -4,6 +4,7 @@ from common import loggedmethod
 from pm2_messaging import MessageHandler, Message
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, ShapeStateGeneratorBase
+from pm2_ui import UISubSystem
 
 # noinspection PyUnreachableCode
 if False:
@@ -12,7 +13,7 @@ if False:
 	from runtime.pattern_state_manager.PatternStateManagerExt import PatternStateManager
 	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 
-class StateGeneratorsPanel(RuntimeComponent, MessageHandler):
+class StateGeneratorsPanel(RuntimeComponent, UISubSystem):
 	@property
 	def _StateManager(self) -> 'PatternStateManager':
 		return self.par.Statemanager.eval()

@@ -8,7 +8,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 
-class SourcesPanel(RuntimeComponent, UISubSystem):
+class ControlSettingsPanel(RuntimeComponent, UISubSystem):
 	@property
 	def _ComponentManagerPanel(self) -> 'ComponentManagerPanel':
 		return self.op('component_manager_panel')

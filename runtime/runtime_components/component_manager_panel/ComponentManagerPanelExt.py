@@ -148,7 +148,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		marker = createFromTemplate(
 			template=self.op('marker_template'),
 			dest=self.ownerComp,
-			name='comp__0',
+			name='comp__1',
 			attrs=OPAttrs(
 				parVals={
 					'display': True,

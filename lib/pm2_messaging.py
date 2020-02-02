@@ -36,5 +36,9 @@ class MessageNamespaces:
 
 class MessageHandler(ABC):
 	@abstractmethod
-	def HandleMessage(self, message: Message):
-		pass
+	def HandleMessage(self, message: Message): pass
+
+class MessageSender(ABC):
+	@abstractmethod
+	def SendMessage(self, name: str, data: Any = None, namespace: str = None): pass
+

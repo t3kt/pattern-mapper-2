@@ -1,6 +1,7 @@
 from common import loggedmethod
 from pm2_messaging import MessageHandler, Message
 from pm2_runtime_shared import RuntimeComponent
+from pm2_ui import UISubSystem
 
 # noinspection PyUnreachableCode
 if False:
@@ -8,7 +9,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager_panel.ComponentManagerPanelExt import ComponentManagerPanel
 
-class ControlsPanel(RuntimeComponent, MessageHandler):
+class ControlsPanel(RuntimeComponent, UISubSystem):
 	@loggedmethod
 	def Initialize(self):
 		self._ClearControls()

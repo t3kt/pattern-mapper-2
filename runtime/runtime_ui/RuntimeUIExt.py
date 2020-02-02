@@ -1,6 +1,7 @@
 from common import loggedmethod
-from pm2_messaging import Message, MessageHandler
+from pm2_messaging import Message
 from pm2_runtime_shared import RuntimeComponent
+from pm2_ui import UIApp
 
 # noinspection PyUnreachableCode
 if False:
@@ -13,7 +14,7 @@ if False:
 	from runtime.runtime_ui.state_generators_panel.StateGeneratorsPanelExt import StateGeneratorsPanel
 	from runtime.RuntimeAppExt import RuntimeApp
 
-class RuntimeUI(RuntimeComponent, MessageHandler):
+class RuntimeUI(RuntimeComponent, UIApp):
 	@loggedmethod
 	def Initialize(self):
 		self.Controls.Initialize()
@@ -27,6 +28,9 @@ class RuntimeUI(RuntimeComponent, MessageHandler):
 
 	@property
 	def Controls(self) -> 'ControlsPanel': return self.op('settings_panel/controls_panel')
+
+	# @property
+	# def ControlSettings(self): return self.op('settings_panel/control_settings_panel')
 
 	@property
 	def Sources(self) -> 'SourcesPanel': return self.op('settings_panel/sources_panel')
