@@ -141,8 +141,8 @@ class _PathSequenceGenerator(_SequenceGenerator):
 			for shape in shapes:
 				if _shapeContainsPoint(shape, testPoint.pos):
 					stepShapeIndices.append(shape.shapeIndex)
-			self._LogEvent('Found {} shapes for path point {} ({})'.format(
-				len(stepShapeIndices), testPointIndex, testPoint.pos))
+			# self._LogEvent('Found {} shapes for path point {} ({})'.format(
+			# 	len(stepShapeIndices), testPointIndex, testPoint.pos))
 			steps.append(PSequenceStep(
 				sequenceIndex=testPointIndex,
 				shapeIndices=stepShapeIndices,
@@ -264,7 +264,10 @@ class _ParallelSequenceGenerator(_SequenceGenerator):
 					if step.sequenceIndex not in shapesByIndex:
 						shapesByIndex[step.sequenceIndex] = []
 					shapesByIndex[step.sequenceIndex] += list(step.shapeIndices)
-		maxIndex = max(shapesByIndex.keys())
+		if not shapesByIndex:
+			maxIndex = 0
+		else:
+			maxIndex = max(shapesByIndex.keys())
 		steps = []
 		for i in range(maxIndex + 1):
 			if i in shapesByIndex:
