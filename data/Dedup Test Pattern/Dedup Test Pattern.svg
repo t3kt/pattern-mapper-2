@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="2000" height="2000" viewBox="0, 0, 2000, 2000">
+  <g id="Exact_Dups_Layer_1">
+    <g id="ExactDupShape1">
+      <path d="M650.5,650.5 L1000.5,650.5 L1000.5,1000.5 L650.5,1000.5 L650.5,650.5 z" fill="#FFFFFF"/>
+      <path d="M650.5,650.5 L1000.5,650.5 L1000.5,1000.5 L650.5,1000.5 L650.5,650.5 z" fill-opacity="0" stroke="#000000" stroke-width="1"/>
+    </g>
+    <g id="ExactDupShape2">
+      <path d="M650.5,650.5 L1000.5,650.5 L1000.5,1000.5 L650.5,1000.5 L650.5,650.5 z" fill="#FFFFFF"/>
+      <path d="M650.5,650.5 L1000.5,650.5 L1000.5,1000.5 L650.5,1000.5 L650.5,650.5 z" fill-opacity="0" stroke="#000000" stroke-width="1"/>
+    </g>
+  </g>
+  <g id="RotatedDups_Layer">
+    <g id="RotatedDupShape1">
+      <path d="M1100.5,1100.5 L1400.5,1100.5 L1400.5,1400.5 L1100.5,1400.5 L1100.5,1100.5 z" fill="#FFFFFF"/>
+      <path d="M1100.5,1100.5 L1400.5,1100.5 L1400.5,1400.5 L1100.5,1400.5 L1100.5,1100.5 z" fill-opacity="0" stroke="#000000" stroke-width="1"/>
+    </g>
+    <g id="RotatedDupShape2">
+      <path d="M1100.5,1400.5 L1100.5,1100.5 L1400.5,1100.5 L1400.5,1400.5 L1100.5,1400.5 z" fill="#FFFFFF"/>
+      <path d="M1100.5,1400.5 L1100.5,1100.5 L1400.5,1100.5 L1400.5,1400.5 L1100.5,1400.5 z" fill-opacity="0" stroke="#000000" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
