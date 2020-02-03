@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -34,28 +34,28 @@ class UISubSystem(UIComponentBase, MessageHandler, MessageSender, ABC):
 @dataclass
 class MarkerObject:
 	objectType: str
+	subType: str
 	name: str
 
-class Marker(ExtensionBase):
-	def __init__(self, ownerComp):
-		super().__init__(ownerComp)
-		self._InitParams()
-
-	def _InitParams(self):
-		if not hasattr(self.ownerComp.par, 'Markerobjtype'):
-			page = self.ownerComp.appendCustomPage('Marker')
-			page.appendStr('Markerobjtype', label=':Marker Type')
-		if not hasattr(self.ownerComp.par, 'Markerobjname'):
-			page = self.ownerComp.appendCustomPage('Marker')
-			page.appendStr('Markerobjtype', label=':Marker Name')
-
-	def GetMarkerObject(self) -> Optional[MarkerObject]:
-		obj = MarkerObject(self.par.Markerobjtype.eval(), self.par.Markerobjname.eval())
-		if obj.objectType and obj.name:
-			return obj
-
 def GetMarkerObjectFromOP(comp: 'OP') -> Optional[MarkerObject]:
-	if hasattr(comp, 'GetMarkerObject'):
-		return comp.GetMarkerObject()
-	if hasattr(comp.ext, 'Marker'):
-		return comp.ext.Marker.GetMarkerObject()
+	if not comp:
+		return None
+	if hasattr(comp.par, 'Markertype'):
+		return MarkerObject(
+			comp.par.Markertype.eval(),
+			comp.par.Markersubtype.eval(),
+			comp.par.Markerobjname.eval(),
+		)
+	if hasattr(comp.parent, 'marker'):
+		return GetMarkerObjectFromOP(comp.parent.marker)
+
+class DropReceiver(ABC):
+	@abstractmethod
+	def HandleDrop(
+			self,
+			dropName: str, dropExt: str,
+			baseName: str, destPath: str) -> bool:
+		pass
+
+class MarkerDropReceiver:
+	pass
