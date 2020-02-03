@@ -49,13 +49,13 @@ class AppSettings(RuntimeComponent, SerializableParams):
 			settingsJson = dat.text
 		vals = json.loads(settingsJson or '{}')
 		self.SetParDict(excludeKeys(vals, ['uiWindow']))
-		uiWindowVals = vals.get('uiWindow') or {}
-		uiWindow = self._UIWindow
-		if 'x' in uiWindowVals:
-			uiWindow.par.winoffsetx = uiWindowVals['x']
-		if 'y' in uiWindowVals:
-			uiWindow.par.winoffsety = uiWindowVals['y']
-		if 'w' in uiWindowVals:
-			uiWindow.par.winw = uiWindowVals['w']
-		if 'h' in uiWindowVals:
-			uiWindow.par.winh = uiWindowVals['h']
+		# uiWindowVals = vals.get('uiWindow') or {}
+		# uiWindow = self._UIWindow
+		# if 'x' in uiWindowVals:
+		# 	uiWindow.par.winoffsetx = uiWindowVals['x']
+		# if 'y' in uiWindowVals:
+		# 	uiWindow.par.winoffsety = uiWindowVals['y']
+		# if 'w' in uiWindowVals:
+		# 	uiWindow.par.winw = uiWindowVals['w']
+		# if 'h' in uiWindowVals:
+		# 	uiWindow.par.winh = uiWindowVals['h']
