@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -37,25 +37,30 @@ class MarkerObject:
 	subType: str
 	name: str
 
-def GetMarkerObjectFromOP(comp: 'OP') -> Optional[MarkerObject]:
-	if not comp:
-		return None
-	if hasattr(comp.par, 'Markertype'):
-		return MarkerObject(
-			comp.par.Markertype.eval(),
-			comp.par.Markersubtype.eval(),
-			comp.par.Markerobjname.eval(),
-		)
-	if hasattr(comp.parent, 'marker'):
-		return GetMarkerObjectFromOP(comp.parent.marker)
+	@classmethod
+	def getFromComp(cls, comp: 'OP') -> Optional['MarkerObject']:
+		if not comp:
+			return None
+		if hasattr(comp.par, 'Markertype'):
+			return MarkerObject(
+				comp.par.Markertype.eval(),
+				comp.par.Markersubtype.eval(),
+				comp.par.Markerobjname.eval(),
+			)
+		if hasattr(comp.parent, 'marker'):
+			return cls.getFromComp(comp.parent.marker)
 
 class DropReceiver(ABC):
-	@abstractmethod
 	def HandleDrop(
 			self,
 			dropName: str, dropExt: str,
 			baseName: str, destPath: str) -> bool:
-		pass
+		if dropExt == 'COMP':
+			parentComp = op(baseName)
+			droppedComp = parentComp and parentComp.op(dropName)
+			if droppedComp and self.HandleCOMPDrop(droppedComp, op(destPath)):
+				return True
+		return False
 
-class MarkerDropReceiver:
-	pass
+	def HandleCOMPDrop(self, droppedComp: 'COMP', dropTarget: 'COMP') -> bool:
+		return False
