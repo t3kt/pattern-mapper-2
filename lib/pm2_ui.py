@@ -64,3 +64,40 @@ class DropReceiver(ABC):
 
 	def HandleCOMPDrop(self, droppedComp: 'COMP', dropTarget: 'COMP') -> bool:
 		return False
+
+class MarkerToParamReceiver(ExtensionBase, DropReceiver):
+	def __init__(
+			self,
+			ownerComp,
+			parName: str,
+			supportedType: str,
+			targetPath: str = None,
+			append=False):
+		super().__init__(ownerComp)
+		self.parName = parName
+		self.targetPath = targetPath
+		self.supportedType = supportedType
+		self.appendMode = append
+
+	def HandleCOMPDrop(self, droppedComp: 'COMP', dropTarget: 'COMP') -> bool:
+		markerObj = MarkerObject.getFromComp(droppedComp)
+		if not markerObj:
+			return False
+		if markerObj.objectType != self.supportedType:
+			self._LogEvent('WARNING: marker type not supported: {}'.format(markerObj))
+			return False
+		if self.targetPath:
+			target = self.ownerComp.op(self.targetPath)
+		else:
+			target = self.ownerComp
+		if not target:
+			return False
+		par = getattr(target.par, self.parName)
+		if par is None:
+			return False
+		if self.appendMode and par:
+			par.val = par.val + ' ' + markerObj.name
+		else:
+			par.val = markerObj.name
+		return True
+
