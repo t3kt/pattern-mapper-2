@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABC
-from dataclasses import dataclass
 from typing import Dict, Any, Union, Iterable, List
 
 import common
@@ -33,53 +32,6 @@ class RuntimeAppInterface(ABC):
 	@property
 	@abstractmethod
 	def Settings(self) -> AppSettingsInterface: pass
-
-# @dataclass
-# class _ParMapping:
-# 	tupletName: str
-# 	suffixes: str = None
-# 	getter: Callable[[PShapeState], Any] = None
-# 	setter: Callable[[PShapeState, Any], None] = None
-#
-#
-# @dataclass
-# class _ParGroup:
-# 	pars: List[_ParMapping]
-# 	switchName: str = None
-#
-#
-#
-#
-# def _createShapeStateParMappings():
-# 	groups = [
-# 		_ParGroup(
-# 			switchName='Includefillopacity',
-# 			pars=[
-# 				_ParMapping(
-# 					'Fillopacity',
-# 					getter=lambda state: state.fill.opacity,
-# 					# setter=lambda state, val: state.fill = 8,
-# 				)
-# 			]
-# 		)
-# 	]
-# 	pass
-
-@dataclass
-class _ParGroup:
-	name: str
-	label: str
-	switchName: str
-	parNames: List[str]
-
-@dataclass
-class _ParPage:
-	name: str
-	label: str
-	parGroups: List[_ParGroup]
-
-def _appearanceParPage(namePrefix: str, labelPrefix: str):
-	pass
 
 class ShapeStateExt(common.ExtensionBase):
 	def SetShapeState(self, shapeState: PShapeState):
