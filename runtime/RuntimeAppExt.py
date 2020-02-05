@@ -4,6 +4,7 @@ import common
 from common import loggedmethod, simpleloggedmethod
 from pm2_messaging import Message, MessageHandler
 from pm2_project import PProject
+from pm2_runtime_shared import RuntimeAppInterface
 
 # noinspection PyUnreachableCode
 if False:
@@ -18,7 +19,7 @@ if False:
 	from runtime.app_settings.AppSettingsExt import AppSettings
 	from pm2_runtime_shared import RuntimeSubsystem
 
-class RuntimeApp(common.ExtensionBase, MessageHandler):
+class RuntimeApp(common.ExtensionBase, MessageHandler, RuntimeAppInterface):
 	def OnStartup(self):
 		self._LogBegin('OnStartup')
 		try:

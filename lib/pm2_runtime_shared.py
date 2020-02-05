@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Any, Union, Iterable, List
 
 import common
@@ -10,8 +10,29 @@ from pm2_state import PShapeState, PAppearance, PTextureAttrs, UVMode, PTransfor
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
-	from runtime.RuntimeAppExt import RuntimeApp
-	from runtime.app_settings.AppSettingsExt import AppSettings
+
+class AppSettingsInterface(ABC):
+	pass
+
+class RuntimeAppInterface(ABC):
+	@abstractmethod
+	def ShowPatternChooser(self): pass
+
+	@abstractmethod
+	def ClosePatternChooser(self): pass
+
+	@abstractmethod
+	def ShowUI(self): pass
+
+	@abstractmethod
+	def CloseUI(self): pass
+
+	@abstractmethod
+	def SaveProject(self): pass
+
+	@property
+	@abstractmethod
+	def Settings(self) -> AppSettingsInterface: pass
 
 # @dataclass
 # class _ParMapping:
@@ -421,11 +442,11 @@ class ShapeStateGeneratorBase(ShapeStateExt, ABC):
 
 class RuntimeComponent(common.ExtensionBase, ABC):
 	@property
-	def _RuntimeApp(self) -> 'RuntimeApp':
+	def _RuntimeApp(self) -> 'RuntimeAppInterface':
 		return ext.RuntimeApp
 
 	@property
-	def _AppSettings(self) -> Union['COMP', 'AppSettings']:
+	def _AppSettings(self) -> Union['COMP', 'AppSettingsInterface']:
 		return op.PMSettings
 
 class RuntimeSubsystem(RuntimeComponent):
