@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from common import DataObject, ExtensionBase
@@ -24,7 +24,13 @@ class ParamState(DataObject):
 
 @dataclass
 class ComponentState(DataObject):
-	pass
+	name: str
+	params: List[ParamState] = field(default_factory=list)
+
+@dataclass
+class ManagedComponentState(DataObject):
+	params: List[ParamState] = field(default_factory=list)
+	subComps: List[ComponentState] = field(default_factory=list)
 
 class ManagedComponent(ExtensionBase):
 	def GetParamStates(self) -> List[ParamState]:
