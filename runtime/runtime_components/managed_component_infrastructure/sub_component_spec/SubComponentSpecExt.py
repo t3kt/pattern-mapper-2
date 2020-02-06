@@ -9,13 +9,12 @@ if False:
 	from _stubs import *
 
 class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
-	@property
-	def _Target(self) -> Optional['OP']:
+	def GetTargetComponent(self) -> Optional['COMP']:
 		return self.par.Target.eval()
 
 	# used for par menu
 	def GetAllPageNames(self):
-		target = self._Target
+		target = self.GetTargetComponent()
 		if not target:
 			return []
 		return [
@@ -26,7 +25,7 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 
 	# used for par menu
 	def GetAllParNames(self):
-		target = self._Target
+		target = self.GetTargetComponent()
 		if not target:
 			return []
 		return [
@@ -53,7 +52,7 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 		name = self.par.Name
 		if name:
 			return name.eval()
-		target = self._Target
+		target = self.GetTargetComponent()
 		if target:
 			return target.name
 
@@ -71,7 +70,8 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 		includeBound = self.par.Boundpars
 		includeExprs = self.par.Exprpars
 		matched = []
-		for par in self._Target.pars(*parNames):
+		target = self.GetTargetComponent()
+		for par in target.pars(*parNames):
 			if par.page.name not in pageNames:
 				continue
 			if par.isOP and not includeOps:

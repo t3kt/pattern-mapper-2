@@ -1,15 +1,16 @@
 from typing import Optional, List
 
 from common import ExtensionBase
-from pm2_managed_components import SubComponentSpecBuilderInterface, ManagedComponentCoreInterface, \
+from pm2_managed_components import SubComponentSpecBuilderInterface, ManagedComponentInterface, \
 	ManagedComponentState
+from pm2_messaging import Message, MessageHandler
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class ManagedComponentCore(ExtensionBase, ManagedComponentCoreInterface):
+class ManagedComponentCore(ExtensionBase, ManagedComponentInterface, MessageHandler):
 	@property
 	def _RootCompSpecBuilder(self) -> Optional[SubComponentSpecBuilderInterface]:
 		return self.par.Rootcompspec.eval()
@@ -30,3 +31,6 @@ class ManagedComponentCore(ExtensionBase, ManagedComponentCoreInterface):
 			params=rootSpecBuilder.GetParamStates() if rootSpecBuilder else [],
 			subComps=subStates,
 		)
+
+	def HandleMessage(self, message: Message):
+		pass

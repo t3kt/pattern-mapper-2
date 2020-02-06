@@ -38,9 +38,12 @@ class SubComponentSpecBuilderInterface(ABC):
 	def GetParamStates(self) -> List[ParamState]: pass
 
 	@abstractmethod
+	def GetTargetComponent(self) -> Optional['COMP']: pass
+
+	@abstractmethod
 	def GetComponentState(self) -> Optional[ComponentState]: pass
 
-class ManagedComponentCoreInterface(ABC):
+class ManagedComponentInterface(ABC):
 	@abstractmethod
 	def GetManagedComponentState(self) -> ManagedComponentState:
 		pass
