@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from common import DataObject, ExtensionBase
 
@@ -31,6 +32,18 @@ class ComponentState(DataObject):
 class ManagedComponentState(DataObject):
 	params: List[ParamState] = field(default_factory=list)
 	subComps: List[ComponentState] = field(default_factory=list)
+
+class SubComponentSpecBuilderInterface(ABC):
+	@abstractmethod
+	def GetParamStates(self) -> List[ParamState]: pass
+
+	@abstractmethod
+	def GetComponentState(self) -> Optional[ComponentState]: pass
+
+class ManagedComponentCoreInterface(ABC):
+	@abstractmethod
+	def GetManagedComponentState(self) -> ManagedComponentState:
+		pass
 
 class ManagedComponent(ExtensionBase):
 	def GetParamStates(self) -> List[ParamState]:

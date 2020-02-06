@@ -1,14 +1,14 @@
 from typing import List, Optional, Set
 
 from common import ExtensionBase
-from pm2_managed_components import ComponentState, ParamState
+from pm2_managed_components import ComponentState, ParamState, SubComponentSpecBuilderInterface
 
 # noinspection PyUnreachableCode
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
-class SubComponentSpecBuilder(ExtensionBase):
+class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 	@property
 	def _Target(self) -> Optional['OP']:
 		return self.par.Target.eval()
