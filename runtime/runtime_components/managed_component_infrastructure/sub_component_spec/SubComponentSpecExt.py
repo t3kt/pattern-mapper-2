@@ -12,6 +12,15 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 	def GetTargetComponent(self) -> Optional['COMP']:
 		return self.par.Target.eval()
 
+
+	def GetTargetComponentName(self) -> Optional[str]:
+		name = self.par.Name
+		if name:
+			return name.eval()
+		target = self.GetTargetComponent()
+		if target:
+			return target.name
+
 	# used for par menu
 	def GetAllPageNames(self):
 		target = self.GetTargetComponent()
@@ -46,15 +55,6 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 			self.par.Includepars.eval(),
 			self.par.Excludepars.eval(),
 		)
-
-	@property
-	def _CompName(self):
-		name = self.par.Name
-		if name:
-			return name.eval()
-		target = self.GetTargetComponent()
-		if target:
-			return target.name
 
 	def GetPars(self) -> List['Par']:
 		pageNames = self._GetMatchedPageNames()
@@ -96,7 +96,7 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 		]
 
 	def GetComponentState(self) -> Optional[ComponentState]:
-		name = self._CompName
+		name = self.GetTargetComponentName()
 		if not name:
 			return None
 		return ComponentState(

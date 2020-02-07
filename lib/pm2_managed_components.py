@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from common import DataObject, ExtensionBase
 
@@ -38,16 +38,26 @@ class SubComponentSpecBuilderInterface(ABC):
 	def GetParamStates(self) -> List[ParamState]: pass
 
 	@abstractmethod
+	def GetPars(self) -> List['Par']: pass
+
+	@abstractmethod
 	def GetTargetComponent(self) -> Optional['COMP']: pass
+
+	@abstractmethod
+	def GetTargetComponentName(self) -> Optional[str]: pass
 
 	@abstractmethod
 	def GetComponentState(self) -> Optional[ComponentState]: pass
 
 class ManagedComponentInterface(ABC):
 	@abstractmethod
-	def GetManagedComponentState(self) -> ManagedComponentState:
-		pass
+	def GetManagedComponentState(self) -> ManagedComponentState: pass
 
-class ManagedComponent(ExtensionBase):
-	def GetParamStates(self) -> List[ParamState]:
-		pass
+	@abstractmethod
+	def GetParVal(self, name: str): pass
+
+	@abstractmethod
+	def GetAllParVals(self) -> Dict[str, Any]: pass
+
+	@abstractmethod
+	def SetParVal(self, name: str, val): pass
