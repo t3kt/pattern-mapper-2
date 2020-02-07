@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any
 from common import ExtensionBase
 from pm2_managed_components import SubComponentSpecBuilderInterface, ManagedComponentInterface, \
 	ManagedComponentState
+from pm2_project import PComponentSpec
 
 # noinspection PyUnreachableCode
 if False:
@@ -75,3 +76,42 @@ class ManagedComponentCore(ExtensionBase, ManagedComponentInterface):
 			name: par.eval()
 			for name, par in self.paramMap.items()
 		}
+
+	def GetTypeCode(self) -> str: return self.par.Typecode.eval()
+
+	@property
+	def _HostComponent(self) -> 'COMP': return self.par.Hostcomp.eval()
+
+	def GetComponentSpec(self) -> PComponentSpec:
+		comp = self._HostComponent
+		spec = PComponentSpec(
+			compType=self.GetTypeCode(),
+			name=comp.name,
+		)
+		for name, par in self.paramMap.items():
+			if par.mode != ParMode.CONSTANT:
+				continue
+			if ':' in name:
+				subName, parName = name.split(':')
+				if subName in spec.subCompPars:
+					spec.subCompPars[subName][parName] = par.eval()
+				else:
+					spec.subCompPars[subName] = {parName: par.eval()}
+			else:
+				spec.pars[name] = par.eval()
+		return spec
+
+	def SetComponentSpec(self, spec: PComponentSpec):
+		for name, par in self.paramMap:
+			if par.mode != ParMode.CONSTANT:
+				continue
+			val = par.default
+			if ':' in name:
+				subName, parName = name.split(':')
+				if subName in spec.subCompPars:
+					subPars = spec.subCompPars[subName]
+					if parName in subPars:
+						val = subPars[parName]
+			elif name in spec.pars:
+				val = spec.pars[name]
+			par.val = val

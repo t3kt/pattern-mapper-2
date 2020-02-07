@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 
-from common import DataObject, ExtensionBase
+from common import DataObject
+from pm2_project import PComponentSpec
 
 # noinspection PyUnreachableCode
 if False:
@@ -61,3 +62,12 @@ class ManagedComponentInterface(ABC):
 
 	@abstractmethod
 	def SetParVal(self, name: str, val): pass
+
+	@abstractmethod
+	def GetTypeCode(self) -> str: pass
+
+	@abstractmethod
+	def GetComponentSpec(self) -> PComponentSpec: pass
+
+	@abstractmethod
+	def SetComponentSpec(self, spec: PComponentSpec): pass
