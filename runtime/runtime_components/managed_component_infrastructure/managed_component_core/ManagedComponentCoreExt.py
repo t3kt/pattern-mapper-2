@@ -104,7 +104,7 @@ class ManagedComponentCore(ExtensionBase, ManagedComponentInterface):
 
 	def SetComponentSpec(self, spec: PComponentSpec):
 		self.Initialize()
-		for name, par in self.paramMap:
+		for name, par in self.paramMap.items():
 			if par.mode != ParMode.CONSTANT:
 				continue
 			val = par.default
