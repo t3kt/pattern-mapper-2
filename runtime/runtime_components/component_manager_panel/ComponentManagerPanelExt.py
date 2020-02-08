@@ -135,7 +135,6 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 
 	def _CreateComponent(self, typeName: str):
 		self._SendMessage(CommonMessages.add, data=PComponentSpec(compType=typeName))
-		self.op('marker_replicator').par.recreateall.pulse()
 
 	@loggedmethod
 	def _OnComponentsCleared(self):

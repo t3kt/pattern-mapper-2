@@ -1,6 +1,6 @@
 from typing import Union
 
-from pm2_runtime_shared import RuntimeComponent, SerializableComponent
+from common import ExtensionBase
 
 # noinspection PyUnreachableCode
 if False:
@@ -8,7 +8,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.single_shape_state_setting.SingleShapeStateSettingExt import SingleShapeStateSetting
 
-class SingleShapeStateOverride(RuntimeComponent, SerializableComponent):
+class SingleShapeStateOverride(ExtensionBase):
 	def __init__(self, ownerComp):
 		super().__init__(ownerComp)
 		self.UpdateParStates()

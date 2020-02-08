@@ -83,6 +83,7 @@ class ManagedComponentCore(ExtensionBase, ManagedComponentInterface):
 	def _HostComponent(self) -> 'COMP': return self.par.Hostcomp.eval()
 
 	def GetComponentSpec(self) -> PComponentSpec:
+		self.Initialize()
 		comp = self._HostComponent
 		spec = PComponentSpec(
 			compType=self.GetTypeCode(),
@@ -102,6 +103,7 @@ class ManagedComponentCore(ExtensionBase, ManagedComponentInterface):
 		return spec
 
 	def SetComponentSpec(self, spec: PComponentSpec):
+		self.Initialize()
 		for name, par in self.paramMap:
 			if par.mode != ParMode.CONSTANT:
 				continue

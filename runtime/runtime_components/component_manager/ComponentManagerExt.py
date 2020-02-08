@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from common import createFromTemplate, OPAttrs, loggedmethod
+from pm2_managed_components import ManagedComponentInterface
 from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
@@ -9,7 +10,6 @@ from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
 if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
-	from runtime.RuntimeAppExt import RuntimeApp
 
 class ComponentManager(RuntimeComponent, MessageHandler):
 	@property
@@ -30,11 +30,18 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 
 	@loggedmethod
 	def WriteComponentSpecs(self) -> List[PComponentSpec]:
-		comps = self._ComponentsInOrder
-		return [
-			comp.GetComponentSpec()
-			for comp in comps
-		]
+		specs = []
+		for comp in self._ComponentsInOrder:
+			managedComp = self._GetManagedComponentInterface(comp)
+			specs.append(managedComp.GetComponentSpec())
+		return specs
+
+	@staticmethod
+	def _GetManagedComponentInterface(comp: 'COMP') -> Union[ManagedComponentInterface, SerializableComponentOrCOMP]:
+		if hasattr(comp.ext, 'ManagedComponent'):
+			return comp.ext.ManagedComponent
+		else:
+			return comp
 
 	@loggedmethod
 	def ReadComponentSpecs(self, specs: List[PComponentSpec]):
@@ -71,8 +78,11 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			)
 		)  # type: SerializableComponentOrCOMP
 		spec.name = comp.name  # handle the case where the name wasn't unique and was automatically changed
+		if hasattr(comp.par, 'Pattern') and comp.par.Pattern.isOP:
+			comp.par.Pattern.expr = 'parent.manager.par.Pattern'
 		self._LogEvent('Created component {}, nodeY: {}'.format(comp, comp.nodeY))
-		comp.SetComponentSpec(spec)
+		managedComp = self._GetManagedComponentInterface(comp)
+		managedComp.SetComponentSpec(spec)
 		if self._IsChain:
 			self._RebuildChain()
 		self._SendMessage(CommonMessages.added, [spec, comp.path])
