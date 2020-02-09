@@ -595,6 +595,28 @@
             "Wiretexuvmode": "path"
           }
         }
+      },
+      {
+        "compType": "singlefieldoverride",
+        "name": "comp_4",
+        "pars": {
+          "Enableoverride": true,
+          "Groups": "Cross",
+          "Invertmask": false,
+          "Overrideamount": 1.0,
+          "Statefield": "Fillcolor",
+          "Valcolora": 1.0,
+          "Valcolorb": 0.0,
+          "Valcolorg": 0.5450981,
+          "Valcolorr": 1.0,
+          "Valfloat": 0.0,
+          "Valint": 0,
+          "Valmenu": "0",
+          "Valvectorx": 0.0,
+          "Valvectory": 0.0,
+          "Valvectorz": 0.0
+        },
+        "subCompPars": {}
       }
     ]
   }
