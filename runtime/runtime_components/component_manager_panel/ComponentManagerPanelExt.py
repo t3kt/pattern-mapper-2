@@ -1,7 +1,7 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 
 from common import loggedmethod, createFromTemplate, OPAttrs
-from pm2_messaging import CommonMessages, Message, MessageHandler
+from pm2_messaging import CommonMessages, Message, MessageHandler, MessageSender
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
 import pm2_menu as menu
@@ -12,7 +12,7 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
-class ComponentManagerPanel(RuntimeComponent, MessageHandler):
+class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 	@property
 	def _CompTable(self) -> 'DAT':
 		return self.op('comp_table')
@@ -82,7 +82,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 			if not newName:
 				return
 			self._LogEvent('Renaming {} to {}'.format(targetComp, newName))
-			self._SendMessage(CommonMessages.rename, data=[targetComp.name, newName])
+			self.SendMessage(CommonMessages.rename, data=[targetComp.name, newName])
 			self._AttachMarkerToComp(marker, targetComp)
 		_ShowPromptDialog(
 			title='Rename',
@@ -92,7 +92,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 
 	def _DeleteComp(self, marker: 'COMP'):
 		targetComp = marker.par.Targetop.eval()
-		self._SendMessage(CommonMessages.delete, data=targetComp.name)
+		self.SendMessage(CommonMessages.delete, data=targetComp.name)
 
 	@property
 	def SelectedComp(self) -> Optional['SerializableComponentOrCOMP']:
@@ -134,7 +134,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		)
 
 	def _CreateComponent(self, typeName: str):
-		self._SendMessage(CommonMessages.add, data=PComponentSpec(compType=typeName))
+		self.SendMessage(CommonMessages.add, data=PComponentSpec(compType=typeName))
 
 	@loggedmethod
 	def _OnComponentsCleared(self):
@@ -190,11 +190,14 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler):
 		# TODO : handle selection update if needed
 		pass
 
-	def _SendMessage(self, name: str, data=None):
+	def SendMessage(self, name: str, data: Any = None, namespace: str = None):
 		handler = self.par.Messagehandler.eval()  # type: MessageHandler
 		if not handler:
 			return
-		handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+		handler.HandleMessage(Message(
+			name,
+			data,
+			namespace=namespace or str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
 		namespace = str(self.par.Messagenamespace)

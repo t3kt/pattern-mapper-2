@@ -71,3 +71,10 @@ class ManagedComponentInterface(ABC):
 
 	@abstractmethod
 	def SetComponentSpec(self, spec: PComponentSpec): pass
+
+class ManagedComponentEditorInterface(ABC):
+	@abstractmethod
+	def InitializeEditor(self, spec: PComponentSpec): pass
+
+	@abstractmethod
+	def SetParVal(self, name: str, val): pass
