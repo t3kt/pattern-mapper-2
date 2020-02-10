@@ -139,8 +139,14 @@ class PDuplicateMergeSettings(DataObject):
 	ignoreDepth: Optional[bool] = None
 
 @dataclass
+class PPostProcSettings(DataObject):
+	keepTemporaryGroups: Optional[bool] = None
+	keepTemporarySequences: Optional[bool] = None
+
+@dataclass
 class PSettings(DataObject):
 	preProc: Optional[PPreProcSettings] = None
 	grouping: Optional[PGroupingSettings] = None
 	sequencing: Optional[PSequencingSettings] = None
 	dedup: Optional[PDuplicateMergeSettings] = None
+	postProc: Optional[PPostProcSettings] = None

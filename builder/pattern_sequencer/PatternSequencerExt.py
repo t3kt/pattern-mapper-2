@@ -34,13 +34,14 @@ class _SequenceGenerator(GeneratorBase):
 		attrs = seqGenSpec.attrs or PSequenceGenAttrs()
 		self.temporary = attrs.temporary
 
-	@staticmethod
 	def _createSequence(
+			self,
 			sequenceName: str,
 			steps: List[PSequenceStep] = None):
 		seq = PSequence(
 			sequenceName,
 			steps=list(steps or []),
+			temporary=self.temporary,
 		)
 		return seq
 

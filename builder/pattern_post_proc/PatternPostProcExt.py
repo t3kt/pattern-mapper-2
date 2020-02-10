@@ -3,7 +3,7 @@ from collections import deque
 import common
 from common import simpleloggedmethod
 from pm2_model import PPattern, PShape, PGroup
-from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence
+from pm2_settings import PSettings, PDuplicateMergeSettings, ShapeEquivalence, PPostProcSettings
 from pm2_builder_shared import PatternProcessorBase, PatternAccessor, createScopes
 from typing import Dict, Iterable, List, Set
 
@@ -32,11 +32,36 @@ class _PostProcessor(common.LoggableSubComponent):
 		self.pattern = pattern
 		if self.settings.dedup:
 			self._deduplicateShapes()
+		self._stripTemporaries()
 
 	@simpleloggedmethod
 	def _deduplicateShapes(self):
 		dedup = _ShapeDeduplicator(self, self.pattern, self.settings.dedup)
 		dedup.mergeDuplicates()
+
+	@simpleloggedmethod
+	def _stripTemporaries(self):
+		postSettings = self.settings.postProc or PPostProcSettings()
+		if not postSettings.keepTemporaryGroups:
+			temps = [
+				group
+				for group in self.pattern.groups or []
+				if group.temporary
+			]
+			if temps:
+				for group in temps:
+					self.pattern.groups.remove(group)
+				self._LogEvent(f'Removed {len(temps)} temporary groups')
+		if not postSettings.keepTemporarySequences:
+			temps = [
+				seq
+				for seq in self.pattern.sequences or []
+				if seq.temporary
+			]
+			if temps:
+				for seq in temps:
+					self.pattern.sequences.remove(seq)
+				self._LogEvent(f'Removed {len(temps)} temporary sequences')
 
 class _ShapeDeduplicator(common.LoggableSubComponent):
 	def __init__(self, hostObj, pattern: PPattern, dedupSettings: PDuplicateMergeSettings):

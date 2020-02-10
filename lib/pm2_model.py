@@ -58,7 +58,6 @@ class PSequenceStep(DataObject):
 	sequenceIndex: int = 0
 	shapeIndices: List[int] = field(default_factory=list)
 	meta: Dict[str, Any] = field(default_factory=dict)
-	temporary: Optional[bool] = None
 
 	def __post_init__(self):
 		self.shapeIndices = self.shapeIndices or []
@@ -68,6 +67,7 @@ class PSequence(DataObject):
 	sequenceName: str = None
 	steps: List[PSequenceStep] = field(default_factory=list)
 	meta: Dict[str, Any] = field(default_factory=dict)
+	temporary: Optional[bool] = None
 
 	def __post_init__(self):
 		self.steps = self.steps or []
