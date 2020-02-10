@@ -1,6 +1,7 @@
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, Union
 
 from common import loggedmethod, createFromTemplate, OPAttrs
+from pm2_managed_components import ManagedComponentEditorInterface
 from pm2_messaging import CommonMessages, Message, MessageHandler, MessageSender
 from pm2_project import PComponentSpec
 from pm2_runtime_shared import RuntimeComponent, SerializableComponentOrCOMP
@@ -172,6 +173,10 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		pathCell = markerTable[name, 1]
 		return self.op(pathCell) if pathCell else None
 
+	def _GetEditorByName(self, name: str) -> Optional[Union[ManagedComponentEditorInterface, 'COMP']]:
+		# TODO: implement editor lookup
+		return None
+
 	@loggedmethod
 	def _OnComponentDeleted(self, name: str):
 		marker = self._GetMarkerByName(name)
@@ -189,6 +194,12 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		marker.par.Targetname = newName
 		# TODO : handle selection update if needed
 		pass
+
+	def _OnComponentParValReceived(self, name: str, parName: str, val: Any):
+		editor = self._GetEditorByName(name)
+		if not editor:
+			return
+		editor.SetParVal(parName, val)
 
 	def SendMessage(self, name: str, data: Any = None, namespace: str = None):
 		handler = self.par.Messagehandler.eval()  # type: MessageHandler
@@ -216,6 +227,12 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		elif message.name == CommonMessages.renamed:
 			oldName, newName = message.data
 			self._OnComponentRenamed(oldName, newName)
+		elif message.name == CommonMessages.parVal:
+			compName = message.data[0]
+			parName = message.data[1]
+			val = message.data[2]
+			self._OnComponentParValReceived(compName, parName, val)
+
 
 
 def _ShowPromptDialog(

@@ -11,9 +11,11 @@ if False:
 	# noinspection PyUnresolvedReferences
 	from _stubs import *
 
+_ManagedCompT = Union[SerializableComponentOrCOMP, ManagedComponentInterface]
+
 class ComponentManager(RuntimeComponent, MessageHandler):
 	@property
-	def _Components(self) -> List['SerializableComponentOrCOMP']:
+	def _Components(self) -> List[_ManagedCompT]:
 		return [
 			comp
 			for comp in self.ops('contents/*')
@@ -37,7 +39,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		return specs
 
 	@staticmethod
-	def _GetManagedComponentInterface(comp: 'COMP') -> Union[ManagedComponentInterface, SerializableComponentOrCOMP]:
+	def _GetManagedComponentInterface(comp: 'COMP') -> _ManagedCompT:
 		if hasattr(comp.ext, 'ManagedComponent'):
 			return comp.ext.ManagedComponent
 		else:
@@ -76,7 +78,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			attrs=OPAttrs(
 				nodePos=(200, 500 - (i * 150)),
 			)
-		)  # type: SerializableComponentOrCOMP
+		)  # type: _ManagedCompT
 		spec.name = comp.name  # handle the case where the name wasn't unique and was automatically changed
 		if hasattr(comp.par, 'Pattern') and comp.par.Pattern.isOP:
 			comp.par.Pattern.expr = 'parent.manager.par.Pattern'
@@ -100,19 +102,19 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		self.op('contents/__sel_chop_out').par.chop = prevSource
 
 	@loggedmethod
-	def DeleteComponent(self, comp: 'SerializableComponentOrCOMP'):
+	def DeleteComponent(self, comp: _ManagedCompT):
 		name = comp.name
 		comp.destroy()
 		self._SendMessage(CommonMessages.deleted, name)
 
 	@loggedmethod
-	def RenameComponent(self, comp: 'SerializableComponentOrCOMP', name: str):
+	def RenameComponent(self, comp: _ManagedCompT, name: str):
 		oldName = comp.name
 		comp.name = name
 		self._RebuildChain()
 		self._SendMessage(CommonMessages.renamed, data=[oldName, name])
 
-	def _GetComponentByName(self, name: str) -> Optional['COMP']:
+	def _GetComponentByName(self, name: str) -> Optional[_ManagedCompT]:
 		if not name:
 			return None
 		comp = self.op('contents/' + name)
@@ -143,3 +145,9 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			if not comp:
 				return
 			self.RenameComponent(comp, message.data[1])
+		elif message.name == CommonMessages.setPar:
+			comp = self._GetComponentByName(message.data[0])
+			parName = message.data[1]
+			val = message.data[2]
+			if hasattr(comp, 'SetParVal'):
+				comp.SetParVal(parName, val)

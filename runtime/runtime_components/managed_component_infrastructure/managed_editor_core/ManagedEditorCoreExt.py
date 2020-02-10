@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Any
 
 from common import ExtensionBase
-from pm2_managed_components import ManagedComponentEditorInterface, ManagedComponentState
+from pm2_managed_components import ManagedComponentEditorInterface
 from pm2_messaging import CommonMessages, MessageHandler, Message
 from pm2_project import PComponentSpec
 
@@ -13,14 +13,54 @@ if False:
 class ManagedEditorCore(ExtensionBase, ManagedComponentEditorInterface):
 	def __init__(self, ownerComp):
 		super().__init__(ownerComp)
-		self.paramMap = {}  # type: Dict[str, Par]
+		self.nameToParamMap = {}  # type: Dict[str, Par]
+		self.paramToNameMap = {}  # type: Dict[Par, str]
+
+	def _InitializeParams(self):
+		self.nameToParamMap.clear()
+		self.paramToNameMap.clear()
+		paramTable = self.op('param_table')  # type: DAT
+		hostEditor = self.par.Hosteditor.eval()  # type: COMP
+		for i in range(1, paramTable.numRows):
+			localPath = paramTable[i, 'localPath'].val
+			localOp = hostEditor.op(localPath)
+			if not localOp:
+				self._LogEvent(f'WARNING: local param op not found: {localPath}')
+				continue
+			localParName = paramTable[i, 'localParam'].val
+			if not hasattr(localOp.par, localParName):
+				self._LogEvent(f'WARNING local param {localParName} not found in {localOp.path}')
+				continue
+			localPar = getattr(localOp.par, localParName)  # type: Par
+			remoteName = paramTable[i, 'remoteName'].val
+			self.nameToParamMap[remoteName] = localPar
+			self.paramToNameMap[localPar] = remoteName
 
 	def InitializeEditor(self, spec: PComponentSpec):
 		self.par.Targetname = spec.name
-		pass
+		self._InitializeParams()
+
+	def _GetPar(self, name: str) -> Optional['Par']:
+		return self.nameToParamMap.get(name)
 
 	def SetParVal(self, name: str, val):
-		pass
+		par = self._GetPar(name)
+		if par is None:
+			self._LogEvent(f'par not found: {name!r}')
+			return
+		if par.mode != ParMode.CONSTANT:
+			self._LogEvent(f'par {name!r} mode is not constant: {par.mode}')
+			return
+		par.val = val
+
+	def OnLocalParChange(self, par: 'Par'):
+		remoteName = self.paramToNameMap.get(par)
+		if not remoteName:
+			return
+		self.SendMessage(
+			CommonMessages.setPar,
+			data=[remoteName, par.eval()]
+		)
 
 	def SendMessage(self, name: str, data: Any = None, namespace: str = None):
 		handler = self.par.Messagehandler.eval()  # type: MessageHandler
