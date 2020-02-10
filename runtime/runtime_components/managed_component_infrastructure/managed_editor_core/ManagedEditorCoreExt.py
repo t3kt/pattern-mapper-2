@@ -36,9 +36,15 @@ class ManagedEditorCore(ExtensionBase, ManagedComponentEditorInterface):
 			self.nameToParamMap[remoteName] = localPar
 			self.paramToNameMap[localPar] = remoteName
 
-	def InitializeEditor(self, spec: PComponentSpec):
+	def InitializeEditor(self, namespace: str, messageHandler: MessageHandler, spec: PComponentSpec):
 		self.par.Targetname = spec.name
 		self._InitializeParams()
+		self.par.Messagehandler = messageHandler
+		for parName, val in spec.pars.items():
+			self.SetParVal(parName, val)
+		for compName, compPars in spec.subCompPars.items():
+			for parName, val in compPars.items():
+				self.SetParVal(f'{compName}.{parName}', val)
 
 	def _GetPar(self, name: str) -> Optional['Par']:
 		return self.nameToParamMap.get(name)

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 
 from common import DataObject
+from pm2_messaging import MessageHandler
 from pm2_project import PComponentSpec
 
 # noinspection PyUnreachableCode
@@ -74,7 +75,7 @@ class ManagedComponentInterface(ABC):
 
 class ManagedComponentEditorInterface(ABC):
 	@abstractmethod
-	def InitializeEditor(self, spec: PComponentSpec): pass
+	def InitializeEditor(self, namespace: str, messageHandler: MessageHandler, spec: PComponentSpec): pass
 
 	@abstractmethod
 	def SetParVal(self, name: str, val): pass

@@ -1,0 +1,2 @@
+typeName	label	template	editor
+singlefieldoverride	Single Shape Setting	single_shape_state_override	single_shape_state_override_editor
