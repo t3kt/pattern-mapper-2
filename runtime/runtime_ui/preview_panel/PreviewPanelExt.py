@@ -36,6 +36,10 @@ class PreviewPanel(RuntimeComponent):
 		self.state.par.Highlightsequences = ' '.join(map(str, sequenceNames))
 
 	@loggedmethod
+	def PreviewSequenceStepMaskTable(self, maskTable: 'DAT'):
+		pass
+
+	@loggedmethod
 	def Reset(self):
 		self.state.par.Previewmode = 'default'
 		self.state.par.Highlightgroups = ''
