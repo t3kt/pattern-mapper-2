@@ -2,8 +2,8 @@ import math
 
 import common
 from common import loggedmethod, simpleloggedmethod
-from pm2_model import PPattern, PShape
-from pm2_settings import PPreProcSettings, PSettings, BoundType
+from pm2_model import PPattern, PShape, PPoint
+from pm2_settings import PPreProcSettings, PSettings, BoundType, BoundsCheckType
 from pm2_builder_shared import PatternProcessorBase
 from typing import List
 
@@ -38,6 +38,8 @@ class _PreProcessor(common.LoggableSubComponent):
 			self._LogEvent('No shapes or paths')
 			return
 		self._LogEvent('proc settings: {}'.format(self.settings))
+		if self.settings.removeOutOfBoundsShapes is not None:
+			self._removeOutOfBoundsShapes()
 		shapePointPositions = [
 			v
 			for shape in self.pattern.shapes
@@ -51,6 +53,38 @@ class _PreProcessor(common.LoggableSubComponent):
 		if self.settings.rescale:
 			self._rescaleCoords()
 		self._calculatePointDistances()
+
+	@loggedmethod
+	def _removeOutOfBoundsShapes(self):
+		removedShapes = []  # type: List[PShape]
+		remainingShapes = []  # type: List[PShape]
+		if self.settings.removeOutOfBoundsShapes == BoundsCheckType.anyPoint:
+			aggregateChecks = any
+		elif self.settings.removeOutOfBoundsShapes == BoundsCheckType.allPoints:
+			aggregateChecks = all
+		else:
+			return
+		for shape in self.pattern.shapes:
+			pointStatuses = [
+				self._isPointOutOfBounds(point)
+				for point in shape.points
+			]
+			if aggregateChecks(pointStatuses):
+				removedShapes.append(shape)
+			else:
+				remainingShapes.append(shape)
+		if not removedShapes:
+			self._LogEvent('No out of bounds shapes to remove')
+			return
+		self._LogEvent(f'Removed {len(removedShapes)} out of bounds shapes, {len(remainingShapes)} remaining')
+		self.pattern.shapes = remainingShapes
+
+	def _isPointOutOfBounds(self, point: PPoint):
+		if point.pos.x < 0 or point.pos.y < 0:
+			return True
+		if point.pos.x > self.pattern.width or point.pos.y > self.pattern.height:
+			return True
+		return False
 
 	@loggedmethod
 	def _recenterCoords(self):

@@ -41,8 +41,13 @@ class PRecenterSettings(DataObject):
 class PRescaleSettings(DataObject):
 	bound: Optional[BoundType] = None
 
+class BoundsCheckType(Enum):
+	anyPoint = 'anyPoint'
+	allPoints = 'allPoints'
+
 @dataclass
 class PPreProcSettings(DataObject):
+	removeOutOfBoundsShapes: Optional[BoundsCheckType] = None
 	recenter: Optional[PRecenterSettings] = None
 	rescale: Optional[PRescaleSettings] = None
 	fixTriangleCenters: Optional[bool] = None
