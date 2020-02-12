@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Iterable
 from common import DataObject
 import common
 
@@ -88,3 +88,97 @@ class PPattern(DataObject):
 		self.paths = self.paths or []
 		self.groups = self.groups or []
 		self.sequences = self.sequences or []
+
+class ModelTableWriter:
+	def __init__(self, table: 'DAT'):
+		self.table = table
+
+	def writeSequences(self, sequences: Iterable[PSequence]):
+		dat = self.table
+		dat.clear()
+		dat.appendRow([
+			'sequenceName',
+			'sequenceLength',
+			'step_count',
+			'allShapeIndices',
+		])
+		for sequence in sequences:
+			allShapeIndices = set()
+			maxIndex = 0
+			for step in sequence.steps:
+				allShapeIndices.update(set(step.shapeIndices))
+				if step.sequenceIndex > maxIndex:
+					maxIndex = step.sequenceIndex
+			dat.appendRow([
+				sequence.sequenceName,
+				(1 + maxIndex) if sequence.steps else 0,
+				len(sequence.steps),
+				self._formatIndexList(allShapeIndices),
+			])
+
+	def writeSequenceSteps(self, sequences: Iterable[PSequence]):
+		dat = self.table
+		dat.clear()
+		dat.appendRow([
+			'sequenceName',
+			'stepIndex',
+			'shapeIndices',
+		])
+		for sequence in sequences:
+			if not sequence.steps:
+				continue
+			foundIndices = [step.sequenceIndex for step in sequence.steps]
+			maxIndex = max(foundIndices)
+			stepsByIndex = {
+				step.sequenceIndex: step
+				for step in sequence.steps
+			}  # type: Dict[int, PSequenceStep]
+			for i in range(maxIndex + 1):
+				if i not in stepsByIndex:
+					shapeIndices = ''
+				else:
+					shapeIndices = self._formatIndexList(stepsByIndex[i].shapeIndices)
+				dat.appendRow([
+					sequence.sequenceName,
+					i,
+					shapeIndices,
+				])
+
+	def writeGroups(self, groups: Iterable[PGroup]):
+		dat = self.table
+		dat.clear()
+		dat.appendRow([
+			'groupName',
+			'groupPath',
+			'shape_count',
+			'shapeIndices',
+		])
+		for group in groups:
+			vals = [
+				group.groupName,
+				group.groupPath,
+				len(group.shapeIndices),
+				self._formatIndexList(group.shapeIndices),
+			]
+			dat.appendRow([common.formatValue(v) for v in vals])
+
+	def writeShapeGroupMemberships(self, shapeTable: 'DAT', groupTable: 'DAT'):
+		dat = self.table
+		dat.clear()
+		dat.appendCol(shapeTable.col('shapeIndex'))
+		allShapeIndices = [int(shapeIndex) for shapeIndex in shapeTable.col('shapeIndex')[1:]]
+		for groupRow in range(1, groupTable.numRows):
+			groupName = groupTable[groupRow, 'groupName']
+			groupShapeIndices = {int(shapeIndex) for shapeIndex in groupTable[groupRow, 'shapeIndices'].val.split(' ')}
+			vals = [
+				int(shapeIndex in groupShapeIndices)
+				for shapeIndex in allShapeIndices
+			]
+			dat.appendCol([groupName] + vals)
+
+	@staticmethod
+	def _formatIndexList(indices: Iterable[int]):
+		if not indices:
+			return ''
+		return ' '.join(map(str, sorted(indices)))
+

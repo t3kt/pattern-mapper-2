@@ -1,8 +1,9 @@
-from typing import Dict, Iterable
+from typing import Iterable
 
 import common
 from common import formatValue
-from pm2_model import PPattern, PShape, PGroup, PSequence, PSequenceStep
+from pm2_model import PPattern, PShape, PGroup, PSequence
+from pm2_model import ModelTableWriter
 
 # noinspection PyUnreachableCode
 if False:
@@ -121,89 +122,16 @@ class PatternTableExtractor(common.ExtensionBase):
 
 	@staticmethod
 	def _BuildGroupTable(dat: 'DAT', groups: Iterable[PGroup]):
-		dat.clear()
-		dat.appendRow([
-			'groupName',
-			'groupPath',
-			'shape_count',
-			'shapeIndices',
-		])
-		for group in groups:
-			vals = [
-				group.groupName,
-				group.groupPath,
-				len(group.shapeIndices),
-				_formatIndexList(group.shapeIndices),
-			]
-			dat.appendRow([formatValue(v) for v in vals])
+		ModelTableWriter(dat).writeGroups(groups)
 
 	@staticmethod
 	def BuildShapeGroupMembershipTable(dat: 'DAT', shapeTable: 'DAT', groupTable: 'DAT'):
-		dat.clear()
-		dat.appendCol(shapeTable.col('shapeIndex'))
-		allShapeIndices = [int(shapeIndex) for shapeIndex in shapeTable.col('shapeIndex')[1:]]
-		for groupRow in range(1, groupTable.numRows):
-			groupName = groupTable[groupRow, 'groupName']
-			groupShapeIndices = {int(shapeIndex) for shapeIndex in groupTable[groupRow, 'shapeIndices'].val.split(' ')}
-			vals = [
-				int(shapeIndex in groupShapeIndices)
-				for shapeIndex in allShapeIndices
-			]
-			dat.appendCol([groupName] + vals)
+		ModelTableWriter(dat).writeShapeGroupMemberships(shapeTable, groupTable)
 
 	@staticmethod
 	def _BuildSequenceTable(dat: 'DAT', sequences: Iterable[PSequence]):
-		dat.clear()
-		dat.appendRow([
-			'sequenceName',
-			'sequenceLength',
-			'step_count',
-			'allShapeIndices',
-		])
-		for sequence in sequences:
-			allShapeIndices = set()
-			maxIndex = 0
-			for step in sequence.steps:
-				allShapeIndices.update(set(step.shapeIndices))
-				if step.sequenceIndex > maxIndex:
-					maxIndex = step.sequenceIndex
-			dat.appendRow([
-				sequence.sequenceName,
-				(1 + maxIndex) if sequence.steps else 0,
-				len(sequence.steps),
-				_formatIndexList(allShapeIndices),
-			])
+		ModelTableWriter(dat).writeSequences(sequences)
 
 	@staticmethod
 	def _BuildSequenceStepTable(dat: 'DAT', sequences: Iterable[PSequence]):
-		dat.clear()
-		dat.appendRow([
-			'sequenceName',
-			'stepIndex',
-			'shapeIndices',
-		])
-		for sequence in sequences:
-			if not sequence.steps:
-				continue
-			foundIndices = [step.sequenceIndex for step in sequence.steps]
-			maxIndex = max(foundIndices)
-			stepsByIndex = {
-				step.sequenceIndex: step
-				for step in sequence.steps
-			}  # type: Dict[int, PSequenceStep]
-			for i in range(maxIndex + 1):
-				if i not in stepsByIndex:
-					shapeIndices = ''
-				else:
-					shapeIndices = _formatIndexList(stepsByIndex[i].shapeIndices)
-				dat.appendRow([
-					sequence.sequenceName,
-					i,
-					shapeIndices,
-				])
-
-def _formatIndexList(indices: Iterable[int]):
-	if not indices:
-		return ''
-	return ' '.join(map(str, sorted(indices)))
-
+		ModelTableWriter(dat).writeSequenceSteps(sequences)
