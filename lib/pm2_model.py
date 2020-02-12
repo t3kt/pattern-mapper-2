@@ -109,7 +109,7 @@ class ModelTableWriter:
 				allShapeIndices.update(set(step.shapeIndices))
 				if step.sequenceIndex > maxIndex:
 					maxIndex = step.sequenceIndex
-			dat.appendRow([
+			self._appendRow([
 				sequence.sequenceName,
 				(1 + maxIndex) if sequence.steps else 0,
 				len(sequence.steps),
@@ -138,7 +138,7 @@ class ModelTableWriter:
 					shapeIndices = ''
 				else:
 					shapeIndices = self._formatIndexList(stepsByIndex[i].shapeIndices)
-				dat.appendRow([
+				self._appendRow([
 					sequence.sequenceName,
 					i,
 					shapeIndices,
@@ -160,7 +160,7 @@ class ModelTableWriter:
 				len(group.shapeIndices),
 				self._formatIndexList(group.shapeIndices),
 			]
-			dat.appendRow([common.formatValue(v) for v in vals])
+			self._appendRow(vals)
 
 	def writeShapeGroupMemberships(self, shapeTable: 'DAT', groupTable: 'DAT'):
 		dat = self.table
@@ -170,11 +170,16 @@ class ModelTableWriter:
 		for groupRow in range(1, groupTable.numRows):
 			groupName = groupTable[groupRow, 'groupName']
 			groupShapeIndices = {int(shapeIndex) for shapeIndex in groupTable[groupRow, 'shapeIndices'].val.split(' ')}
-			vals = [
-				int(shapeIndex in groupShapeIndices)
+			self._appendCol([groupName or ''] + [
+				str(int(shapeIndex in groupShapeIndices))
 				for shapeIndex in allShapeIndices
-			]
-			dat.appendCol([groupName] + vals)
+			])
+
+	def _appendRow(self, vals: list):
+		self.table.appendRow(common.formatValues(vals))
+
+	def _appendCol(self, vals: list):
+		self.table.appendCol(common.formatValues(vals))
 
 	@staticmethod
 	def _formatIndexList(indices: Iterable[int]):

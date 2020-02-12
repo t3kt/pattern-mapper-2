@@ -449,6 +449,8 @@ def formatValue(val):
 		return str(int(val))
 	return str(val)
 
+def formatValues(vals):
+	return [formatValue(val) for val in vals or []]
 
 def formatValueList(vals):
 	return ' '.join([formatValue(i) for i in vals]) if vals else ''
