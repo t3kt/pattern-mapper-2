@@ -1,6 +1,5 @@
 from typing import Union, List
 
-from common import toJson
 from pm2_model import PSequence, PSequenceStep, ModelTableWriter
 from pm2_runtime_shared import RuntimeComponent, SerializableParams
 
@@ -11,19 +10,18 @@ if False:
 
 class SequenceMap(RuntimeComponent, SerializableParams):
 
-	def TEST_WriteSequences(self, outDat: 'DAT'):
-		sequence = self._BuildMergedSequence()
-		outDat.text = sequence.toJsonStr(minify=False)
-
-	def _ParseSequences(self, seqDat: 'DAT', stepDat: 'DAT') -> List[PSequence]:
+	def _ParseSequences(self) -> List[PSequence]:
+		seqDat = self.op('selected_sequences')  # type: DAT
+		stepDat = self.op('selected_steps')  # type: DAT
 		return [
 			self._ParseSequence(seqDat, stepDat, i)
 			for i in range(1, seqDat.numRows)
 		]
 
-	def RebuildSequenceStepTable(self, dat: 'DAT'):
-		sequences = self._BuildMergedSequence()
-		ModelTableWriter(dat).writeSequenceSteps([sequences])
+	def BuildSequentialStepTable(self, dat: 'DAT'):
+		sequences = self._ParseSequences()
+		mergedSequence = self._BuildMergedSequential(sequences)
+		ModelTableWriter(dat).writeSequenceSteps([mergedSequence])
 
 	@staticmethod
 	def _ParseSequence(seqDat: 'DAT', stepDat: 'DAT', seqRow: Union[str, int]) -> PSequence:
@@ -37,24 +35,8 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 			], key=lambda s: s.sequenceIndex)),
 		)
 
-	def _BuildMergedSequence(self):
-		seqDat = self.op('selected_sequences')  # type: DAT
-		stepDat = self.op('selected_steps')  # type: DAT
-		mergeType = self.par.Sequencemergetype.eval()
-		sequences = self._ParseSequences(seqDat, stepDat)
-		if not sequences:
-			return PSequence()
-		if len(sequences) == 1:
-			return sequences[0]
-		if mergeType == 'sequential':
-			return self._MergeSequencesSequential(sequences)
-		elif mergeType == 'parallel':
-			return self._MergeSequencesParallel(sequences)
-		else:
-			return PSequence()
-
 	@staticmethod
-	def _MergeSequencesSequential(sequences: List[PSequence]):
+	def _BuildMergedSequential(sequences: List[PSequence]):
 		mergedSteps = []  # type: List[PSequenceStep]
 		sequenceNames = []
 		for sequenceIndex, sequence in enumerate(sequences):
@@ -74,10 +56,6 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 			steps=mergedSteps,
 			meta={'sequenceNames': ' '.join(sequenceNames)},
 		)
-
-	def _MergeSequencesParallel(self, sequences: List[PSequence]):
-		# TODO: IMPLEMENT PARALLEL MERGE!
-		return PSequence()
 
 def _parseSequenceStepRow(dat: 'DAT', row: Union[str, int]):
 	indices = dat[row, 'shapeIndices']
