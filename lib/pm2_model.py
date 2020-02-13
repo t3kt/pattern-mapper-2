@@ -116,14 +116,19 @@ class ModelTableWriter:
 				self._formatIndexList(allShapeIndices),
 			])
 
-	def writeSequenceSteps(self, sequences: Iterable[PSequence]):
+	def writeSequenceSteps(self, sequences: Iterable[PSequence], includeMeta=False, includeSequenceName=True):
 		dat = self.table
 		dat.clear()
-		dat.appendRow([
-			'sequenceName',
+		cols = []
+		if includeSequenceName:
+			cols.append('sequenceName')
+		cols += [
 			'stepIndex',
 			'shapeIndices',
-		])
+		]
+		if includeMeta:
+			cols.append('meta')
+		dat.appendRow(cols)
 		for sequence in sequences:
 			if not sequence.steps:
 				continue
@@ -136,13 +141,22 @@ class ModelTableWriter:
 			for i in range(maxIndex + 1):
 				if i not in stepsByIndex:
 					shapeIndices = ''
+					metaObj = None
 				else:
 					shapeIndices = self._formatIndexList(stepsByIndex[i].shapeIndices)
-				self._appendRow([
-					sequence.sequenceName,
+					metaObj = stepsByIndex[i].meta
+				vals = []
+				if includeSequenceName:
+					vals.append(sequence.sequenceName)
+				vals += [
 					i,
 					shapeIndices,
-				])
+				]
+				if includeMeta:
+					vals.append(
+						common.toJson(metaObj, minify=True) if metaObj else '',
+					)
+				self._appendRow(vals)
 
 	def writeGroups(self, groups: Iterable[PGroup]):
 		dat = self.table
@@ -174,6 +188,30 @@ class ModelTableWriter:
 				str(int(shapeIndex in groupShapeIndices))
 				for shapeIndex in allShapeIndices
 			])
+
+	def writeShapeSequenceStepMaskTable(self, sequence: PSequence, shapeCount: int):
+		dat = self.table
+		dat.clear()
+		if not shapeCount:
+			return
+		if not sequence.steps:
+			dat.appendRow([0] * shapeCount)
+			return
+		foundIndices = [step.sequenceIndex for step in sequence.steps]
+		maxIndex = max(foundIndices)
+		stepsByIndex = {
+			step.sequenceIndex: step
+			for step in sequence.steps
+		}  # type: Dict[int, PSequenceStep]
+		for index in range(maxIndex + 1):
+			if index not in stepsByIndex:
+				self._appendRow([0] * shapeCount)
+			else:
+				step = stepsByIndex[index]
+				self._appendRow([
+					1 if shapeIndex in step.shapeIndices else 0
+					for shapeIndex in range(shapeCount)
+				])
 
 	def _appendRow(self, vals: list):
 		self.table.appendRow(common.formatValues(vals))

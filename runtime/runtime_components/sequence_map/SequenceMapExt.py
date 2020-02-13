@@ -1,4 +1,5 @@
-from typing import Union, List
+from dataclasses import dataclass
+from typing import Union, List, Dict
 
 from pm2_model import PSequence, PSequenceStep, ModelTableWriter
 from pm2_runtime_shared import RuntimeComponent, SerializableParams
@@ -18,10 +19,15 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 			for i in range(1, seqDat.numRows)
 		]
 
-	def BuildSequentialStepTable(self, dat: 'DAT'):
-		sequences = self._ParseSequences()
-		mergedSequence = self._BuildMergedSequential(sequences)
-		ModelTableWriter(dat).writeSequenceSteps([mergedSequence])
+	def BuildSequenceStepTable(self, dat: 'DAT'):
+		mergedSequence = self._BuildMergedSequence()
+		ModelTableWriter(dat).writeSequenceSteps([mergedSequence], includeMeta=True, includeSequenceName=False)
+
+	def BuildShapeSequenceStepMaskTable(self, dat: 'DAT', shapeCount: int):
+		mergedSequence = self._BuildMergedSequence()
+		ModelTableWriter(dat).writeShapeSequenceStepMaskTable(
+			mergedSequence,
+			shapeCount=shapeCount)
 
 	@staticmethod
 	def _ParseSequence(seqDat: 'DAT', stepDat: 'DAT', seqRow: Union[str, int]) -> PSequence:
@@ -66,51 +72,91 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 			meta={'sequenceNames': ' '.join(sequenceNames)},
 		)
 
-	def BuildParallelStepLookupChop(
-			self,
-			chop: 'scriptCHOP'):
-		chop.clear()
+	# def BuildParallelStepLookupChop(
+	# 		self,
+	# 		chop: 'scriptCHOP'):
+	# 	chop.clear()
+	# 	sequences = self._ParseSequences()
+	# 	if not sequences:
+	# 		pass
+	# 	# alignstart alignend
+	# 	# stretchfirst stretchlong stretchshort - NOT CURRENTLY SUPPORTED
+	# 	alignMode = self.par.Sequencealignmode.eval()
+	# 	if alignMode.startswith('align'):
+	# 		self._BuildParallelStepLookupAligned(chop, sequences, alignMode)
+	# 	elif alignMode.startswith('stretch'):
+	# 		raise NotImplementedError('stretch alignment not supported')
+	#
+	# @staticmethod
+	# def _BuildParallelStepLookupAligned(chop: 'scriptCHOP', sequences: List[PSequence], mode: str):
+	# 	totalStepCount = max([len(seq.steps) for seq in sequences])
+	# 	chop.numSamples = totalStepCount
+	# 	usingStart = mode == 'alignstart'
+	# 	for sequence in sequences:
+	# 		chan = chop.appendChan('step_' + sequence.sequenceName)
+	# 		if usingStart:
+	# 			# seq 1:  0  1  2  3  4  5  6  7
+	# 			# seq 2:  0  1  2  3  4  x  x  x
+	# 			for i in range(totalStepCount):
+	# 				if i < len(sequence.steps):
+	# 					chan[i] = i
+	# 				else:
+	# 					chan[i] = - 1
+	# 		else:
+	# 			# seq 1:  0  1  2  3  4  5  6  7
+	# 			# seq 2:  x  x  x  0  1  2  3  4
+	# 			startIndex = totalStepCount - len(sequence.steps)
+	# 			for i in range(len(sequence.steps)):
+	# 				pass
+	# 			for step in sequence.steps:
+	# 				chan[step.sequenceIndex + startIndex] = step.sequenceIndex
+
+
+	def _BuildMergedSequence(self):
 		sequences = self._ParseSequences()
+		if self.par.Sequencemergetype == 'sequential':
+			return self._BuildMergedSequential(sequences)
+		else:
+			return self._BuildMergedParallelAligned(sequences)
+
+	def _BuildMergedParallelAligned(self, sequences: List[PSequence]):
 		if not sequences:
-			pass
-		# alignstart alignend stretchfirst stretchlong stretchshort
+			return PSequence()
+		totalStepCount = max([len(seq.steps) for seq in sequences])
 		alignMode = self.par.Sequencealignmode.eval()
-		if alignMode.startswith('align'):
-			self._BuildParallelStepLookupAligned(chop, sequences, alignMode)
-		elif alignMode.startswith('stretch'):
-			self._BuildParallelStepLookupStretched(chop, sequences, alignMode)
-
-	@staticmethod
-	def _BuildParallelStepLookupAligned(chop: 'scriptCHOP', sequences: List[PSequence], mode: str):
-		totalStepCount = 1 + max([len(seq.steps) for seq in sequences])
-		chop.numSamples = totalStepCount
-		usingStart = mode == 'alignstart'
+		usingStart = alignMode == 'alignstart'
+		stepListsByIndex = {}  # type: Dict[int, List[_StepWithName]]
 		for sequence in sequences:
-			chan = chop.appendChan('step_' + sequence.sequenceName)
 			if usingStart:
-				# seq 1:  0  1  2  3  4  5  6  7
-				# seq 2:  0  1  2  3  4  x  x  x
-				for i in range(totalStepCount):
-					if i < len(sequence.steps):
-						chan[i] = i
-					else:
-						chan[i] = - 1
+				indexOffset = 0
 			else:
-				# seq 1:  0  1  2  3  4  5  6  7
-				# seq 2:  x  x  x  0  1  2  3  4
-				startIndex = totalStepCount - len(sequence.steps)
-				for i in range(len(sequence.steps)):
-					pass
-				for step in sequence.steps:
-					chan[step.sequenceIndex + startIndex] = step.sequenceIndex
+				indexOffset = totalStepCount - len(sequence.steps)
+			for step in sequence.steps:
+				newIndex = indexOffset + step.sequenceIndex
+				if newIndex not in stepListsByIndex:
+					stepListsByIndex[newIndex] = []
+				stepListsByIndex[newIndex].append(_StepWithName(sequence.sequenceName, step))
+		mergedSteps = []  # type: List[PSequenceStep]
+		for index in range(totalStepCount):
+			shapeIndices = set()
+			partNames = []
+			for step in stepListsByIndex.get(index) or []:
+				shapeIndices.update(step.step.shapeIndices)
+				partNames.append(f'{step.sequenceName}.{step.step.sequenceIndex}')
+			mergedSteps.append(PSequenceStep(
+				sequenceIndex=index,
+				shapeIndices=list(sorted(shapeIndices)),
+				meta={'steps': partNames},
+			))
+		return PSequence(
+			steps=mergedSteps,
+			meta={'sequences': [sequence.sequenceName for sequence in sequences]}
+		)
 
-	def _BuildParallelStepLookupStretched(self, chop: 'scriptCHOP', sequences: List[PSequence], mode: str):
-		pass
-
-	def BuildAlignedStepMaskTable(self, dat: 'DAT', shapeCount: int):
-		dat.clear()
-		
-		pass
+@dataclass
+class _StepWithName:
+	sequenceName: str
+	step: PSequenceStep
 
 def _parseSequenceStepRow(dat: 'DAT', row: Union[str, int]):
 	indices = dat[row, 'shapeIndices']
