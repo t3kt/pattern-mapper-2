@@ -45,6 +45,9 @@
         "name": "comp_0",
         "pars": {
           "Enableanimation": true,
+          "Extendleft": "repeat",
+          "Extendright": "sameasleft",
+          "Format": "mono8fixed",
           "Interp": "linear",
           "Period": 1.0,
           "Phase": 0.0,
@@ -473,7 +476,7 @@
         "name": "comp_4",
         "pars": {
           "Enableoverride": true,
-          "Groups": null,
+          "Groups": "*",
           "Interp": true,
           "Invertmask": false,
           "Overrideamount": 1.0,
