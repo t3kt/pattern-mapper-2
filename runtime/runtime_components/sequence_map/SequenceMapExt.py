@@ -19,6 +19,10 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 			for i in range(1, seqDat.numRows)
 		]
 
+	def BuildSequenceInfoTable(self, dat: 'DAT'):
+		mergedSequence = self._BuildMergedSequence()
+		ModelTableWriter(dat).writeSequences([mergedSequence])
+
 	def BuildSequenceStepTable(self, dat: 'DAT'):
 		mergedSequence = self._BuildMergedSequence()
 		ModelTableWriter(dat).writeSequenceSteps([mergedSequence], includeMeta=True, includeSequenceName=False)
@@ -114,6 +118,10 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 
 	def _BuildMergedSequence(self):
 		sequences = self._ParseSequences()
+		if not sequences:
+			return PSequence()
+		if len(sequences) == 1:
+			return sequences[0]
 		if self.par.Sequencemergetype == 'sequential':
 			return self._BuildMergedSequential(sequences)
 		else:
