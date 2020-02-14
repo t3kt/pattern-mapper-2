@@ -139,7 +139,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	@loggedmethod
 	def _OnComponentsCleared(self):
-		for o in self.ownerComp.ops('comp__*'):
+		for o in self.ownerComp.ops('markers_panel/comp__*'):
 			o.destroy()
 		self.par.Selectedcomp = -1
 
@@ -147,7 +147,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 	def _OnComponentAdded(self, spec: PComponentSpec, compPath: str):
 		marker = createFromTemplate(
 			template=self.op('marker_template'),
-			dest=self.ownerComp,
+			dest=self.op('markers_panel'),
 			name='comp__1',
 			attrs=OPAttrs(
 				parVals={
