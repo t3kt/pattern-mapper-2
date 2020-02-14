@@ -107,7 +107,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	def SelectComponent(self, index: int):
 		self.par.Selectedcomp = index
-		editor = self.op(f'editors_panel/editor_{index + 1}')
+		editor = self.op(f'editors_panel/editor__{index + 1}')
 		self.op('editors_panel').par.display = editor is not None
 
 	@property
@@ -142,7 +142,13 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	@loggedmethod
 	def _OnComponentsCleared(self):
-		for o in self.ownerComp.ops('markers_panel/comp__*', 'editors_panel/editor__*'):
+		comps = self.ownerComp.ops('markers_panel/comp__*')
+		self._LogEvent(f'Destroying markers: {comps}')
+		for o in comps:
+			o.destroy()
+		comps = self.ownerComp.ops('editors_panel/editor__*')
+		self._LogEvent(f'Destroying editors: {comps}')
+		for o in comps:
 			o.destroy()
 		self.par.Selectedcomp = -1
 
@@ -183,7 +189,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		editor = createFromTemplate(
 			template=template,
 			dest=self.op('editors_panel'),
-			name=f'editor_{index}',
+			name=f'editor__{index}',
 			attrs=OPAttrs(
 				parVals={
 					'hmode': 'fill',
@@ -211,7 +217,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		marker = self._GetMarkerByName(name)
 		if not marker:
 			return None
-		return self.op(f'editors_panel/editor_{marker.digits}')
+		return self.op(f'editors_panel/editor__{marker.digits}')
 
 	def _GetEditorTemplateForType(self, compType: str):
 		cell = self.op('type_table')[compType, 'editor']
