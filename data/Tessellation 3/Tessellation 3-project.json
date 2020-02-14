@@ -45,7 +45,7 @@
         "name": "comp_0",
         "pars": {
           "Enableanimation": true,
-          "Extendleft": "repeat",
+          "Extendleft": "mirror",
           "Extendright": "sameasleft",
           "Format": "mono8fixed",
           "Interp": "linear",
@@ -56,7 +56,7 @@
           "Resolutionw": 1024.0,
           "Reverse": false,
           "Reversespeed": false,
-          "Speed": 0.5199999809265137
+          "Speed": 0.12800000607967377
         },
         "subCompPars": {}
       }
@@ -482,6 +482,8 @@
           "Overrideamount": 1.0,
           "Play": true,
           "Playmode": "loop",
+          "Sequencealignmode": "alignstart",
+          "Sequencemergetype": "sequential",
           "Sequencename": "OuterLoopPath",
           "Specifybasestate": false,
           "Speed": 1.5700000524520874,
