@@ -13,6 +13,8 @@ if False:
 	from _stubs import *
 	from runtime.runtime_components.component_manager.ComponentManagerExt import ComponentManager
 
+_EditorOrCOMP = Union[ManagedComponentEditorInterface, 'COMP', None]
+
 class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 	@property
 	def _CompTable(self) -> 'DAT':
@@ -56,11 +58,10 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	def _OnMarkerSelect(self, marker: 'COMP'):
 		index = marker.digits - 1
-		selectedPar = self.par.Selectedcomp
-		if index == selectedPar:
-			selectedPar.val = -1
+		if index == self.par.Selectedcomp:
+			self.SelectComponent(-1)
 		else:
-			selectedPar.val = index
+			self.SelectComponent(index)
 
 	def _ShowMarkerContextMenu(self, marker: 'COMP'):
 		items = [
@@ -106,6 +107,8 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	def SelectComponent(self, index: int):
 		self.par.Selectedcomp = index
+		editor = self.op(f'editors_panel/editor_{index + 1}')
+		self.op('editors_panel').par.display = editor is not None
 
 	@property
 	def PropertiesOp(self) -> Optional['COMP']:
@@ -139,12 +142,16 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	@loggedmethod
 	def _OnComponentsCleared(self):
-		for o in self.ownerComp.ops('markers_panel/comp__*'):
+		for o in self.ownerComp.ops('markers_panel/comp__*', 'editors_panel/editor__*'):
 			o.destroy()
 		self.par.Selectedcomp = -1
 
 	@loggedmethod
 	def _OnComponentAdded(self, spec: PComponentSpec, compPath: str):
+		marker = self._CreateMarker(spec, compPath)
+		self._CreateEditor(spec, index=marker.digits)
+
+	def _CreateMarker(self, spec: PComponentSpec, compPath: str):
 		marker = createFromTemplate(
 			template=self.op('marker_template'),
 			dest=self.op('markers_panel'),
@@ -167,22 +174,58 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		marker.nodeY = 500 - (i * 200)
 		# TODO: get rid of this direct binding
 		self._AttachMarkerToComp(marker, op(compPath))
+		return marker
+
+	def _CreateEditor(self, spec: PComponentSpec, index: int):
+		template = self._GetEditorTemplateForType(spec.compType)
+		if not template:
+			return
+		editor = createFromTemplate(
+			template=template,
+			dest=self.op('editors_panel'),
+			name=f'editor_{index}',
+			attrs=OPAttrs(
+				parVals={
+					'hmode': 'fill',
+					'vmode': 'fill',
+				},
+				parExprs={
+					'display': '(parent.managerPanel.par.Selectedcomp+1) == me.digits',
+					'alignorder': '20000 - me.nodeY',
+				},
+				nodePos=(400, 500 - (index * 200)),
+			)
+		)  # type: _EditorOrCOMP
+		editor.InitializeEditor(
+			namespace=str(self.par.Messagenamespace),
+			messageHandler=self.ownerComp,
+			spec=spec,
+		)
 
 	def _GetMarkerByName(self, name: str) -> Optional['COMP']:
 		markerTable = self.op('markers_by_name')  # type: DAT
 		pathCell = markerTable[name, 1]
 		return self.op(pathCell) if pathCell else None
 
-	def _GetEditorByName(self, name: str) -> Optional[Union[ManagedComponentEditorInterface, 'COMP']]:
-		# TODO: implement editor lookup
-		return None
+	def _GetEditorByName(self, name: str) -> _EditorOrCOMP:
+		marker = self._GetMarkerByName(name)
+		if not marker:
+			return None
+		return self.op(f'editors_panel/editor_{marker.digits}')
+
+	def _GetEditorTemplateForType(self, compType: str):
+		cell = self.op('type_table')[compType, 'editor']
+		return op(cell) if cell else None
 
 	@loggedmethod
 	def _OnComponentDeleted(self, name: str):
 		marker = self._GetMarkerByName(name)
 		if not marker:
 			return
+		editor = self._GetEditorByName(name)
 		marker.destroy()
+		if editor:
+			editor.destroy()
 		# TODO : handle selection update if needed
 		pass
 
@@ -191,7 +234,10 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		marker = self._GetMarkerByName(oldName)
 		if not marker:
 			return
+		editor = self._GetEditorByName(oldName)
 		marker.par.Targetname = newName
+		if editor:
+			editor.SetTargetName(newName)
 		# TODO : handle selection update if needed
 		pass
 

@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 
 from common import ExtensionBase
 from pm2_managed_components import ManagedComponentEditorInterface
@@ -37,7 +37,7 @@ class ManagedEditorCore(ExtensionBase, ManagedComponentEditorInterface):
 			self.paramToNameMap[localPar] = remoteName
 
 	def InitializeEditor(self, namespace: str, messageHandler: MessageHandler, spec: PComponentSpec):
-		self.par.Targetname = spec.name
+		self.SetTargetName(spec.name)
 		self._InitializeParams()
 		self.par.Messagehandler = messageHandler
 		for parName, val in spec.pars.items():
@@ -45,6 +45,9 @@ class ManagedEditorCore(ExtensionBase, ManagedComponentEditorInterface):
 		for compName, compPars in spec.subCompPars.items():
 			for parName, val in compPars.items():
 				self.SetParVal(f'{compName}.{parName}', val)
+
+	def SetTargetName(self, name: str):
+		self.par.Targetname = name
 
 	def _GetPar(self, name: str) -> Optional['Par']:
 		return self.nameToParamMap.get(name)

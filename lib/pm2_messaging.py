@@ -1,8 +1,13 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union
 
 from common import DataObject
+
+# noinspection PyUnreachableCode
+if False:
+	# noinspection PyUnresolvedReferences
+	from _stubs import *
 
 @dataclass
 class Message(DataObject):
@@ -37,6 +42,8 @@ class MessageNamespaces:
 class MessageHandler(ABC):
 	@abstractmethod
 	def HandleMessage(self, message: Message): pass
+
+MessageHandlerOrCOMP = Union[MessageHandler, 'COMP']
 
 class MessageSender(ABC):
 	@abstractmethod
