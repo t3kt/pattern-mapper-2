@@ -232,7 +232,7 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 			return
 		editorExt.InitializeEditor(
 			namespace=str(self.par.Messagenamespace),
-			messageHandler=self.ownerComp,
+			messageHandler=self.par.Messagehandler.eval(),
 			spec=spec,
 		)
 		return editor

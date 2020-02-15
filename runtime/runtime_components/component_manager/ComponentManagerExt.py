@@ -149,5 +149,15 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			comp = self._GetComponentByName(message.data[0])
 			parName = message.data[1]
 			val = message.data[2]
+			self._LogEvent(f'handling setPar {message}..')
+			self._LogEvent(f'... comp: {comp!r} parName: {parName!r} val: {val!r}')
 			if hasattr(comp, 'SetParVal'):
-				comp.SetParVal(parName, val)
+				managedComp = comp
+				self._LogEvent('.... it has a SetParVal method!')
+			elif hasattr(comp.ext, 'ManagedComponent'):
+				self._LogEvent('.... it has a named extension!')
+				managedComp = comp.ext.ManagedComponent
+			else:
+				self._LogEvent('.... it does NOT have a SetParVal method!')
+				return
+			managedComp.SetParVal(parName, val)
