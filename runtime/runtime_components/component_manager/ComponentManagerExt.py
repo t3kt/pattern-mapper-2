@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from common import createFromTemplate, OPAttrs, loggedmethod
+from common import createFromTemplate, OPAttrs, loggedmethod, simpleloggedmethod
 from pm2_managed_components import ManagedComponentInterface
 from pm2_messaging import CommonMessages, Message, MessageHandler
 from pm2_project import PComponentSpec
@@ -45,7 +45,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		else:
 			return comp
 
-	@loggedmethod
+	@simpleloggedmethod
 	def ReadComponentSpecs(self, specs: List[PComponentSpec]):
 		self.ClearComponents()
 		if not specs:
@@ -61,7 +61,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 			self.op('contents/__sel_chop_out').par.chop = self.op('contents/__chop_in')
 		self._SendMessage(CommonMessages.cleared)
 
-	@loggedmethod
+	@simpleloggedmethod
 	def AddComponent(self, spec: PComponentSpec):
 		templatePath = self.op('type_table')[spec.compType, 'template']
 		template = self.op(templatePath) if templatePath else None

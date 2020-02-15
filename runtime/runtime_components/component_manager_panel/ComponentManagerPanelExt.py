@@ -1,6 +1,6 @@
 from typing import Callable, Optional, Any, Union
 
-from common import loggedmethod, createFromTemplate, OPAttrs
+from common import loggedmethod, createFromTemplate, OPAttrs, simpleloggedmethod
 from pm2_managed_components import ManagedComponentEditorInterface
 from pm2_messaging import CommonMessages, Message, MessageHandler, MessageSender
 from pm2_project import PComponentSpec
@@ -17,8 +17,8 @@ _EditorOrCOMP = Union[ManagedComponentEditorInterface, 'COMP', None]
 
 class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 	@property
-	def _CompTable(self) -> 'DAT':
-		return self.op('comp_table')
+	def _ComponentTable(self) -> 'DAT':
+		return self.op('component_table')
 
 	@property
 	def _TypeTable(self) -> 'DAT':
@@ -77,7 +77,6 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 			autoClose=True,
 		)
 
-	@loggedmethod
 	def _ShowRenamePrompt(self, marker: 'COMP'):
 		targetComp = marker.par.Targetop.eval()
 		def _callback(newName=None):
@@ -101,9 +100,8 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		index = int(self.par.Selectedcomp)
 		if index == -1:
 			return None
-		compTable = self._CompTable
-		cell = compTable[1 + index, 'path']
-		return op(cell) if cell else None
+		compTable = self._ComponentTable
+		return self.op(compTable[1 + index, 'localPath'] or '')
 
 	def SelectComponent(self, index: int):
 		self.par.Selectedcomp = index
@@ -150,18 +148,41 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 		self._LogEvent(f'Destroying editors: {comps}')
 		for o in comps:
 			o.destroy()
+		self._InitComponentTable()
 		self.par.Selectedcomp = -1
 
-	@loggedmethod
-	def _OnComponentAdded(self, spec: PComponentSpec, compPath: str):
-		marker = self._CreateMarker(spec, compPath)
-		self._CreateEditor(spec, index=marker.digits)
+	def _InitComponentTable(self):
+		table = self._ComponentTable
+		table.clear()
+		table.appendRow(['name', 'compType', 'localPath', 'marker', 'editor'])
 
-	def _CreateMarker(self, spec: PComponentSpec, compPath: str):
+	def _AutoInitComponentTable(self):
+		table = self._ComponentTable
+		if table.numRows < 1 or table.numCols < 5 or table[0, 0] != 'name':
+			self._InitComponentTable()
+
+	@simpleloggedmethod
+	def _OnComponentAdded(self, spec: PComponentSpec, compPath: str):
+		self._AutoInitComponentTable()
+		table = self._ComponentTable
+		index = table.numRows
+		self._LogEvent(f'Handling new component {spec.name}, index: {index}...')
+		marker = self._CreateMarker(spec, compPath, index=index)
+		editor = self._CreateEditor(spec, index=index)
+		table.appendRow([
+			spec.name,
+			spec.compType,
+			compPath,
+			marker.path,
+			editor.path if editor else '',
+		])
+		self._LogEvent(f'... created marker: {marker!r} and editor: {editor!r}')
+
+	def _CreateMarker(self, spec: PComponentSpec, compPath: str, index: int):
 		marker = createFromTemplate(
 			template=self.op('marker_template'),
 			dest=self.op('markers_panel'),
-			name='comp__1',
+			name=f'comp__{index}',
 			attrs=OPAttrs(
 				parVals={
 					'display': True,
@@ -172,12 +193,11 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 					'Typelabeltext': self._TypeTable[spec.compType, 'label'] or '',
 				},
 				parExprs={
+					'Selected': f'(parent.managerPanel.par.Selectedcomp+1) == {index}',
 					'alignorder': '20000 - me.nodeY',
 				},
+				nodePos=(400, 500 - (index * 200)),
 			))  # type: COMP
-		i = marker.digits
-		marker.nodeX = 400
-		marker.nodeY = 500 - (i * 200)
 		# TODO: get rid of this direct binding
 		self._AttachMarkerToComp(marker, op(compPath))
 		return marker
@@ -196,54 +216,57 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 					'vmode': 'fill',
 				},
 				parExprs={
-					'display': '(parent.managerPanel.par.Selectedcomp+1) == me.digits',
+					'display': f'(parent.managerPanel.par.Selectedcomp+1) == {index}',
 					'alignorder': '20000 - me.nodeY',
 				},
 				nodePos=(400, 500 - (index * 200)),
 			)
 		)  # type: _EditorOrCOMP
-		editor.InitializeEditor(
+		editor.initializeExtensions()
+		if hasattr(editor, 'InitializeEditor'):
+			editorExt = editor
+		elif hasattr(editor.ext, 'ManagedEditor'):
+			editorExt = editor.ext.ManagedEditor
+		else:
+			self._LogEvent(f'ERROR: UNSUPPORTED EDITOR: {editor}')
+			return
+		editorExt.InitializeEditor(
 			namespace=str(self.par.Messagenamespace),
 			messageHandler=self.ownerComp,
 			spec=spec,
 		)
+		return editor
 
 	def _GetMarkerByName(self, name: str) -> Optional['COMP']:
-		markerTable = self.op('markers_by_name')  # type: DAT
-		pathCell = markerTable[name, 1]
-		return self.op(pathCell) if pathCell else None
+		return self.op(self._ComponentTable[name, 'marker'] or '')
 
 	def _GetEditorByName(self, name: str) -> _EditorOrCOMP:
-		marker = self._GetMarkerByName(name)
-		if not marker:
-			return None
-		return self.op(f'editors_panel/editor__{marker.digits}')
+		return self.op(self._ComponentTable[name, 'editor'] or '')
 
 	def _GetEditorTemplateForType(self, compType: str):
-		cell = self.op('type_table')[compType, 'editor']
-		return op(cell) if cell else None
+		return self.op(self._TypeTable[compType, 'editor'] or '')
 
 	@loggedmethod
 	def _OnComponentDeleted(self, name: str):
 		marker = self._GetMarkerByName(name)
-		if not marker:
-			return
 		editor = self._GetEditorByName(name)
-		marker.destroy()
+		if marker:
+			marker.destroy()
 		if editor:
 			editor.destroy()
+		self._ComponentTable.deleteRow(name)
 		# TODO : handle selection update if needed
 		pass
 
 	@loggedmethod
 	def _OnComponentRenamed(self, oldName: str, newName: str):
 		marker = self._GetMarkerByName(oldName)
-		if not marker:
-			return
 		editor = self._GetEditorByName(oldName)
-		marker.par.Targetname = newName
+		if marker:
+			marker.par.Targetname = newName
 		if editor:
 			editor.SetTargetName(newName)
+		self._ComponentTable[oldName, 'name'] = newName
 		# TODO : handle selection update if needed
 		pass
 
