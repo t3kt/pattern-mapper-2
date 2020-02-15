@@ -710,14 +710,25 @@ class DAT(OP):
 	# noinspection PyMethodOverriding
 	def copy(self, dat: 'DAT'): pass
 
-	def appendRow(self, cells: _T.List[_T.Any]): pass
-	def appendCol(self, cells: _T.List[_T.Any]): pass
-	def appendRows(self, cells: _T.List[_T.List[_T.Any]]): pass
-	def appendCols(self, cells: _T.List[_T.List[_T.Any]]): pass
+	def appendRow(self, cells: _T.List[_T.Any], nameOrIndex: _NameOrIndex = None, sort: _NameOrIndex = None): pass
+	def appendCol(self, cells: _T.List[_T.Any], nameOrIndex: _NameOrIndex = None, sort: _NameOrIndex = None): pass
+	def appendRows(self, cells: _T.List[_T.List[_T.Any]], nameOrIndex: _NameOrIndex = None, sort: _NameOrIndex = None):
+		pass
+	def appendCols(self, cells: _T.List[_T.List[_T.Any]], nameOrIndex: _NameOrIndex = None, sort: _NameOrIndex = None):
+		pass
+	def insertRow(self, vals: _T.List[_T.Any], nameOrIndex: _NameOrIndex, sort=None) -> int: pass
+	def insertCol(self, vals: _T.List[_T.Any], nameOrIndex: _NameOrIndex, sort=None) -> int: pass
+	def replaceRow(self, nameOrIndex: _NameOrIndex, vals: _T.List[_T.Any], entireRow=True) -> int: pass
+	def replaceCol(self, nameOrIndex: _NameOrIndex, vals: _T.List[_T.Any], entireCol=True) -> int: pass
+	def deleteRow(self, nameOrIndex: _NameOrIndex): pass
+	def deleteCol(self, nameOrIndex: _NameOrIndex): pass
+	def deleteRows(self, vals: _NamesOrIndices): pass
+	def deleteCols(self, vals: _NamesOrIndices): pass
 	def setSize(self, numrows: int, numcols: int): pass
 	def __getitem__(self, rowcol: _T.Tuple[_NameOrIndex, _NameOrIndex]) -> Cell: pass
 	def __setitem__(self, rowcol: _T.Tuple[_NameOrIndex, _NameOrIndex], value): pass
-	def cell(self, rowNameOrIndex: _NameOrIndex, colNameOrIndex: _NameOrIndex, caseSensitive=True) -> Cell: pass
+	def cell(self, rowNameOrIndex: _NameOrIndex, colNameOrIndex: _NameOrIndex, caseSensitive=True) -> _T.Optional[Cell]:
+		pass
 	def cells(self, rowNameOrIndex: _NameOrIndex, colNameOrIndex: _NameOrIndex, caseSensitive=True) -> _T.List[Cell]: pass
 	def findCell(
 			self,
