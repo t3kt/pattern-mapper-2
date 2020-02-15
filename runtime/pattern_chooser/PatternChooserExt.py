@@ -54,6 +54,11 @@ class PatternChooser(RuntimeComponent):
 				projectJsonDat.par.loadonstartpulse.pulse()
 			self._RuntimeApp.OnChoosePattern()
 
+	def OnPatternButtonHover(self, button: 'COMP'):
+		i = button.digits + 1
+		thumbPath = self.op('pattern_table')[i, 'thumbPath']
+		self.op('thumb_file').par.file = thumbPath or ''
+
 	@simpleloggedmethod
 	def SaveProject(self, project: PProject):
 		projectJson = project.toJsonStr(minify=False)
