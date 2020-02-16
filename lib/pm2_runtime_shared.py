@@ -20,6 +20,8 @@ class RuntimeAppInterface(ABC):
 	@abstractmethod
 	def ClosePatternChooser(self): pass
 
+	def OnChoosePattern(self): pass
+
 	@abstractmethod
 	def ShowUI(self): pass
 
