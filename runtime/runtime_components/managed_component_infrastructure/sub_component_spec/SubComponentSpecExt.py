@@ -56,6 +56,13 @@ class SubComponentSpecBuilder(ExtensionBase, SubComponentSpecBuilderInterface):
 			self.par.Excludepars.eval(),
 		)
 
+	def GetNumericParNames(self):
+		return [
+			par.name
+			for par in self.GetPars()
+			if not par.isString
+		]
+
 	def GetPars(self) -> List['Par']:
 		pageNames = self._GetMatchedPageNames()
 		if not pageNames:
