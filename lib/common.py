@@ -3,7 +3,7 @@ from colorsys import rgb_to_hsv
 import math
 
 import datetime
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sized, Tuple, Type, Union
 import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
@@ -478,7 +478,7 @@ def longestCommonPrefix(strs):
 	else:
 		return min(strs)
 
-class ValueSequence:
+class ValueSequence(Iterable[str], Sized):
 	def __init__(self, vals, cyclic, backup=None):
 		self.vals = list(vals or [])
 		self.cyclic = cyclic

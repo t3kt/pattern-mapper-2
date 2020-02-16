@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Iterable, Set, List, Union
+from typing import Optional, Iterable, Set, List, Union, Callable
 import re
 
 import common
@@ -137,10 +137,38 @@ class PatternAccessor:
 			if path.shapePath == pathPath:
 				return path
 
-def createScopes(scopeSpecs: List[PScope]):
+	def getShapesContainingPoint(self, testPoint: 'tdu.Vector', predicate: Callable[[PShape], bool] = None):
+		return [
+			shape
+			for shape in self.pattern.shapes
+			if _shapeContainsPoint(shape, testPoint) and (
+					not predicate or predicate(shape))
+		]
+
+def createScopes(scopeSpecs: List[PScope]) -> Optional[List[common.ValueSequence]]:
 	if not scopeSpecs:
 		return None
 	return [
 		common.ValueSequence.FromSpec(scope.groups, cyclic=False)
 		for scope in scopeSpecs
 	]
+
+def _shapeContainsPoint(shape: PShape, testPoint: 'tdu.Vector') -> bool:
+	testX, testY = testPoint.x, testPoint.y
+	shapePoints = [(pt.pos.x, pt.pos.y) for pt in shape.points]
+	nShapePoints = len(shapePoints)
+	inside = False
+	p1x, p1y = shapePoints[0]
+	for i in range(nShapePoints + 1):
+		p2x, p2y = shapePoints[i % nShapePoints]
+		if testY > min(p1y, p2y):
+			if testY <= max(p1y, p2y):
+				if testX <= max(p1x, p2x):
+					if p1y != p2y:
+						xints = (testY - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+					else:
+						xints = -99999999
+					if p1x == p2x or testX <= xints:
+						inside = not inside
+		p1x, p1y = p2x, p2y
+	return inside
