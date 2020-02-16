@@ -6,7 +6,6 @@ from pm2_model import PPattern, PShape, PGroup
 from pm2_settings import *
 from pm2_builder_shared import PatternProcessorBase, GeneratorBase, PatternAccessor
 from typing import Dict, Iterable, List, Optional, Set
-import re
 
 # noinspection PyUnreachableCode
 if False:
@@ -22,7 +21,16 @@ class PatternGrouper(PatternProcessorBase):
 			for spec in settings.grouping.groupGenerators:
 				self._LogEvent('using group generator {}({})'.format(type(spec), spec))
 				generator = _GroupGenerator.fromSpec(self, spec)
-				generator.generateGroups(pattern)
+				prevGroups = generator.generateGroups(pattern)
+				if prevGroups and spec.attrs and spec.attrs.mergeAs:
+					mergeSpec = PMergeGroupGenSpec(
+						baseName=spec.attrs.mergeAs,
+						boolOp=BoolOp.OR,
+						groups=[group.groupName for group in prevGroups],
+					)
+					self._LogEvent(f'using merge group generator {mergeSpec}')
+					generator = _MergeGroupGenerator(self, mergeSpec)
+					generator.generateGroups(pattern)
 		self._LogEvent('Generated {} groups: {}'.format(len(pattern.groups), [group.groupName for group in pattern.groups]))
 		return pattern
 
@@ -38,53 +46,39 @@ class _GroupGenerator(GeneratorBase):
 			logPrefix=logPrefix or 'GroupGen')
 		attrs = groupGenSpec.attrs or PGroupGenAttrs()
 		self.temporary = attrs.temporary
-		self.mergeName = attrs.mergeAs
-		self.merger = _GroupCombiner(self, boolOp=BoolOp.OR) if self.mergeName else None
 		# TODO: rotate axes
 
 	def _createGroup(
 			self,
 			groupName: str,
 			shapeIndices: List[int] = None,
-			skipMerge=False,
 	):
 		group = PGroup(
 			groupName,
 			shapeIndices=list(shapeIndices or []),
+			temporary=self.temporary,
 		)
-		if not skipMerge and self.merger is not None:
-			self.merger.addGroup(group)
 		return group
 
-	def _generateMergedGroup(self, pattern: PPattern):
-		if self.merger is None:
-			return
-		mergedGroup = self._createGroup(
-			self.mergeName,
-			skipMerge=True,
-		)
-		if self.merger.buildInto(mergedGroup):
-			pattern.groups.append(mergedGroup)
-
-	def generateGroups(self, pattern: PPattern):
+	def generateGroups(self, pattern: PPattern) -> List[PGroup]:
 		raise NotImplementedError()
 
 	@classmethod
 	def fromSpec(cls, hostObj, groupGenSpec: PGroupGenSpec):
 		if isinstance(groupGenSpec, PXmlPathGroupGenSpec):
-			return _PathGroupGenerator(hostObj, groupGenSpec)
+			return _XmlPathGroupGenerator(hostObj, groupGenSpec)
 		if isinstance(groupGenSpec, PIdGroupGenSpec):
 			return _IdGroupGenerator(hostObj, groupGenSpec)
 		raise Exception('Unsupported group gen spec type: {}'.format(type(groupGenSpec)))
 
-class _PathGroupGenerator(_GroupGenerator):
-	def __init__(self, hostObj, groupGenSpec: PXmlPathGroupGenSpec, logPrefix='PathGroupGen'):
+class _XmlPathGroupGenerator(_GroupGenerator):
+	def __init__(self, hostObj, groupGenSpec: PXmlPathGroupGenSpec, logPrefix='XmlPathGroupGen'):
 		super().__init__(hostObj, groupGenSpec, logPrefix=logPrefix)
 		self.pathPatterns = common.ValueSequence.FromSpec(groupGenSpec.paths, cyclic=False)
 		self.groupAtPathDepth = groupGenSpec.groupAtPathDepth
 
 	@simpleloggedmethod
-	def generateGroups(self, pattern: PPattern):
+	def generateGroups(self, pattern: PPattern) -> List[PGroup]:
 		self._LogEvent('path patterns: {!r}'.format(self.pathPatterns))
 		groups = []  # type: List[PGroup]
 		n = len(self.pathPatterns)
@@ -114,9 +108,9 @@ class _PathGroupGenerator(_GroupGenerator):
 			groups[0].groupName = self._getName(0, isSolo=True)
 		self._LogEvent('Generated {} groups: {}'.format(len(groups), [group.groupName for group in groups]))
 		if not groups:
-			return
+			return []
 		pattern.groups += groups
-		self._generateMergedGroup(pattern)
+		return groups
 
 	@simpleloggedmethod
 	def _groupsFromPathMatches(self, baseName: str, shapes: List[PShape]) -> List[PGroup]:
@@ -144,7 +138,7 @@ class _PathGroupGenerator(_GroupGenerator):
 		]
 
 def _IdGroupGenerator(hostObj, groupGenSpec: PIdGroupGenSpec):
-	return _PathGroupGenerator(
+	return _XmlPathGroupGenerator(
 		hostObj,
 		PXmlPathGroupGenSpec(
 			baseName=groupGenSpec.baseName,
@@ -157,6 +151,27 @@ def _IdGroupGenerator(hostObj, groupGenSpec: PIdGroupGenSpec):
 		),
 		logPrefix='IdGroupGen',
 	)
+
+class _MergeGroupGenerator(_GroupGenerator):
+	def __init__(self, hostObj, groupGenSpec: PMergeGroupGenSpec, logPrefix='MergeGroupGen'):
+		super().__init__(hostObj, groupGenSpec, logPrefix=logPrefix)
+		self.groupNames = common.ValueSequence.FromSpec(groupGenSpec.groups, cyclic=False)
+		self.merger = _GroupCombiner(self, boolOp=groupGenSpec.boolOp or BoolOp.OR)
+
+	@simpleloggedmethod
+	def generateGroups(self, pattern: PPattern) -> List[PGroup]:
+		patternAccessor = PatternAccessor(pattern)
+		groups = patternAccessor.getGroupsByPatterns(self.groupNames)
+		if not groups:
+			self._LogEvent(f'No groups found matching patterns: {self.groupNames.vals}')
+			return []
+		self.merger.addGroups(groups)
+		mergedGroup = self._createGroup(
+			self._getName(0, isSolo=True),
+		)
+		self.merger.buildInto(mergedGroup)
+		pattern.groups.append(mergedGroup)
+		return [mergedGroup]
 
 class _GroupCombiner(common.LoggableSubComponent):
 	def __init__(self, hostObj, boolOp: BoolOp):

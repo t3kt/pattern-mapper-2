@@ -76,6 +76,11 @@ class PIdGroupGenSpec(PGroupGenSpec):
 	ids: List[str] = dataclasses.field(default_factory=list)
 
 @dataclass
+class PMergeGroupGenSpec(PGroupGenSpec):
+	groups: List[str] = dataclasses.field(default_factory=list)
+	boolOp: Optional[BoolOp] = None
+
+@dataclass
 class PGroupingSettings(DataObject):
 	groupGenerators: List[PGroupGenSpec] = dataclasses.field(
 		default_factory=list,
@@ -83,6 +88,7 @@ class PGroupingSettings(DataObject):
 			'TypeMap': TypeMap(
 				xmlPath=PXmlPathGroupGenSpec,
 				id=PIdGroupGenSpec,
+				merge=PMergeGroupGenSpec,
 			)
 		}
 	)
