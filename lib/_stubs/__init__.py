@@ -750,6 +750,16 @@ class DAT(OP):
 	isText: bool
 	locals: _T.Dict[str, _T.Any]
 
+class oscoutDAT(DAT):
+	def sendBytes(self, *messages) -> int: pass
+
+	def sendOSC(
+			self, *addressesFollowedByValueLists: _T.Union[str, _T.List[_T.Any]],
+			asBundle=True, useNonStandardTypes=True, use64BitPrecision=False) -> int:
+		pass
+
+	def send(self, *messages: str, terminator='') -> int: pass
+
 class CHOP(OP):
 	numChans: int
 	numSamples: int
