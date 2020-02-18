@@ -32,10 +32,6 @@ def settings():
 				PPathSequenceGenSpec(
 					baseName='BarBouncePath',
 					pathPath='svg/g[id=BouncePath]/path[id=BouncePath]'),
-				PPathSequenceGenSpec(
-					baseName='VerticalBarRingStack1Path1',
-					pathPath='svg/g[id=VerticalRingStackPaths]/path[id=VerticalBarRingStack1]'
-				)
 			]
 		),
 	)
@@ -48,14 +44,20 @@ def settings():
 				PPathSequenceGenSpec(
 					baseName=partName,
 					pathPath=f'svg/g[id=VerticalRingStackPaths]/g[id=VerticalBarRingStack{stackNum}]/path[id=Loop{loopNum}]',
-					# attrs=PSequenceGenAttrs(temporary=True),
+					attrs=PSequenceGenAttrs(temporary=True),
 				))
-		settings.sequencing.sequenceGenerators.append(
+		settings.sequencing.sequenceGenerators += [
 			PParallelSequenceGenSpec(
 				baseName=f'VerticalBarRingStack{stackNum}Parallel',
-				partNames=partNames))
-		settings.sequencing.sequenceGenerators.append(
+				partNames=partNames),
 			PJoinSequenceGenSpec(
 				baseName=f'VerticalBarRingStack{stackNum}Sequence',
-				partNames=partNames))
+				partNames=partNames),
+			PParallelSequenceGenSpec(
+				baseName='VerticalBarRingStacksParallel',
+				partNames=[f'VerticalBarRingStack{stackNum}Parallel' for stackNum in range(1, 4)]),
+			PJoinSequenceGenSpec(
+				baseName='VerticalBarRingStacksSequence',
+				partNames=[f'VerticalBarRingStack{stackNum}Parallel' for stackNum in range(1, 4)]),
+		]
 	return settings
