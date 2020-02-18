@@ -1,0 +1,3 @@
+typeName	label	template	editor
+gradientgen	Gradient Generator	gradient_generator	
+videoplayer	Video Player	video_player	
