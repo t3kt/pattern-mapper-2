@@ -649,6 +649,15 @@ class tdu:
 	@staticmethod
 	def remap(inputVal, fromMin, fromMax, toMin, toMax): pass
 
+	@staticmethod
+	def rand(seed: _T.Any) -> float: pass
+
+	@staticmethod
+	def base(s: str) -> str: pass
+
+	@staticmethod
+	def digits(s: str) -> _T.Optional[int]: pass
+
 	Dependency = _Dependency
 	Position = _Position
 	Vector = _Vector
