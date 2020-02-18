@@ -69,6 +69,8 @@ class _GroupGenerator(GeneratorBase):
 			return _XmlPathGroupGenerator(hostObj, groupGenSpec)
 		if isinstance(groupGenSpec, PIdGroupGenSpec):
 			return _IdGroupGenerator(hostObj, groupGenSpec)
+		if isinstance(groupGenSpec, PMergeGroupGenSpec):
+			return _MergeGroupGenerator(hostObj, groupGenSpec)
 		raise Exception('Unsupported group gen spec type: {}'.format(type(groupGenSpec)))
 
 class _XmlPathGroupGenerator(_GroupGenerator):
