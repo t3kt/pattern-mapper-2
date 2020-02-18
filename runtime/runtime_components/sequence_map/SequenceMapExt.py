@@ -121,11 +121,32 @@ class SequenceMap(RuntimeComponent, SerializableParams):
 		if not sequences:
 			return PSequence()
 		if len(sequences) == 1:
-			return sequences[0]
-		if self.par.Sequencemergetype == 'sequential':
-			return self._BuildMergedSequential(sequences)
+			sequence = sequences[0]
+		elif self.par.Sequencemergetype == 'sequential':
+			sequence = self._BuildMergedSequential(sequences)
 		else:
-			return self._BuildMergedParallelAligned(sequences)
+			sequence = self._BuildMergedParallelAligned(sequences)
+		if self.par.Reversesequence:
+			sequence = self._ReverseSequence(sequence)
+		return sequence
+
+	@staticmethod
+	def _ReverseSequence(origSequence: PSequence):
+		n = len(origSequence.steps)
+		newSteps = []
+		for i in range(n):
+			origStep = origSequence.steps[n - i - 1]
+			newSteps.append(
+				PSequenceStep(
+					sequenceIndex=i,
+					shapeIndices=list(origStep.shapeIndices),
+					meta=dict(origStep.meta),
+				)
+			)
+		return PSequence(
+			origSequence.sequenceName,
+			meta=dict(origSequence.meta),
+			steps=newSteps)
 
 	def _BuildMergedParallelAligned(self, sequences: List[PSequence]):
 		if not sequences:
