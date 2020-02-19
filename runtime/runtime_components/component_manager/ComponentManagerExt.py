@@ -51,7 +51,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		if not specs:
 			return
 		for spec in specs:
-			self.AddComponent(spec)
+			self.AddComponent(spec, deferMessageToUI=False)
 
 	@loggedmethod
 	def ClearComponents(self):
@@ -62,7 +62,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		self._SendMessage(CommonMessages.cleared)
 
 	@simpleloggedmethod
-	def AddComponent(self, spec: PComponentSpec):
+	def AddComponent(self, spec: PComponentSpec, deferMessageToUI=True):
 		templatePath = self.op('type_table')[spec.compType, 'template']
 		template = self.op(templatePath) if templatePath else None
 		if not template:
@@ -87,7 +87,7 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		managedComp.SetComponentSpec(spec)
 		if self._IsChain:
 			self._RebuildChain()
-		self._SendMessage(CommonMessages.added, [spec, comp.path])
+		self._SendMessage(CommonMessages.added, [spec, comp.path], defer=deferMessageToUI)
 
 	def _RebuildChain(self):
 		comps = self._ComponentsInOrder
@@ -105,14 +105,14 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 	def DeleteComponent(self, comp: _ManagedCompT):
 		name = comp.name
 		comp.destroy()
-		self._SendMessage(CommonMessages.deleted, name)
+		self._SendMessage(CommonMessages.deleted, name, defer=True)
 
 	@loggedmethod
 	def RenameComponent(self, comp: _ManagedCompT, name: str):
 		oldName = comp.name
 		comp.name = name
 		self._RebuildChain()
-		self._SendMessage(CommonMessages.renamed, data=[oldName, name])
+		self._SendMessage(CommonMessages.renamed, data=[oldName, name], defer=True)
 
 	def _GetComponentByName(self, name: str) -> Optional[_ManagedCompT]:
 		if not name:
@@ -121,11 +121,15 @@ class ComponentManager(RuntimeComponent, MessageHandler):
 		if comp and comp.isCOMP:
 			return comp
 
-	def _SendMessage(self, name: str, data=None):
+	def _SendMessage(self, name: str, data=None, defer=False):
 		handler = self.par.Messagehandler.eval()  # type: MessageHandler
 		if not handler:
 			return
-		handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
+		if defer:
+			code = f'op({self.ownerComp.path!r}).ext.ComponentManager._SendMessage({name!r}, args, defer=False)'
+			run(code, data or [], fromOP=self.ownerComp, delayFrames=1)
+		else:
+			handler.HandleMessage(Message(name, data, namespace=str(self.par.Messagenamespace)))
 
 	def HandleMessage(self, message: Message):
 		namespace = str(self.par.Messagenamespace)

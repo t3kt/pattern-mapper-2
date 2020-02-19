@@ -468,8 +468,6 @@ def ops(*paths) -> _T.List['_AnyOpT']: pass
 
 def var(name) -> str: pass
 
-def run(codeorwhatever, *args, delayFrames=0, delayMilliSeconds=0, delayRef=None): pass
-
 class td:
 	Monitor = Monitor
 	Monitors = Monitors
@@ -508,6 +506,8 @@ class td:
 	@classmethod
 	def varOwner(cls, varName) -> _T.Optional['OP']: pass
 
+
+run = td.run
 
 class _Matrix:
 	vals: _T.List[float]
