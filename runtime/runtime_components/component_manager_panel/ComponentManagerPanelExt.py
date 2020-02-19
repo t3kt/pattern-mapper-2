@@ -260,12 +260,28 @@ class ComponentManagerPanel(RuntimeComponent, MessageHandler, MessageSender):
 
 	@loggedmethod
 	def _OnComponentRenamed(self, oldName: str, newName: str):
+		oldLocalPath = self._ComponentTable[oldName, 'localPath']
+		if oldLocalPath:
+			newLocalPath = oldLocalPath.val.rsplit('/', maxsplit=1)[0] + '/' + newName
+			self._ComponentTable[oldName, 'localPath'] = newLocalPath
 		marker = self._GetMarkerByName(oldName)
 		editor = self._GetEditorByName(oldName)
 		if marker:
 			marker.par.Targetname = newName
+			marker.name = newName
+			self._ComponentTable[oldName, 'marker'] = marker.path
 		if editor:
-			editor.SetTargetName(newName)
+			if hasattr(editor, 'SetTargetName'):
+				editorExt = editor
+			elif hasattr(editor.ext, 'ManagedEditor'):
+				editorExt = editor.ext.ManagedEditor
+			else:
+				self._LogEvent(f'ERROR: UNSUPPORTED EDITOR: {editor}')
+				editorExt = None
+			if editorExt:
+				editorExt.SetTargetName(newName)
+			editor.name = newName
+			self._ComponentTable[oldName, 'editor'] = editor.path
 		self._ComponentTable[oldName, 'name'] = newName
 		# TODO : handle selection update if needed
 		pass
