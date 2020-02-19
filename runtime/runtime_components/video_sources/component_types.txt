@@ -1,3 +1,5 @@
 typeName	label	template	editor
 gradientgen	Gradient Generator	gradient_generator	
 videoplayer	Video Player	video_player	
+ndisource	NDI Video Source	ndi_video_source	
+syphonspoutsource	Syphon / Spout Source	syphon_spout_video_source	
